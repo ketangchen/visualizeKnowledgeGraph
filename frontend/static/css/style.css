@@ -1,0 +1,79 @@
+/* 基础样式 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Microsoft YaHei", sans-serif;
+    overflow: hidden;
+    height: 100vh;
+}
+
+.app-container {
+    display: flex;
+    height: 100%;
+}
+
+/* 左侧控制面板 */
+.control-panel {
+    width: 300px;
+    padding: 20px;
+    background-color: #f5f5f5;
+    border-right: 1px solid #ddd;
+    overflow-y: auto;
+}
+
+.btn {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    background-color: #4285f4;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background-color: #3367d6;
+}
+
+.entity-form input {
+    width: 100%;
+    padding: 8px;
+    margin-top: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* 右侧图谱可视化区域 */
+.graph-container {
+    flex: 1;
+    height: 100%;
+    background-color: #fff;
+}
+
+/* 图谱元素样式 */
+.node {
+    cursor: pointer;
+}
+
+.node circle {
+    stroke: #fff;
+    stroke-width: 2px;
+}
+
+.node text {
+    font-size: 12px;
+}
+
+.link {
+    stroke: #999;
+    stroke-opacity: 0.6;
+}
+
+.link text {
+    font-size: 10px;
+}
