@@ -1,19 +1,20 @@
+# -*- coding: utf-8 -*-
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import Entity, Relationship
 import json
 
-@csrf_exempt  # ¿çÓòÇëÇóÊ±¹Ø±ÕCSRFÑéÖ¤
-def get_graph_data(request): #»ñÈ¡ÖªÊ¶Í¼Æ×ÍêÕûÊı¾İ£ºÊµÌå+¹ØÏµ"""
+@csrf_exempt  # è·¨åŸŸè¯·æ±‚æ—¶å…³é—­CSRFéªŒè¯
+def get_graph_data(request): #è·å–çŸ¥è¯†å›¾è°±å®Œæ•´æ•°æ®ï¼šå®ä½“+å…³ç³»"""
     if request.method == 'GET':
         try:
-            # ²éÑ¯ËùÓĞÊµÌå
+            # æŸ¥è¯¢æ‰€æœ‰å®ä½“
             entities = Entity.objects.all().values("id", "name", "type", "description")
-            # ²éÑ¯ËùÓĞ¹ØÏµ
+            # æŸ¥è¯¢æ‰€æœ‰å…³ç³»
             relations = Relationship.objects.all().values(
                 "id", "source_id", "target_id", "type", "description"
             )
-            # ×ª»»ÎªD3.js¿ÉÊ¶±ğµÄ¸ñÊ½
+            # è½¬æ¢ä¸ºD3.jså¯è¯†åˆ«çš„æ ¼å¼
             graph_data = {
                 "nodes": list(entities),
                 "links": [
@@ -30,3 +31,8 @@ def get_graph_data(request): #»ñÈ¡ÖªÊ¶Í¼Æ×ÍêÕûÊı¾İ£ºÊµÌå+¹ØÏµ"""
         except Exception as e:
             return JsonResponse({"ret": 1, "msg": f"Fiding data is failed!:{str(e)}"})
     return JsonResponse({"ret": 1, "msg": "unsupported request method"})
+
+@csrf_exempt  # è·¨åŸŸè¯·æ±‚æ—¶å…³é—­CSRFéªŒè¯
+def add_entity(request):
+    # å®ç°å®ä½“æ·»åŠ çš„é€»è¾‘
+    pass

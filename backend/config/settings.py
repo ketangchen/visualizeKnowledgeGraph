@@ -1,22 +1,23 @@
+# -*- coding: utf-8 -*-
 import os
 from pathlib import Path
 import environ
 
-# ³õÊ¼»¯»·¾³±äÁ¿
+# åˆå§‹åŒ–ç¯å¢ƒå˜é‡
 env = environ.Env()
 environ.Env.read_env(os.path.join(Path(__file__).resolve().parent.parent.parent, '.env'))
 
-# ÏîÄ¿¸ùÄ¿Â¼
+# é¡¹ç›®æ ¹ç›®å½•
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-# °²È«ÃÜÔ¿£¨´Ó»·¾³±äÁ¿¶ÁÈ¡£©
+# å®‰å…¨å¯†é’¥ï¼ˆä»ç¯å¢ƒå˜é‡è¯»å–ï¼‰
 SECRET_KEY = env('SECRET_KEY', default='django-insecure-example-key-for-dev-only')
 
-# µ÷ÊÔÄ£Ê½£¨Éú²ú»·¾³ĞèÉèÎªFalse£©
-DEBUG = env.bool('DEBUG', default=True)
+# è°ƒè¯•æ¨¡å¼ï¼ˆç”Ÿäº§ç¯å¢ƒéœ€è®¾ä¸ºFalseï¼‰
+DEBUG = env.bool('DEBUG', default=False)
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1'])
 
-# Ó¦ÓÃÅäÖÃ
+# åº”ç”¨é…ç½®
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -24,15 +25,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # ĞŞÕıÓ¦ÓÃ×¢²áÂ·¾¶£¬Ê¹ÓÃAppConfigÀàµÄÍêÕûÂ·¾¶
-    'apps.kg_visualize',  # Ìæ»»Ô­ÓĞµÄ'backend.apps.kg_visualize'
+    # ä¿®æ­£åº”ç”¨æ³¨å†Œè·¯å¾„ï¼Œä½¿ç”¨AppConfigç±»çš„å®Œæ•´è·¯å¾„
+    'apps.kg_visualize',  # æ›¿æ¢åŸæœ‰çš„'backend.apps.kg_visualize'
     'corsheaders',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',  # ¿çÓòÖĞ¼ä¼ş
+    'corsheaders.middleware.CorsMiddleware',  # è·¨åŸŸä¸­é—´ä»¶
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -42,11 +43,11 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'config.urls'
 
-# Ä£°åÅäÖÃ
+# æ¨¡æ¿é…ç½®
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'frontend')],  # Ç°¶ËÒ³ÃæÄ¿Â¼
+        'DIRS': [os.path.join(BASE_DIR, 'frontend')],  # å‰ç«¯é¡µé¢ç›®å½•
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -61,32 +62,32 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-# Êı¾İ¿âÅäÖÃ
+# æ•°æ®åº“é…ç½®
 DATABASES = {
     'default': env.db('DATABASE_URL', default=f'sqlite:///{BASE_DIR / "db.sqlite3"}')
 }
 
-# ÃÜÂëÑéÖ¤
+# å¯†ç éªŒè¯
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
 ]
 
-# ÓïÑÔºÍÊ±Çø
+# è¯­è¨€å’Œæ—¶åŒº
 LANGUAGE_CODE = 'zh-hans'
 TIME_ZONE = 'Asia/Shanghai'
 USE_I18N = True
 USE_TZ = True
 
-# ¾²Ì¬ÎÄ¼şÅäÖÃ
+# é™æ€æ–‡ä»¶é…ç½®
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'frontend/static')]
 
-# Ä¬ÈÏÖ÷¼ü×Ö¶Î
+# é»˜è®¤ä¸»é”®å­—æ®µ
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# ¿çÓòÅäÖÃ£¨¿ª·¢»·¾³£©
+# è·¨åŸŸé…ç½®ï¼ˆå¼€å‘ç¯å¢ƒï¼‰
 if DEBUG:
-    CORS_ALLOW_ALL_ORIGINS = True  # Éú²ú»·¾³ĞèÖ¸¶¨¾ßÌåÓòÃû
+    CORS_ALLOW_ALL_ORIGINS = True  # ç”Ÿäº§ç¯å¢ƒéœ€æŒ‡å®šå…·ä½“åŸŸå
 else:
     CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', default=[])

@@ -7,7 +7,7 @@ BASE_URL = getattr(settings, 'TEST_BASE_URL', 'http://localhost:8000/api')
 
 def test_get_graph_data():
     """测试获取图谱数据接口"""
-    response = requests.get(f'{BASE_URL}/kg/data')
+    response = requests.get(f'{BASE_URL}/kg/data') # http://localhost:8000/api/kg/data
     assert response.status_code == 200, "接口请求失败"
     data = response.json()
     assert data['ret'] == 0, "接口返回错误"
@@ -56,3 +56,9 @@ def test_add_duplicate_entity():
 
 if __name__ == '__main__':
     pytest.main(['-v', 'test_kg_api.py'])
+
+
+"""
+http://localhost:8000/api/kg/data
+http://localhost:8000/api/kg/entity
+"""

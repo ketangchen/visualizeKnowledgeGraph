@@ -1,9 +1,9 @@
+# -*- coding: utf-8 -*-
 from django.db import models
-
 
 class Entity(models.Model):
     """
-    kg's entity
+    knowledge graph's entity
     """
     id = models.CharField(max_length=100, primary_key=True, verbose_name="entityID")
     name = models.CharField(max_length=200, verbose_name="entityName")
@@ -16,7 +16,7 @@ class Entity(models.Model):
         verbose_name = "entity"
         verbose_name_plural = "entity"
         ordering = ["-updated_at"]
-        app_label = "kg_visualize"  # ÏÔÊ½Ö¸¶¨Ó¦ÓÃÃû³Æ
+        app_label = "kg_visualize"  # æ˜¾å¼æŒ‡å®šåº”ç”¨åç§°
 
     def __str__(self):
         return f"{self.name} ({self.id})"
@@ -38,15 +38,15 @@ class Relationship(models.Model):
         related_name="in_relations",
         verbose_name="targetEntity"
     )
-    type = models.CharField(max_length=100, verbose_name="relationType")  # Èç"°üº¬"¡¢"ÊôÓÚ"
+    type = models.CharField(max_length=100, verbose_name="relationType")  # å¦‚"åŒ…å«"ã€"å±žäºŽ"
     description = models.TextField(verbose_name="relationDescribe", blank=True)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="createdTime")
 
     class Meta:
         verbose_name = "entityRelation"
         verbose_name_plural = "entityRelation"
-        unique_together = ("source", "target", "type")  # ±ÜÃâÖØ¸´¹ØÏµ
-        app_label = "kg_visualize"  # ÏÔÊ½Ö¸¶¨Ó¦ÓÃÃû³Æ
+        unique_together = ("source", "target", "type")  # é¿å…é‡å¤å…³ç³»
+        app_label = "kg_visualize"  # æ˜¾å¼æŒ‡å®šåº”ç”¨åç§°
 
     def __str__(self):
         return f"{self.source.name} -[{self.type}]-> {self.target.name}"
