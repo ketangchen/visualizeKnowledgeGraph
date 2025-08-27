@@ -2,10 +2,16 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
+import pathlib  # 新增：导入pathlib模块
+
 
 def main():
     """Run administrative tasks."""
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
+    # 新增：将backend目录添加到Python路径
+    backend_dir = pathlib.Path(__file__).resolve().parent / "backend"
+    sys.path.append(str(backend_dir))
+
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.config.settings')
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
@@ -16,5 +22,15 @@ def main():
         ) from exc
     execute_from_command_line(sys.argv)
 
+
 if __name__ == '__main__':
     main()
+
+"""
+python manage.py runserver
+http://127.0.0.1:8000/api/
+
+http://127.0.0.1:8000
+
+
+"""

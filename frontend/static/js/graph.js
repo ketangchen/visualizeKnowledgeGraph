@@ -1,6 +1,6 @@
 // 全局变量
 let graphData = { nodes: [], links: [] }; // 图谱数据
-let svg, simulation; // D3 SVG容器和力导向模拟
+let svg, simulation; // D3 SVG容器和力导向模型
 
 // 初始化图谱
 function initGraph() {
@@ -34,53 +34,62 @@ function initGraph() {
 // 从后端API加载图谱数据
 function loadGraphData() {
     fetch('/api/kg/data')
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP错误：${response.status}`);
+            }
+            return response.json();
+        })
         .then(res => {
             if (res.ret === 0) {
                 graphData = res.data;
-                updateGraph(); // 更新图谱渲染
+                updateGraph(); // 重新渲染图谱
             } else {
-                console.error('加载数据失败:', res.msg);
+                console.error('数据加载失败:', res.msg);
+                alert(`数据加载失败：${res.msg}`);
             }
         })
-        .catch(error => console.error('请求失败:', error));
+        .catch(error => {
+            console.error('请求失败:', error);
+            alert(`加载数据时出错：${error.message}`);
+        });
 }
 
-// 更新图谱渲染
+// 重新渲染图谱
 function updateGraph() {
-    // 清除现有元素
-    svg.selectAll('*').remove();
+        // 清空所有元素
+        svg.selectAll('*').remove();
 
-    // 重新创建图层
-    const g = svg.append('g');
+        // 创建新的图层
+        const g = svg.append('g');
 
-    // 绘制关系线
-    const link = g.append('g')
-        .selectAll('line')
-        .data(graphData.links)
-        .enter().append('line')
-        .attr('class', 'link')
-        .attr('stroke-width', 2);
+        // 绘制关系边
+        const link = g.append('g')
+            .selectAll('line')
+            .data(graphData.links)
+            .enter().append('line')
+            .attr('class', 'link')
+            .attr('stroke-width', 2);
 
-    // 绘制实体节点
-    const node = g.append('g')
-        .selectAll('g')
-        .data(graphData.nodes)
-        .enter().append('g')
-        .attr('class', 'node')
-        .call(d3.drag()
-            .on('start', dragstarted)
-            .on('drag', dragged)
-            .on('end', dragended));
+        // 绘制实体节点
+        const node = g.append('g')
+            .selectAll('g')
+            .data(graphData.nodes)
+            .enter().append('g')
+            .attr('class', 'node')
+            .call(d3.drag()
+                .on('start', dragstarted)
+                .on('drag', dragged)
+                .on('end', dragended));
 
-    // 节点添加圆形
-    node.append('circle')
-        .attr('r', 15)
-        .attr('fill', d => {
-            // 根据实体类型设置颜色
-            const colors = { '人物': '#4285f4', '组织': '#34a853', '地点': '#fbbc05' };
-            return colors[d.type] || '#ea4335';
-        });
+        // 节点添加圆形
+        node.append('circle')
+            .attr('r', 15)
+            .attr('fill', d => {
+                // 根据实体类型设置颜色
+                const colors = { '人物': '#4285f4', '组织': '#34a853', '地点': '#fbbc05' };
+                return colors[d.type] || '#ea4335';
+            });
 
     // 节点添加文字
     node.append('text')
@@ -88,7 +97,7 @@ function updateGraph() {
         .attr('dy', '.3em')
         .text(d => d.name);
 
-    // 更新力导向模拟
+    // 更新力导向模型
     simulation.nodes(graphData.nodes)
         .on('tick', ticked);
 
@@ -127,7 +136,7 @@ function dragended(event, d) {
     d.fy = null;
 }
 
-// 绑定文件导入导出事件
+// 绑定事件
 function bindEvents() {
     // 导入JSON文件
     document.getElementById('import-btn').addEventListener('click', () => {
@@ -139,7 +148,7 @@ function bindEvents() {
     // 导出当前数据
     document.getElementById('export-btn').addEventListener('click', exportGraphData);
 
-    // 新增实体
+    // 添加实体
     document.getElementById('add-entity-btn').addEventListener('click', addNewEntity);
 }
 
@@ -181,12 +190,12 @@ function exportGraphData() {
     URL.revokeObjectURL(url);
 }
 
-// 新增实体到后端
+// 添加新实体到后端
 function addNewEntity() {
     const id = document.getElementById('entity-id').value;
     const name = document.getElementById('entity-name').value;
     if (!id || !name) {
-        alert('请输入实体ID和名称');
+        alert('请填写实体ID和名称');
         return;
     }
 
@@ -195,7 +204,12 @@ function addNewEntity() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, name })
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP错误：${response.status}`);
+        }
+        return response.json();
+    })
     .then(res => {
         if (res.ret === 0) {
             alert('实体添加成功');
@@ -203,6 +217,9 @@ function addNewEntity() {
         } else {
             alert('添加失败: ' + res.msg);
         }
+    })
+    .catch(error => {
+        alert('请求失败: ' + error.message);
     });
 }
 
