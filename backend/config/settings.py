@@ -26,7 +26,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # 修正应用注册路径，使用AppConfig类的完整路径
-    'apps.kg_visualize',  # 替换原有的'backend.apps.kg_visualize'
+    'backend.apps.kg_visualize',
     'corsheaders',
 ]
 

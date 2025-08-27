@@ -29,10 +29,30 @@ def get_graph_data(request): #获取知识图谱完整数据：实体+关系"""
             }
             return JsonResponse({"ret": 0, "data": graph_data})
         except Exception as e:
-            return JsonResponse({"ret": 1, "msg": f"Fiding data is failed!:{str(e)}"})
-    return JsonResponse({"ret": 1, "msg": "unsupported request method"})
+            return JsonResponse({"ret": 1, "msg": f"Finding data failed: {str(e)}"})
+    return JsonResponse({"ret": 1, "msg": "Unsupported request method"})
 
 @csrf_exempt  # 跨域请求时关闭CSRF验证
 def add_entity(request):
-    # 实现实体添加的逻辑
-    pass
+    """
+    add a new entity
+    """
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            # 验证数据
+            if 'id' not in data or 'name' not in data:
+                return JsonResponse({"ret": 1, "msg": "'id' and 'name' are required"})
+            # 创建实体
+            entity = Entity.objects.create(
+                id=data['id'],
+                name=data['name'],
+                type=data.get('type', ''),
+                description=data.get('description', '')
+            )
+            return JsonResponse({"ret": 0, "msg": "success"})
+        except json.JSONDecodeError:
+            return JsonResponse({"ret": 1, "msg": "Invalid JSON"})
+        except Exception as e:
+            return JsonResponse({"ret": 1, "msg": f"An error occurred: {str(e)}"})
+    return JsonResponse({"ret": 1, "msg": "Unsupported request method"})

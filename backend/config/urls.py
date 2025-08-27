@@ -3,7 +3,7 @@ from django.urls import path, include
 from django.views.generic import TemplateView
 
 urlpatterns = [
-    path('admin/', admin.site.urls),  # Django¹ÜÀíºóÌ¨
-    path('', TemplateView.as_view(template_name='index.html')),  # Ç°¶ËÈë¿ÚÒ³Ãæ
-    path('api/', include('apps.kg_visualize.urls')),  # ÖªÊ¶Í¼Æ×APIÂ·ÓÉ
+    path('admin/', admin.site.urls),  # Djangoï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì¨
+    path('', TemplateView.as_view(template_name='index.html')),  # Ç°ï¿½ï¿½ï¿½ï¿½ï¿½Ò³ï¿½ï¿½
+    path('api/', include('backend.apps.kg_visualize.urls')),  # ÖªÊ¶Í¼APIÂ·ï¿½ï¿½
 ]
