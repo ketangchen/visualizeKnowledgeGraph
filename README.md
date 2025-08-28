@@ -21,7 +21,7 @@ visualizeKnowledgeGraph/
 ## 技术栈
 - 前端：HTML、CSS、JavaScript、D3.js
 - 后端：Python、Django
-- 数据库：MYSQLite（可扩展为PostgreSQL等）
+- 数据库：MYSQL（可扩展为PostgreSQL等）
 
 ## 部署步骤
 1. 安装依赖：`pip install -r requirements.txt`
