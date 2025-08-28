@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>前后端API集成测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #45a049;
+        }
+        .status {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>前后端API集成测试</h1>
+    
+    <div class="test-section">
+        <h2>1. 后端服务器状态</h2>
+        <button class="test-button" onclick="testServerStatus()">测试服务器连接</button>
+        <div id="server-status"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. API接口测试</h2>
+        <button class="test-button" onclick="testGetData()">测试获取数据</button>
+        <button class="test-button" onclick="testCreateEntity()">测试创建实体</button>
+        <button class="test-button" onclick="testCreateRelationship()">测试创建关系</button>
+        <div id="api-test-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>3. 前端页面测试</h2>
+        <p>请访问 <a href="http://127.0.0.1:8000/static/KG.html" target="_blank">http://127.0.0.1:8000/static/KG.html</a> 来测试完整功能</p>
+        <p>预期功能：</p>
+        <ul>
+            <li>✅ 页面加载时从后端获取数据</li>
+            <li>✅ 添加实体时调用后端API</li>
+            <li>✅ 编辑实体时调用后端API</li>
+            <li>✅ 删除实体时调用后端API</li>
+            <li>✅ 添加关系时调用后端API</li>
+            <li>✅ 文件导入时调用后端API</li>
+            <li>✅ 文件导出时调用后端API</li>
+        </ul>
+    </div>
+
+    <script>
+        const API_BASE_URL = '/api/kg';
+        
+        async function apiCall(endpoint, method = 'GET', data = null) {
+            try {
+                const options = {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                };
+                
+                if (data && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
+                    options.body = JSON.stringify(data);
+                }
+                
+                const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
+                const result = await response.json();
+                
+                return result;
+            } catch (error) {
+                console.error('API调用错误:', error);
+                throw error;
+            }
+        }
+
+        async function testServerStatus() {
+            const statusDiv = document.getElementById('server-status');
+            try {
+                const response = await fetch('http://127.0.0.1:8000/');
+                if (response.ok) {
+                    statusDiv.innerHTML = '<div class="status success">✅ 后端服务器运行正常</div>';
+                } else {
+                    statusDiv.innerHTML = '<div class="status error">❌ 后端服务器响应异常，状态码: ' + response.status + '</div>';
+                }
+            } catch (error) {
+                statusDiv.innerHTML = '<div class="status error">❌ 无法连接到后端服务器: ' + error.message + '</div>';
+            }
+        }
+
+        async function testGetData() {
+            const resultsDiv = document.getElementById('api-test-results');
+            try {
+                const result = await apiCall('/data');
+                resultsDiv.innerHTML = `
+                    <div class="status success">✅ 获取数据成功</div>
+                    <pre>${JSON.stringify(result, null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultsDiv.innerHTML = '<div class="status error">❌ 获取数据失败: ' + error.message + '</div>';
+            }
+        }
+
+        async function testCreateEntity() {
+            const resultsDiv = document.getElementById('api-test-results');
+            try {
+                const testEntity = {
+                    id: 'test_' + Date.now(),
+                    name: '测试实体',
+                    description: '这是一个测试实体'
+                };
+                
+                const result = await apiCall('/entities', 'POST', testEntity);
+                resultsDiv.innerHTML = `
+                    <div class="status success">✅ 创建实体成功</div>
+                    <pre>${JSON.stringify(result, null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultsDiv.innerHTML = '<div class="status error">❌ 创建实体失败: ' + error.message + '</div>';
+            }
+        }
+
+        async function testCreateRelationship() {
+            const resultsDiv = document.getElementById('api-test-results');
+            try {
+                // 先创建两个测试实体
+                const entity1 = {
+                    id: 'rel_test_1_' + Date.now(),
+                    name: '关系测试实体1',
+                    description: '关系测试用实体1'
+                };
+                
+                const entity2 = {
+                    id: 'rel_test_2_' + Date.now(),
+                    name: '关系测试实体2',
+                    description: '关系测试用实体2'
+                };
+                
+                await apiCall('/entities', 'POST', entity1);
+                await apiCall('/entities', 'POST', entity2);
+                
+                // 创建关系
+                const testRelationship = {
+                    source: entity1.id,
+                    target: entity2.id,
+                    type: '测试关系'
+                };
+                
+                const result = await apiCall('/relationships', 'POST', testRelationship);
+                resultsDiv.innerHTML = `
+                    <div class="status success">✅ 创建关系成功</div>
+                    <pre>${JSON.stringify(result, null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultsDiv.innerHTML = '<div class="status error">❌ 创建关系失败: ' + error.message + '</div>';
+            }
+        }
+
+        // 页面加载时自动测试服务器状态
+        window.addEventListener('load', testServerStatus);
+    </script>
+</body>
+</html>

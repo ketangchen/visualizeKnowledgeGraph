@@ -3,7 +3,11 @@ import os
 from pathlib import Path
 import environ
 
-# 初始化环境变量
+# 配置 PyMySQL 作为 MySQLdb 的替代
+import pymysql
+pymysql.install_as_MySQLdb()
+
+# 初始化环境变量 
 env = environ.Env()
 environ.Env.read_env(os.path.join(Path(__file__).resolve().parent.parent.parent, '.env'))
 

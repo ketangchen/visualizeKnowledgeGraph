@@ -1,69 +1,70 @@
-// È«¾Ö±äÁ¿
-let graphData = { nodes: [], links: [] }; // Í¼Æ×Êý¾Ý
-let svg, simulation; // D3 SVGÈÝÆ÷ºÍÁ¦µ¼ÏòÄ£ÐÍ
+/* -*- coding: utf-8 -*- */
+// È«ï¿½Ö±ï¿½ï¿½ï¿½
+let graphData = { nodes: [], links: [] }; // Í¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+let svg, simulation; // D3 SVGï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½
 
-// ³õÊ¼»¯Í¼Æ×
+// ï¿½ï¿½Ê¼ï¿½ï¿½Í¼ï¿½ï¿½
 function initGraph() {
     const container = document.getElementById('graph-container');
     const width = container.clientWidth;
     const height = container.clientHeight;
 
-    // ´´½¨SVGÈÝÆ÷
+    // ï¿½ï¿½ï¿½ï¿½SVGï¿½ï¿½ï¿½ï¿½
     svg = d3.select('#graph-container')
         .append('svg')
         .attr('width', width)
         .attr('height', height);
 
-    // Ìí¼ÓËõ·Å¹¦ÄÜ
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å¹ï¿½ï¿½ï¿½
     svg.call(d3.zoom().on('zoom', (event) => {
         g.attr('transform', event.transform);
     }));
 
     const g = svg.append('g');
 
-    // ³õÊ¼»¯Á¦µ¼Ïò²¼¾Ö
+    // ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ò²¼¾ï¿½
     simulation = d3.forceSimulation()
         .force('link', d3.forceLink().id(d => d.id).distance(100))
         .force('charge', d3.forceManyBody().strength(-300))
         .force('center', d3.forceCenter(width / 2, height / 2));
 
-    // ´Óºó¶Ë¼ÓÔØÊý¾Ý
+    // ï¿½Óºï¿½Ë¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     loadGraphData();
 }
 
-// ´Óºó¶ËAPI¼ÓÔØÍ¼Æ×Êý¾Ý
+// ï¿½Óºï¿½ï¿½APIï¿½ï¿½ï¿½ï¿½Í¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 function loadGraphData() {
     fetch('/api/kg/data')
         .then(response => {
             if (!response.ok) {
-                throw new Error(`HTTP´íÎó£º${response.status}`);
+                throw new Error(`HTTPï¿½ï¿½ï¿½ï¿½${response.status}`);
             }
             return response.json();
         })
         .then(res => {
             if (res.ret === 0) {
                 graphData = res.data;
-                updateGraph(); // ÖØÐÂäÖÈ¾Í¼Æ×
+                updateGraph(); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¾Í¼ï¿½ï¿½
             } else {
-                console.error('Êý¾Ý¼ÓÔØÊ§°Ü:', res.msg);
-                alert(`Êý¾Ý¼ÓÔØÊ§°Ü£º${res.msg}`);
+                console.error('ï¿½ï¿½ï¿½Ý¼ï¿½ï¿½ï¿½Ê§ï¿½ï¿½:', res.msg);
+                alert(`ï¿½ï¿½ï¿½Ý¼ï¿½ï¿½ï¿½Ê§ï¿½Ü£ï¿½${res.msg}`);
             }
         })
         .catch(error => {
-            console.error('ÇëÇóÊ§°Ü:', error);
-            alert(`¼ÓÔØÊý¾ÝÊ±³ö´í£º${error.message}`);
+            console.error('ï¿½ï¿½ï¿½ï¿½Ê§ï¿½ï¿½:', error);
+            alert(`ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½${error.message}`);
         });
 }
 
-// ÖØÐÂäÖÈ¾Í¼Æ×
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¾Í¼ï¿½ï¿½
 function updateGraph() {
-        // Çå¿ÕËùÓÐÔªËØ
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ôªï¿½ï¿½
         svg.selectAll('*').remove();
 
-        // ´´½¨ÐÂµÄÍ¼²ã
+        // ï¿½ï¿½ï¿½ï¿½ï¿½Âµï¿½Í¼ï¿½ï¿½
         const g = svg.append('g');
 
-        // »æÖÆ¹ØÏµ±ß
+        // ï¿½ï¿½ï¿½Æ¹ï¿½Ïµï¿½ï¿½
         const link = g.append('g')
             .selectAll('line')
             .data(graphData.links)
@@ -71,7 +72,7 @@ function updateGraph() {
             .attr('class', 'link')
             .attr('stroke-width', 2);
 
-        // »æÖÆÊµÌå½Úµã
+        // ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½Úµï¿½
         const node = g.append('g')
             .selectAll('g')
             .data(graphData.nodes)
@@ -82,22 +83,22 @@ function updateGraph() {
                 .on('drag', dragged)
                 .on('end', dragended));
 
-        // ½ÚµãÌí¼ÓÔ²ÐÎ
+        // ï¿½Úµï¿½ï¿½ï¿½ï¿½ï¿½Ô²ï¿½ï¿½
         node.append('circle')
             .attr('r', 15)
             .attr('fill', d => {
-                // ¸ù¾ÝÊµÌåÀàÐÍÉèÖÃÑÕÉ«
-                const colors = { 'ÈËÎï': '#4285f4', '×éÖ¯': '#34a853', 'µØµã': '#fbbc05' };
+                // ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É«
+                const colors = { 'ï¿½ï¿½ï¿½ï¿½': '#4285f4', 'ï¿½ï¿½Ö¯': '#34a853', 'ï¿½Øµï¿½': '#fbbc05' };
                 return colors[d.type] || '#ea4335';
             });
 
-    // ½ÚµãÌí¼ÓÎÄ×Ö
+    // ï¿½Úµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     node.append('text')
         .attr('dx', 20)
         .attr('dy', '.3em')
         .text(d => d.name);
 
-    // ¸üÐÂÁ¦µ¼ÏòÄ£ÐÍ
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½
     simulation.nodes(graphData.nodes)
         .on('tick', ticked);
 
@@ -106,7 +107,7 @@ function updateGraph() {
 
     simulation.alpha(1).restart();
 
-    // Á¦µ¼Ïò²¼¾Ö¸üÐÂ»Øµ÷
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ò²¼¾Ö¸ï¿½ï¿½Â»Øµï¿½
     function ticked() {
         link
             .attr('x1', d => d.source.x)
@@ -118,7 +119,7 @@ function updateGraph() {
     }
 }
 
-// ÍÏ×§ÊÂ¼þ´¦Àí
+// ï¿½ï¿½×§ï¿½Â¼ï¿½ï¿½ï¿½ï¿½ï¿½
 function dragstarted(event, d) {
     if (!event.active) simulation.alphaTarget(0.3).restart();
     d.fx = d.x;
@@ -136,27 +137,27 @@ function dragended(event, d) {
     d.fy = null;
 }
 
-// °ó¶¨ÊÂ¼þ
+// ï¿½ï¿½ï¿½Â¼ï¿½
 function bindEvents() {
-    // µ¼ÈëJSONÎÄ¼þ
+    // ï¿½ï¿½ï¿½ï¿½JSONï¿½Ä¼ï¿½
     document.getElementById('import-btn').addEventListener('click', () => {
         document.getElementById('file-upload').click();
     });
 
     document.getElementById('file-upload').addEventListener('change', handleFileImport);
 
-    // µ¼³öµ±Ç°Êý¾Ý
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½
     document.getElementById('export-btn').addEventListener('click', exportGraphData);
 
-    // Ìí¼ÓÊµÌå
+    // ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½
     document.getElementById('add-entity-btn').addEventListener('click', addNewEntity);
 }
 
-// ´¦ÀíÎÄ¼þµ¼Èë
+// ï¿½ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½
 function handleFileImport(event) {
     const file = event.target.files[0];
     if (!file || !file.name.endsWith('.json')) {
-        alert('ÇëÑ¡ÔñJSONÎÄ¼þ');
+        alert('ï¿½ï¿½Ñ¡ï¿½ï¿½JSONï¿½Ä¼ï¿½');
         return;
     }
 
@@ -167,18 +168,18 @@ function handleFileImport(event) {
             if (data.nodes && data.links) {
                 graphData = data;
                 updateGraph();
-                alert('µ¼Èë³É¹¦');
+                alert('ï¿½ï¿½ï¿½ï¿½É¹ï¿½');
             } else {
-                alert('JSON¸ñÊ½´íÎó£¬Ðè°üº¬nodesºÍlinks');
+                alert('JSONï¿½ï¿½Ê½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½nodesï¿½ï¿½links');
             }
         } catch (error) {
-            alert('½âÎöÊ§°Ü: ' + error.message);
+            alert('ï¿½ï¿½ï¿½ï¿½Ê§ï¿½ï¿½: ' + error.message);
         }
     };
     reader.readAsText(file);
 }
 
-// µ¼³öµ±Ç°Êý¾Ý
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½
 function exportGraphData() {
     const dataStr = JSON.stringify(graphData, null, 2);
     const blob = new Blob([dataStr], { type: 'application/json' });
@@ -190,40 +191,106 @@ function exportGraphData() {
     URL.revokeObjectURL(url);
 }
 
-// Ìí¼ÓÐÂÊµÌåµ½ºó¶Ë
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Êµï¿½åµ½ï¿½ï¿½ï¿½
 function addNewEntity() {
     const id = document.getElementById('entity-id').value;
     const name = document.getElementById('entity-name').value;
     if (!id || !name) {
-        alert('ÇëÌîÐ´ÊµÌåIDºÍÃû³Æ');
+        alert('ï¿½ï¿½ï¿½ï¿½Ð´Êµï¿½ï¿½IDï¿½ï¿½ï¿½ï¿½ï¿½ï¿½');
         return;
     }
 
-    fetch('/api/kg/entity', {
+    fetch('/api/kg/entities', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, name })
     })
     .then(response => {
         if (!response.ok) {
-            throw new Error(`HTTP´íÎó£º${response.status}`);
+            throw new Error(`HTTPï¿½ï¿½ï¿½ï¿½${response.status}`);
         }
         return response.json();
     })
     .then(res => {
         if (res.ret === 0) {
-            alert('ÊµÌåÌí¼Ó³É¹¦');
-            loadGraphData(); // ÖØÐÂ¼ÓÔØÊý¾Ý
+            alert('Êµï¿½ï¿½ï¿½ï¿½ï¿½Ó³É¹ï¿½');
+            loadGraphData(); // ï¿½ï¿½ï¿½Â¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         } else {
-            alert('Ìí¼ÓÊ§°Ü: ' + res.msg);
+            alert('ï¿½ï¿½ï¿½ï¿½Ê§ï¿½ï¿½: ' + res.msg);
         }
     })
     .catch(error => {
-        alert('ÇëÇóÊ§°Ü: ' + error.message);
+        alert('ï¿½ï¿½ï¿½ï¿½Ê§ï¿½ï¿½: ' + error.message);
     });
 }
 
-// Ò³Ãæ¼ÓÔØÍê³Éºó³õÊ¼»¯
+// æ–°å¢žï¼šå¯¹æŽ¥åŽç«¯çš„é€šç”¨æ“ä½œï¼ˆä¾›ç®€å•é¡µé¢æˆ–æŽ§åˆ¶å°ä½¿ç”¨ï¼‰
+async function updateEntityOnServer(entityId, payload) {
+    try {
+        const response = await fetch(`/api/kg/entities/${encodeURIComponent(entityId)}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const data = await response.json();
+        return data.ret === 0;
+    } catch (e) {
+        console.warn('æ›´æ–°å®žä½“å¼‚å¸¸:', e);
+        return false;
+    }
+}
+
+async function deleteEntityFromServer(entityId) {
+    try {
+        const response = await fetch(`/api/kg/entities/${encodeURIComponent(entityId)}`, {
+            method: 'DELETE'
+        });
+        const data = await response.json();
+        return data.ret === 0;
+    } catch (e) {
+        console.warn('åˆ é™¤å®žä½“å¼‚å¸¸:', e);
+        return false;
+    }
+}
+
+async function createRelationshipOnServer(sourceId, targetId, type, description = '') {
+    try {
+        const response = await fetch('/api/kg/relationships', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ source: sourceId, target: targetId, type, description })
+        });
+        const data = await response.json();
+        if (data.ret === 0 && data.data && typeof data.data.id !== 'undefined') {
+            return { ok: true, id: data.data.id };
+        }
+        return { ok: false };
+    } catch (e) {
+        console.warn('åˆ›å»ºå…³ç³»å¼‚å¸¸:', e);
+        return { ok: false };
+    }
+}
+
+async function deleteRelationshipFromServer(relId) {
+    try {
+        const response = await fetch(`/api/kg/relationships/${relId}`, { method: 'DELETE' });
+        const data = await response.json();
+        return data.ret === 0;
+    } catch (e) {
+        console.warn('åˆ é™¤å…³ç³»å¼‚å¸¸:', e);
+        return false;
+    }
+}
+
+// æš´éœ²ç®€æ˜“APIï¼Œæ–¹ä¾¿åœ¨æŽ§åˆ¶å°æˆ–å…¶ä»–è„šæœ¬ä¸­è°ƒç”¨
+window.KGApi = {
+    updateEntityOnServer,
+    deleteEntityFromServer,
+    createRelationshipOnServer,
+    deleteRelationshipFromServer,
+};
+
+// Ò³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Éºï¿½ï¿½Ê¼ï¿½ï¿½
 window.onload = () => {
     initGraph();
     bindEvents();

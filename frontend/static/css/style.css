@@ -1,4 +1,5 @@
-/* 基础样式 */
+/* -*- coding: utf-8 -*- */
+/* 涓枃鏍峰紡 */
 * {
     margin: 0;
     padding: 0;
@@ -16,7 +17,7 @@ body {
     height: 100%;
 }
 
-/* 左侧控制面板 */
+/* 鎺у埗闈㈡澘 */
 .control-panel {
     width: 300px;
     padding: 20px;
@@ -48,14 +49,14 @@ body {
     border-radius: 4px;
 }
 
-/* 右侧图谱可视化区域 */
+/* 鍥捐氨瀹瑰櫒 */
 .graph-container {
     flex: 1;
     height: 100%;
     background-color: #fff;
 }
 
-/* 图谱元素样式 */
+/* 鍥捐氨鍏冪礌鏍峰紡 */
 .node {
     cursor: pointer;
 }
