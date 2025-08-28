@@ -481,6 +481,79 @@
             border-top: 1px solid #e0f2f1;
         }
 
+        /* 实体编辑表单样式 */
+        .entity-edit-form {
+            margin-top: 15px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e0f2f1;
+        }
+
+        .entity-edit-form .form-group {
+            margin-bottom: 15px;
+        }
+
+        .entity-edit-form label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .entity-edit-form input,
+        .entity-edit-form select,
+        .entity-edit-form textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .entity-edit-form input:focus,
+        .entity-edit-form select:focus,
+        .entity-edit-form textarea:focus {
+            outline: none;
+            border-color: #26a69a;
+            box-shadow: 0 0 0 2px rgba(38, 166, 154, 0.2);
+        }
+
+        .entity-edit-form .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .entity-edit-form .btn-primary,
+        .entity-edit-form .btn-secondary {
+            flex: 1;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .entity-edit-form .btn-primary {
+            background-color: #26a69a;
+            color: white;
+        }
+
+        .entity-edit-form .btn-primary:hover {
+            background-color: #1e8a7f;
+        }
+
+        .entity-edit-form .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .entity-edit-form .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+
         .relation-item {
             margin-bottom: 10px;
             padding: 5px;
@@ -526,6 +599,89 @@
         .dropdown-item.active {
             background-color: #81c784;
             color: white;
+        }
+
+        /* 领域选择器样式 */
+        .domain-selector-container {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: linear-gradient(135deg, #f1f8e9 0%, #e8f5e9 100%);
+            border-radius: 8px;
+            border: 1px solid #c8e6c9;
+        }
+
+        .domain-info {
+            margin-top: 10px;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 4px;
+            font-size: 12px;
+            color: #2e7d32;
+            text-align: center;
+        }
+
+        #domain-select {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid #81c784;
+            color: #2e7d32;
+            font-weight: 500;
+        }
+
+        #domain-select:focus {
+            border-color: #4caf50;
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+        }
+
+        /* 领域选择下拉框样式 */
+        .domain-select-container {
+            position: relative;
+        }
+
+        .domain-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #81c784;
+            border-radius: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+            margin-top: 2px;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .domain-dropdown.visible {
+            display: block;
+        }
+
+        .domain-dropdown .dropdown-item {
+            padding: 8px 10px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .domain-dropdown .dropdown-item:hover {
+            background-color: #e0f7fa;
+        }
+
+        .domain-dropdown .dropdown-item.active {
+            background-color: #81c784;
+            color: white;
+        }
+
+        #domain-select-display {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid #81c784;
+            color: #2e7d32;
+            font-weight: 500;
+        }
+
+        #domain-select-display:focus {
+            border-color: #4caf50;
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
         }
     </style>
 </head>
@@ -640,6 +796,22 @@
         </div>
 
         <div class="panel right-panel">
+            <!-- 领域选择区域 -->
+            <div class="domain-selector-container">
+                <h3 class="list-title">领域筛选</h3>
+                <div class="form-group">
+                    <label for="domain-select">选择领域</label>
+                    <div class="domain-select-container">
+                        <input type="text" id="domain-select-display" placeholder="输入或选择领域">
+                        <input type="hidden" id="domain-select" value="all">
+                        <div class="domain-dropdown" id="domain-dropdown"></div>
+                    </div>
+                </div>
+                <div class="domain-info">
+                    <span id="current-domain-info">当前显示：所有领域</span>
+                </div>
+            </div>
+
             <div class="search-container">
                 <!-- 搜索类型选择下拉框 -->
                 <div class="search-type-container">
@@ -699,6 +871,18 @@
             try {
                 const result = await apiCall('/data');
                 graphData = result.data;
+                
+                // 确保数据包含领域信息
+                graphData.nodes = graphData.nodes.map(node => ({
+                    ...node,
+                    domain: node.domain || 'default'
+                }));
+                
+                graphData.links = graphData.links.map(link => ({
+                    ...link,
+                    domain: link.domain || 'default'
+                }));
+                
                 console.log('从后端加载数据成功:', graphData);
                 return true;
             } catch (error) {
@@ -758,11 +942,13 @@
         // 删除关系
         async function deleteRelationshipAPI(relationshipId) {
             try {
+                console.log('调用删除关系API，ID:', relationshipId);
                 const result = await apiCall(`/relationships/${relationshipId}`, 'DELETE');
                 console.log('删除关系成功:', result);
                 return true;
             } catch (error) {
                 console.error('删除关系失败:', error);
+                console.error('错误详情:', error.message);
                 return false;
             }
         }
@@ -815,6 +1001,9 @@
         let arrowElements = null; // 存储箭头元素引用
         let currentFilePath = null; // 当前打开的文件路径
         let usedRelationTypes = new Set(); // 已使用的关系类型集合
+        let currentDomain = 'all'; // 当前选中的领域
+        let allGraphData = { nodes: [], links: [] }; // 存储所有数据
+        let filteredGraphData = { nodes: [], links: [] }; // 存储筛选后的数据
 
         // DOM元素
         const entityDomainSelect = document.getElementById('entity-domain');
@@ -852,6 +1041,10 @@
         const saveCurrentDataBtn = document.getElementById('save-current-data');
         const currentFileInfo = document.getElementById('current-file-info');
         const currentFileName = document.getElementById('current-file-name');
+        const domainSelect = document.getElementById('domain-select');
+        const domainSelectDisplay = document.getElementById('domain-select-display');
+        const domainDropdown = document.getElementById('domain-dropdown');
+        const currentDomainInfo = document.getElementById('current-domain-info');
 
         // 页面加载完成后初始化
         window.addEventListener('DOMContentLoaded', initialize);
@@ -868,21 +1061,37 @@
                 // 初始化默认数据
                 graphData = {
                     nodes: [
-                        { id: "1", name: "人工智能", description: "研究如何使机器模拟人类智能的科学" },
-                        { id: "2", name: "机器学习", description: "人工智能的一个分支" },
-                        { id: "3", name: "深度学习", description: "机器学习的一个分支" },
-                        { id: "4", name: "神经网络", description: "受人脑结构启发的计算模型" },
-                        { id: "5", name: "计算机视觉", description: "使计算机能够从图像中获取理解的领域" }
+                        { id: "1", name: "人工智能", description: "研究如何使机器模拟人类智能的科学", domain: "ai_domain" },
+                        { id: "2", name: "机器学习", description: "人工智能的一个分支", domain: "ai_domain" },
+                        { id: "3", name: "深度学习", description: "机器学习的一个分支", domain: "ai_domain" },
+                        { id: "4", name: "神经网络", description: "受人脑结构启发的计算模型", domain: "ai_domain" },
+                        { id: "5", name: "计算机视觉", description: "使计算机能够从图像中获取理解的领域", domain: "ai_domain" },
+                        { id: "6", name: "心脏病", description: "心脏疾病的总称", domain: "medical_domain" },
+                        { id: "7", name: "高血压", description: "血压持续升高的疾病", domain: "medical_domain" },
+                        { id: "8", name: "糖尿病", description: "血糖代谢异常的疾病", domain: "medical_domain" },
+                        { id: "9", name: "股票投资", description: "购买股票进行投资的行为", domain: "finance_domain" },
+                        { id: "10", name: "基金理财", description: "通过基金进行理财投资", domain: "finance_domain" },
+                        { id: "11", name: "在线教育", description: "通过网络进行的教育活动", domain: "education_domain" },
+                        { id: "12", name: "编程语言", description: "用于编写计算机程序的语言", domain: "tech_domain" }
                     ],
                     links: [
-                        { source: "1", target: "2", type: "包含" },
-                        { source: "2", target: "3", type: "包含" },
-                        { source: "3", target: "4", type: "基于" },
-                        { source: "1", target: "5", type: "包含" },
-                        { source: "5", target: "3", type: "应用" }
+                        { source: "1", target: "2", type: "包含", domain: "ai_domain" },
+                        { source: "2", target: "3", type: "包含", domain: "ai_domain" },
+                        { source: "3", target: "4", type: "基于", domain: "ai_domain" },
+                        { source: "1", target: "5", type: "包含", domain: "ai_domain" },
+                        { source: "5", target: "3", type: "应用", domain: "ai_domain" },
+                        { source: "6", target: "7", type: "相关", domain: "medical_domain" },
+                        { source: "7", target: "8", type: "并发症", domain: "medical_domain" },
+                        { source: "9", target: "10", type: "替代", domain: "finance_domain" },
+                        { source: "11", target: "12", type: "使用", domain: "education_domain" },
+                        { source: "1", target: "12", type: "应用", domain: "ai_domain" }
                     ]
                 };
             }
+
+            // 初始化数据存储
+            allGraphData = { ...graphData };
+            filteredGraphData = { ...graphData };
 
             // 初始化已使用的关系类型集合
             updateUsedRelationTypes();
@@ -894,7 +1103,215 @@
             setupEventListeners();
             // 初始化实体表单默认值
             populateDefaultEntityValues();
+            
+            // 初始化领域选择器
+            initializeDomainSelector();
+            
+            // 设置初始显示值
+            domainSelectDisplay.value = '所有领域';
+            
             console.log('系统初始化完成');
+        }
+
+        // 初始化领域选择器
+        function initializeDomainSelector() {
+            // 更新领域下拉框
+            updateDomainDropdown();
+            
+            // 更新领域信息显示
+            updateDomainInfo();
+            
+            // 添加领域选择事件监听
+            domainSelectDisplay.addEventListener('focus', () => {
+                domainDropdown.classList.add('visible');
+            });
+
+            domainSelectDisplay.addEventListener('input', () => {
+                const inputValue = domainSelectDisplay.value.trim();
+                const filtered = filterDomains(inputValue);
+                updateDomainDropdown(filtered);
+                domainDropdown.classList.add('visible');
+            });
+
+            // 失去焦点时保存自定义输入
+            domainSelectDisplay.addEventListener('blur', () => {
+                const inputValue = domainSelectDisplay.value.trim();
+                if (inputValue) {
+                    domainSelect.value = inputValue;
+                    currentDomain = inputValue;
+                    setTimeout(() => {
+                        domainDropdown.classList.remove('visible');
+                    }, 200);
+                }
+            });
+
+            // 点击其他区域关闭下拉框
+            document.addEventListener('click', (event) => {
+                if (!event.target.closest('.domain-select-container')) {
+                    domainDropdown.classList.remove('visible');
+                }
+            });
+        }
+
+        // 根据领域筛选数据
+        function filterDataByDomain() {
+            if (currentDomain === 'all') {
+                // 显示所有数据
+                filteredGraphData = { ...allGraphData };
+            } else {
+                // 筛选指定领域的实体
+                const filteredNodes = allGraphData.nodes.filter(node => 
+                    node.domain === currentDomain
+                );
+                
+                // 获取筛选出的实体的ID集合
+                const filteredNodeIds = new Set(filteredNodes.map(node => node.id));
+                
+                // 找到所有与筛选实体有关系的实体ID
+                const relatedNodeIds = new Set(filteredNodeIds);
+                
+                // 遍历所有关系，找到与筛选实体相关的所有实体
+                allGraphData.links.forEach(link => {
+                    const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
+                    const targetId = typeof link.target === 'object' ? link.target.id : link.target;
+                    
+                    // 如果关系的源实体或目标实体在筛选结果中，则包含整个关系
+                    if (filteredNodeIds.has(sourceId) || filteredNodeIds.has(targetId)) {
+                        relatedNodeIds.add(sourceId);
+                        relatedNodeIds.add(targetId);
+                    }
+                });
+                
+                // 获取所有相关实体
+                const allRelatedNodes = allGraphData.nodes.filter(node => 
+                    relatedNodeIds.has(node.id)
+                );
+                
+                // 获取所有相关关系
+                const allRelatedLinks = allGraphData.links.filter(link => {
+                    const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
+                    const targetId = typeof link.target === 'object' ? link.target.id : link.target;
+                    return relatedNodeIds.has(sourceId) && relatedNodeIds.has(targetId);
+                });
+                
+                filteredGraphData = {
+                    nodes: allRelatedNodes,
+                    links: allRelatedLinks
+                };
+            }
+            
+            // 更新当前使用的数据
+            graphData = filteredGraphData;
+            
+            // 更新已使用的关系类型集合
+            updateUsedRelationTypes();
+            
+            // 更新界面
+            updateEntityDropdowns();
+            updateRelationTypeDropdown();
+            renderEntityList();
+            reloadGraph();
+            
+            // 重置详情视图
+            detailView.innerHTML = '<div class="no-data">选择一个实体或关系查看详情</div>';
+            resetSearchState();
+            
+            // 更新领域下拉框
+            updateDomainDropdown();
+            
+            console.log(`领域筛选完成：${currentDomain}，实体数：${graphData.nodes.length}，关系数：${graphData.links.length}`);
+        }
+
+        // 获取当前数据中的所有领域
+        function getAvailableDomains() {
+            const domains = new Set();
+            
+            // 从实体中获取领域
+            graphData.nodes.forEach(node => {
+                if (node.domain) {
+                    domains.add(node.domain);
+                }
+            });
+            
+            // 从关系中获取领域
+            graphData.links.forEach(link => {
+                if (link.domain) {
+                    domains.add(link.domain);
+                }
+            });
+            
+            return Array.from(domains).sort();
+        }
+
+        // 过滤领域
+        function filterDomains(keyword) {
+            const availableDomains = getAvailableDomains();
+            
+            if (!keyword) {
+                return availableDomains;
+            }
+
+            const lowerKeyword = keyword.toLowerCase();
+            return availableDomains.filter(domain =>
+                domain.toLowerCase().includes(lowerKeyword)
+            );
+        }
+
+        // 更新领域下拉框
+        function updateDomainDropdown(filteredDomains = null) {
+            domainDropdown.innerHTML = '';
+
+            const domains = filteredDomains || getAvailableDomains();
+
+            if (domains.length === 0) {
+                const emptyItem = document.createElement('div');
+                emptyItem.className = 'dropdown-item';
+                emptyItem.textContent = '暂无领域数据';
+                emptyItem.style.cursor = 'default';
+                emptyItem.style.opacity = '0.7';
+                domainDropdown.appendChild(emptyItem);
+                return;
+            }
+
+            // 添加"所有领域"选项
+            const allItem = document.createElement('div');
+            allItem.className = 'dropdown-item';
+            allItem.textContent = '所有领域';
+            allItem.dataset.domain = 'all';
+            allItem.addEventListener('click', () => {
+                domainSelect.value = 'all';
+                domainSelectDisplay.value = '所有领域';
+                currentDomain = 'all';
+                filterDataByDomain();
+                updateDomainInfo();
+                domainDropdown.classList.remove('visible');
+            });
+            domainDropdown.appendChild(allItem);
+
+            // 添加领域选项
+            domains.forEach(domain => {
+                const item = document.createElement('div');
+                item.className = 'dropdown-item';
+                item.textContent = domain;
+                item.dataset.domain = domain;
+
+                item.addEventListener('click', () => {
+                    domainSelect.value = domain;
+                    domainSelectDisplay.value = domain;
+                    currentDomain = domain;
+                    filterDataByDomain();
+                    updateDomainInfo();
+                    domainDropdown.classList.remove('visible');
+                });
+
+                domainDropdown.appendChild(item);
+            });
+        }
+
+        // 更新领域信息显示
+        function updateDomainInfo() {
+            const domainName = currentDomain === 'all' ? '所有领域' : currentDomain;
+            currentDomainInfo.textContent = `当前显示：${domainName} (${graphData.nodes.length}个实体，${graphData.links.length}个关系)`;
         }
 
         // 更新已使用的关系类型集合
@@ -1010,11 +1427,27 @@
                         throw new Error('关系数据不完整，每个关系需包含source、target和type字段');
                     }
 
+                    // 处理导入的数据，确保包含领域信息
+                    const processedData = {
+                        nodes: importedData.nodes.map(node => ({
+                            ...node,
+                            domain: node.domain || 'default'
+                        })),
+                        links: importedData.links.map(link => ({
+                            ...link,
+                            domain: link.domain || 'default'
+                        }))
+                    };
+
                     // 调用后端API导入数据
-                    const success = await importGraphData(importedData);
+                    const success = await importGraphData(processedData);
                     if (success) {
                         // 重新从后端加载数据
                         await loadGraphData();
+                        
+                        // 更新数据存储
+                        allGraphData = { ...graphData };
+                        filteredGraphData = { ...graphData };
                         
                         currentFilePath = file.name;
                         currentFileName.textContent = file.name;
@@ -1031,6 +1464,10 @@
                         resetSearchState();
                         // 更新实体表单默认值
                         populateDefaultEntityValues();
+                        // 更新领域信息显示
+                        updateDomainInfo();
+                        // 更新领域下拉框
+                        updateDomainDropdown();
                         alert(`数据导入成功！共导入 ${graphData.nodes.length} 个实体和 ${graphData.links.length} 个关系`);
                     } else {
                         alert('数据导入失败，请检查网络连接');
@@ -1080,6 +1517,7 @@
                 const cleanNodes = exportData.nodes.map(node => ({
                     id: node.id,
                     name: node.name,
+                    domain: node.domain || 'default',
                     ...(node.description && node.description.trim() ? { description: node.description } : {})
                 }));
 
@@ -1090,7 +1528,8 @@
                     return {
                         source: sourceId,
                         target: targetId,
-                        type: link.type
+                        type: link.type,
+                        domain: link.domain || 'default'
                     };
                 });
 
@@ -1283,26 +1722,9 @@
             if (!entity) return;
 
             editingEntityId = id;
-            entityFormTitle.textContent = '编辑实体';
-            entityIdInput.value = entity.id;
-            entityIdInput.disabled = true;
-            entityNameInput.value = entity.name;
-            entityDescInput.value = entity.description || '';
             
-            // 设置领域信息
-            const domain = entity.domain || 'default';
-            if (domain === 'default' || ['technology', 'medicine', 'finance', 'education', 'culture'].includes(domain)) {
-                entityDomainSelect.value = domain;
-                customDomainInput.style.display = 'none';
-            } else {
-                entityDomainSelect.value = 'custom';
-                customDomainInput.value = domain;
-                customDomainInput.style.display = 'block';
-            }
-
-            addEntityBtn.style.display = 'none';
-            updateEntityBtn.style.display = 'block';
-            cancelEditBtn.style.display = 'block';
+            // 重新显示实体详情，这次会包含编辑表单
+            showEntityDetail(entity);
         }
 
 
@@ -1319,6 +1741,11 @@
             addEntityBtn.style.display = 'block';
             updateEntityBtn.style.display = 'none';
             cancelEditBtn.style.display = 'none';
+            
+            // 如果当前有选中的实体，重新显示其详情（非编辑状态）
+            if (selectedNode) {
+                showEntityDetail(selectedNode);
+            }
         }
 
         function clearEntityForm() {
@@ -1365,12 +1792,21 @@
             if (success) {
                 // 重新从后端加载数据
                 await loadGraphData();
+                
+                // 更新数据存储
+                allGraphData = { ...graphData };
+                filteredGraphData = { ...graphData };
+                
                 updateEntityDropdowns();
                 renderEntityList();
                 reloadGraph();
                 // 清空表单并填充新的默认值
                 clearEntityForm();
                 populateDefaultEntityValues();
+                // 更新领域信息显示
+                updateDomainInfo();
+                // 更新领域下拉框
+                updateDomainDropdown();
                 alert('实体添加成功');
             } else {
                 alert('实体添加失败，请检查网络连接');
@@ -1431,7 +1867,7 @@
         }
 
         // 复制实体功能
-        function copyEntity(sourceId) {
+        async function copyEntity(sourceId) {
             const sourceEntity = graphData.nodes.find(n => n.id === sourceId);
             if (!sourceEntity) return;
 
@@ -1448,18 +1884,24 @@
                 ...(sourceEntity.description ? { description: sourceEntity.description } : {})
             };
 
-            // 添加到图谱数据
-            graphData.nodes.push(copiedEntity);
+            // 调用后端API创建复制的实体
+            const success = await createEntity(copiedEntity);
+            if (success) {
+                // 重新从后端加载数据
+                await loadGraphData();
+                
+                // 更新界面
+                updateEntityDropdowns();
+                renderEntityList();
+                reloadGraph();
 
-            // 更新界面
-            updateEntityDropdowns();
-            renderEntityList();
-            reloadGraph();
+                // 自动填充表单并切换到编辑模式（方便用户修改）
+                startEditCopiedEntity(copiedEntity);
 
-            // 自动填充表单并切换到编辑模式（方便用户修改）
-            startEditCopiedEntity(copiedEntity);
-
-            alert(`实体复制成功！新实体ID：${newId}`);
+                alert(`实体复制成功！新实体ID：${newId}`);
+            } else {
+                alert('实体复制失败，请检查网络连接');
+            }
         }
 
         // 生成不重复的实体ID
@@ -1525,6 +1967,8 @@
                 }
 
                 resetSearchState();
+                // 更新领域下拉框
+                updateDomainDropdown();
 
                 alert('实体删除成功');
             } else {
@@ -1561,16 +2005,26 @@
                 return;
             }
 
+            // 获取源实体的领域信息
+            const sourceEntity = graphData.nodes.find(n => n.id === sourceId);
+            const targetEntity = graphData.nodes.find(n => n.id === targetId);
+            const domain = sourceEntity?.domain || targetEntity?.domain || 'default';
+
             // 调用后端API创建关系
             const success = await createRelationship({
                 source: sourceId,
                 target: targetId,
-                type: type
+                type: type,
+                domain: domain
             });
 
             if (success) {
                 // 重新从后端加载数据
                 await loadGraphData();
+                
+                // 更新数据存储
+                allGraphData = { ...graphData };
+                filteredGraphData = { ...graphData };
                 
                 // 更新已使用的关系类型
                 updateUsedRelationTypes();
@@ -1584,6 +2038,10 @@
                 }
 
                 resetSearchState();
+                // 更新领域信息显示
+                updateDomainInfo();
+                // 更新领域下拉框
+                updateDomainDropdown();
 
                 alert('关系添加成功');
             } else {
@@ -1688,25 +2146,50 @@
             relationTypeDisplay.value = '';
         }
 
-        function deleteRelation(sourceId, targetId, type) {
+        async function deleteRelation(sourceId, targetId, type) {
             if (!confirm(`确定要删除关系「${type}」吗？`)) return;
 
-            const initialLinkCount = graphData.links.length;
             const source = typeof sourceId === 'object' ? sourceId.id : sourceId;
             const target = typeof targetId === 'object' ? targetId.id : targetId;
 
-            graphData.links = graphData.links.filter(link => {
+            // 找到要删除的关系
+            const linkToDelete = graphData.links.find(link => {
                 const linkSource = typeof link.source === 'object' ? link.source.id : link.source;
                 const linkTarget = typeof link.target === 'object' ? link.target.id : link.target;
-                return !(linkSource === source && linkTarget === target && link.type === type);
+                return linkSource === source && linkTarget === target && link.type === type;
             });
 
-            if (graphData.links.length < initialLinkCount) {
-                // 更新已使用的关系类型
-            updateUsedRelationTypes();
-            updateRelationTypeDropdown();
+            if (!linkToDelete) {
+                alert('未找到该关系');
+                return;
+            }
 
-            reloadGraph();
+            // 获取关系ID
+            const relationshipId = linkToDelete.id;
+            
+            console.log('要删除的关系:', linkToDelete);
+            console.log('关系ID:', relationshipId);
+            
+            if (!relationshipId) {
+                alert('关系ID不存在，无法删除');
+                return;
+            }
+
+            // 调用后端API删除关系
+            const success = await deleteRelationshipAPI(relationshipId);
+            if (success) {
+                // 重新从后端加载数据
+                await loadGraphData();
+                
+                // 更新数据存储
+                allGraphData = { ...graphData };
+                filteredGraphData = { ...graphData };
+                
+                // 更新已使用的关系类型
+                updateUsedRelationTypes();
+                updateRelationTypeDropdown();
+
+                reloadGraph();
 
                 if (selectedNode && (selectedNode.id === source || selectedNode.id === target)) {
                     showEntityDetail(selectedNode);
@@ -1716,15 +2199,17 @@
                     (typeof selectedLink.source === 'object' ? selectedLink.source.id : selectedLink.source) === source &&
                     (typeof selectedLink.target === 'object' ? selectedLink.target.id : selectedLink.target) === target &&
                     selectedLink.type === type) {
-                selectedLink = null;
-                detailView.innerHTML = '<div class="no-data">选择一个实体或关系查看详情</div>';
-            }
+                    selectedLink = null;
+                    detailView.innerHTML = '<div class="no-data">选择一个实体或关系查看详情</div>';
+                }
 
                 resetSearchState();
+                // 更新领域下拉框
+                updateDomainDropdown();
 
                 alert('关系删除成功');
             } else {
-                alert('未找到该关系或删除失败');
+                alert('关系删除失败，请检查网络连接');
             }
         }
 
@@ -2282,6 +2767,15 @@
             selectedNode = entity;
             selectedLink = null;
 
+            // 检查是否处于编辑状态
+            const isEditing = editingEntityId === entity.id;
+
+            // 如果是编辑状态，显示编辑页面
+            if (isEditing) {
+                showEntityEditPage(entity);
+                return;
+            }
+
             const relatedLinks = graphData.links.filter(link => {
                 const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
                 const targetId = typeof link.target === 'object' ? link.target.id : link.target;
@@ -2377,6 +2871,9 @@
                 return lSourceId === sourceId && lTargetId === targetId && l.type === link.type;
             });
 
+            // 检查是否处于编辑状态
+            const isEditing = editingLinkIndex === linkIndex;
+
             detailView.innerHTML = `
                 <div class="detail-header">关系详情</div>
                 <div class="detail-section">
@@ -2410,6 +2907,7 @@
                     </div>
                 </div>
 
+                ${isEditing ? `
                 <!-- 关系编辑表单 -->
                 <div class="relation-edit-form">
                     <h3 class="list-title">编辑关系</h3>
@@ -2450,13 +2948,17 @@
                         <button class="btn-secondary" onclick="cancelRelationEdit()">取消</button>
                     </div>
                 </div>
+                ` : ''}
             `;
 
-            // 初始化编辑关系时的实体选择下拉框
-            initEditRelationDropdowns();
+            // 只有在编辑状态下才初始化下拉框
+            if (isEditing) {
+                // 初始化编辑关系时的实体选择下拉框
+                initEditRelationDropdowns();
 
-            // 初始化编辑关系时的关系类型下拉框
-            initEditRelationTypeDropdown();
+                // 初始化编辑关系时的关系类型下拉框
+                initEditRelationTypeDropdown();
+            }
         }
 
         // 初始化编辑关系时的实体选择下拉框
@@ -2686,11 +3188,160 @@
 
         // 取消关系编辑
         function cancelRelationEdit() {
+            // 重置编辑状态
+            editingLinkIndex = -1;
+            
+            // 清空关系表单
+            clearRelationForm();
+            
+            // 如果之前有选中的关系，重新显示其详情
             if (selectedLink) {
                 showRelationDetail(selectedLink);
             } else {
                 detailView.innerHTML = '<div class="no-data">选择一个实体或关系查看详情</div>';
             }
+            
+            console.log('关系编辑已取消');
+        }
+
+        // 显示实体编辑页面
+        function showEntityEditPage(entity) {
+            detailView.innerHTML = `
+                <div class="detail-header">编辑实体</div>
+                <div class="entity-edit-form">
+                    <div class="form-group">
+                        <label for="edit-entity-id">实体ID</label>
+                        <input type="text" id="edit-entity-id" value="${entity.id}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-entity-name">实体名称</label>
+                        <input type="text" id="edit-entity-name" value="${entity.name}" placeholder="输入实体名称">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-entity-domain">图谱领域</label>
+                        <select id="edit-entity-domain">
+                            <option value="default" ${entity.domain === 'default' ? 'selected' : ''}>默认领域</option>
+                            <option value="technology" ${entity.domain === 'technology' ? 'selected' : ''}>技术领域</option>
+                            <option value="medicine" ${entity.domain === 'medicine' ? 'selected' : ''}>医学领域</option>
+                            <option value="finance" ${entity.domain === 'finance' ? 'selected' : ''}>金融领域</option>
+                            <option value="education" ${entity.domain === 'education' ? 'selected' : ''}>教育领域</option>
+                            <option value="culture" ${entity.domain === 'culture' ? 'selected' : ''}>文化领域</option>
+                            <option value="custom" ${!['default', 'technology', 'medicine', 'finance', 'education', 'culture'].includes(entity.domain) ? 'selected' : ''}>自定义领域</option>
+                        </select>
+                        <input type="text" id="edit-custom-domain" placeholder="输入自定义领域名称" style="display: none; margin-top: 5px; width: 100%;" value="${!['default', 'technology', 'medicine', 'finance', 'education', 'culture'].includes(entity.domain) ? entity.domain : ''}">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-entity-desc">实体描述</label>
+                        <textarea id="edit-entity-desc" rows="3" placeholder="输入实体描述">${entity.description || ''}</textarea>
+                    </div>
+                    <div class="btn-group">
+                        <button id="save-entity-edit" class="btn-primary" onclick="saveEntityEdit()">更新实体</button>
+                        <button class="btn-secondary" onclick="cancelEntityEdit()">取消</button>
+                    </div>
+                </div>
+            `;
+
+            // 初始化编辑表单事件
+            initEntityEditForm();
+        }
+
+        // 初始化实体编辑表单
+        function initEntityEditForm() {
+            const editEntityDomain = document.getElementById('edit-entity-domain');
+            const editCustomDomain = document.getElementById('edit-custom-domain');
+
+            // 领域选择事件监听器
+            editEntityDomain.addEventListener('change', function() {
+                if (this.value === 'custom') {
+                    editCustomDomain.style.display = 'block';
+                    editCustomDomain.focus();
+                } else {
+                    editCustomDomain.style.display = 'none';
+                    editCustomDomain.value = '';
+                }
+            });
+
+            // 如果当前选中的是自定义领域，显示自定义输入框
+            if (editEntityDomain.value === 'custom') {
+                editCustomDomain.style.display = 'block';
+            }
+        }
+
+        // 保存实体编辑
+        async function saveEntityEdit() {
+            if (!editingEntityId) return;
+
+            const entity = graphData.nodes.find(n => n.id === editingEntityId);
+            if (!entity) {
+                alert('实体不存在');
+                cancelEntityEdit();
+                return;
+            }
+
+            const name = document.getElementById('edit-entity-name').value.trim();
+            const description = document.getElementById('edit-entity-desc').value.trim();
+            
+            // 获取领域信息
+            let domain = document.getElementById('edit-entity-domain').value;
+            if (domain === 'custom') {
+                domain = document.getElementById('edit-custom-domain').value.trim();
+                if (!domain) {
+                    alert('请输入自定义领域名称');
+                    return;
+                }
+            }
+
+            if (!name) {
+                alert('实体名称不能为空');
+                return;
+            }
+
+            const updateData = { name, domain };
+            if (description) {
+                updateData.description = description;
+            }
+
+            // 调用后端API更新实体
+            const success = await updateEntityAPI(editingEntityId, updateData);
+            if (success) {
+                // 重新从后端加载数据
+                await loadGraphData();
+                
+                // 更新数据存储
+                allGraphData = { ...graphData };
+                filteredGraphData = { ...graphData };
+                
+                renderEntityList();
+                updateEntityDropdowns();
+                reloadGraph();
+                
+                // 更新详情视图
+                const updatedEntity = graphData.nodes.find(n => n.id === editingEntityId);
+                if (updatedEntity) {
+                    // 重置编辑状态并显示详情页
+                    editingEntityId = null;
+                    showEntityDetail(updatedEntity);
+                }
+
+                alert('实体更新成功');
+            } else {
+                alert('实体更新失败，请检查网络连接');
+            }
+        }
+
+        // 取消实体编辑
+        function cancelEntityEdit() {
+            // 重置编辑状态
+            editingEntityId = null;
+            
+            // 如果之前有选中的实体，重新显示其详情
+            if (selectedNode) {
+                showEntityDetail(selectedNode);
+            } else {
+                detailView.innerHTML = '<div class="no-data">选择一个实体或关系查看详情</div>';
+            }
+            
+            console.log('实体编辑已取消');
         }
 
         // 重置搜索状态
@@ -2969,6 +3620,8 @@
         window.showEntityDetail = showEntityDetail;
         window.saveRelationEdit = saveRelationEdit;
         window.cancelRelationEdit = cancelRelationEdit;
+        window.saveEntityEdit = saveEntityEdit;
+        window.cancelEntityEdit = cancelEntityEdit;
     </script>
 </body>
 </html>

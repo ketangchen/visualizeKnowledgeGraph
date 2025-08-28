@@ -34,6 +34,8 @@ http://127.0.0.1:8000/api/
 http://127.0.0.1:8000
 
 
+
+
 visualizeKnowledgeGraph/
 ├── frontend/               # 前端代码
 │   ├── index.html          # 主页面，包含知识图谱可视化界面和交互控件
@@ -48,5 +50,30 @@ visualizeKnowledgeGraph/
 ├── tests/                  # 测试代码（如test_kg_api.py）
 ├── manage.py               # Django项目管理脚本
 └── 其他配置文件（.gitignore、IDE配置等）
+
+
+
+打包依赖库
+pip freeze > requirements.txt
+安装依赖库
+pip install -r requirements.txt
+
+
+操作系统版本（uname -m）：x86_64
+Python版本（python --version）:3.9
+PaddlePaddle和PaddleOCR的版本（pip list | grep paddle）:
+
+pip怎么查看一个三方库有哪些版本？
+pip index versions <package>
+pip index versions paddlepaddle
+pip index versions paddleocr
+
+conda创建虚拟环境
+conda create -n my_env1 python=3.10
+conda activate my_env1
+conda deactivate
+conda env list
+file $(which python3)
+
 
 """

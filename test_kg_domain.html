@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KG.html 领域筛选功能测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .iframe-container {
+            width: 100%;
+            height: 800px;
+            border: 2px solid #4caf50;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .iframe-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>KG.html 领域筛选功能测试</h1>
+        
+        <p><strong>说明：</strong>KG.html 已添加领域筛选功能，在右侧面板顶部有领域选择下拉框。</p>
+        
+        <div class="iframe-container">
+            <iframe src="frontend/static/KG.html" title="KG.html 知识图谱可视化系统"></iframe>
+        </div>
+        
+        <p><strong>测试方法：</strong></p>
+        <ul>
+            <li>在右侧面板找到"领域筛选"区域</li>
+            <li>使用下拉框选择不同领域</li>
+            <li>观察图谱和实体列表的变化</li>
+        </ul>
+    </div>
+</body>
+</html>

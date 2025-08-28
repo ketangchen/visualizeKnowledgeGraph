@@ -1,0 +1,150 @@
+{
+  "nodes": [
+    {
+      "id": "1",
+      "name": "人工智能",
+      "type": "技术领域",
+      "description": "研究如何使机器模拟人类智能的科学"
+    },
+    {
+      "id": "2", 
+      "name": "机器学习",
+      "type": "技术分支",
+      "description": "人工智能的一个分支"
+    },
+    {
+      "id": "3",
+      "name": "深度学习",
+      "type": "技术分支", 
+      "description": "机器学习的一个分支"
+    },
+    {
+      "id": "4",
+      "name": "神经网络",
+      "type": "技术模型",
+      "description": "受人脑结构启发的计算模型"
+    },
+    {
+      "id": "5",
+      "name": "计算机视觉",
+      "type": "应用领域",
+      "description": "使计算机能够从图像中获取理解的领域"
+    },
+    {
+      "id": "6",
+      "name": "自然语言处理",
+      "type": "应用领域",
+      "description": "使计算机能够理解和处理人类语言的领域"
+    },
+    {
+      "id": "7",
+      "name": "强化学习",
+      "type": "学习方式",
+      "description": "通过与环境交互来学习最优策略的方法"
+    },
+    {
+      "id": "8",
+      "name": "卷积神经网络",
+      "type": "网络类型",
+      "description": "专门用于处理网格结构数据的神经网络"
+    },
+    {
+      "id": "9",
+      "name": "循环神经网络",
+      "type": "网络类型", 
+      "description": "能够处理序列数据的神经网络"
+    },
+    {
+      "id": "10",
+      "name": "Transformer",
+      "type": "网络架构",
+      "description": "基于注意力机制的神经网络架构"
+    }
+  ],
+  "links": [
+    {
+      "source": "1",
+      "target": "2",
+      "type": "包含",
+      "description": "机器学习是人工智能的重要组成部分"
+    },
+    {
+      "source": "2", 
+      "target": "3",
+      "type": "包含",
+      "description": "深度学习是机器学习的重要分支"
+    },
+    {
+      "source": "3",
+      "target": "4", 
+      "type": "基于",
+      "description": "深度学习基于神经网络架构"
+    },
+    {
+      "source": "1",
+      "target": "5",
+      "type": "包含",
+      "description": "计算机视觉是人工智能的重要应用"
+    },
+    {
+      "source": "1",
+      "target": "6",
+      "type": "包含", 
+      "description": "自然语言处理是人工智能的重要应用"
+    },
+    {
+      "source": "2",
+      "target": "7",
+      "type": "包含",
+      "description": "强化学习是机器学习的重要分支"
+    },
+    {
+      "source": "4",
+      "target": "8",
+      "type": "包含",
+      "description": "卷积神经网络是神经网络的一种"
+    },
+    {
+      "source": "4",
+      "target": "9", 
+      "type": "包含",
+      "description": "循环神经网络是神经网络的一种"
+    },
+    {
+      "source": "4",
+      "target": "10",
+      "type": "包含",
+      "description": "Transformer是神经网络的一种"
+    },
+    {
+      "source": "5",
+      "target": "8",
+      "type": "应用",
+      "description": "计算机视觉广泛使用卷积神经网络"
+    },
+    {
+      "source": "6",
+      "target": "9",
+      "type": "应用",
+      "description": "自然语言处理早期主要使用循环神经网络"
+    },
+    {
+      "source": "6", 
+      "target": "10",
+      "type": "应用",
+      "description": "现代自然语言处理主要使用Transformer"
+    },
+    {
+      "source": "7",
+      "target": "5",
+      "type": "应用",
+      "description": "强化学习在计算机视觉中有应用"
+    },
+    {
+      "source": "8",
+      "target": "9",
+      "type": "相关",
+      "description": "卷积神经网络和循环神经网络都是重要的神经网络类型"
+    }
+  ]
+}
