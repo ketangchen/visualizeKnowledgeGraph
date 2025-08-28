@@ -1,30 +1,30 @@
 # visualizeKnowledgeGraph
 
-ÖªÊ¶Í¼Æ×¿ÉÊÓ»¯ÏµÍ³£¬Ö§³ÖÊµÌåÓë¹ØÏµµÄ¹ÜÀí¡¢µ¼Èëµ¼³ö¼°¿ÉÊÓ»¯Õ¹Ê¾¡£
+çŸ¥è¯†å›¾è°±å¯è§†åŒ–ç³»ç»Ÿï¼Œæ”¯æŒå®žä½“ä¸Žå…³ç³»çš„ç®¡ç†ã€å¯¼å…¥å¯¼å‡ºåŠå¯è§†åŒ–å±•ç¤ºã€‚
 
-# visualizeKnowledgeGraphÄ¿Â¼
+# visualizeKnowledgeGraphç›®å½•
 visualizeKnowledgeGraph/
-©À©¤©¤ frontend/               # Ç°¶Ë´úÂë
-©¦   ©À©¤©¤ index.html          # Ö÷Ò³Ãæ£¬°üº¬ÖªÊ¶Í¼Æ×¿ÉÊÓ»¯½çÃæºÍ½»»¥¿Ø¼þ
-©¦   ©À©¤©¤ libs/               # Ç°¶ËÒÀÀµ¿â
-©¦   ©¸©¤©¤ static/             # ¾²Ì¬×ÊÔ´£¨ÈçJS¡¢CSS£©
-©¦       ©¸©¤©¤ js/graph.js     # ÖªÊ¶Í¼Æ×¿ÉÊÓ»¯ºËÐÄÂß¼­£¨»ùÓÚD3.js£©
-©À©¤©¤ backend/                # ºó¶Ë´úÂë£¨»ùÓÚDjango£©
-©¦   ©À©¤©¤ apps/               # Ó¦ÓÃÄ£¿é
-©¦   ©¦   ©¸©¤©¤ kg_visualize/   # ÖªÊ¶Í¼Æ×¿ÉÊÓ»¯Ïà¹Ø¹¦ÄÜ£¨Ä£ÐÍ¡¢APIµÈ£©
-©¦   ©À©¤©¤ config/             # ÏîÄ¿ÅäÖÃ£¨ÈçÊý¾Ý¿â¡¢Â·ÓÉ¡¢È«¾ÖÉèÖÃµÈ£©
-©¦   ©¸©¤©¤ ...
-©À©¤©¤ tests/                  # ²âÊÔ´úÂë£¨Èçtest_kg_api.py£©
-©À©¤©¤ manage.py               # DjangoÏîÄ¿¹ÜÀí½Å±¾
-©¸©¤©¤ ÆäËûÅäÖÃÎÄ¼þ£¨.gitignore¡¢IDEÅäÖÃµÈ£©
+â”œâ”€â”€ frontend/               # å‰ç«¯ä»£ç 
+â”‚   â”œâ”€â”€ index.html          # ä¸»é¡µé¢ï¼ŒåŒ…å«çŸ¥è¯†å›¾è°±å¯è§†åŒ–ç•Œé¢å’Œäº¤äº’æŽ§ä»¶
+â”‚   â”œâ”€â”€ libs/               # å‰ç«¯ä¾èµ–åº“
+â”‚   â””â”€â”€ static/             # é™æ€èµ„æºï¼ˆå¦‚JSã€CSSï¼‰
+â”‚       â””â”€â”€ js/graph.js     # çŸ¥è¯†å›¾è°±å¯è§†åŒ–æ ¸å¿ƒé€»è¾‘ï¼ˆåŸºäºŽD3.jsï¼‰
+â”œâ”€â”€ backend/                # åŽç«¯ä»£ç ï¼ˆåŸºäºŽDjangoï¼‰
+â”‚   â”œâ”€â”€ apps/               # åº”ç”¨æ¨¡å—
+â”‚   â”‚   â””â”€â”€ kg_visualize/   # çŸ¥è¯†å›¾è°±å¯è§†åŒ–ç›¸å…³åŠŸèƒ½ï¼ˆæ¨¡åž‹ã€APIç­‰ï¼‰
+â”‚   â”œâ”€â”€ config/             # é¡¹ç›®é…ç½®ï¼ˆå¦‚æ•°æ®åº“ã€è·¯ç”±ã€å…¨å±€è®¾ç½®ç­‰ï¼‰
+â”‚   â””â”€â”€ ...
+â”œâ”€â”€ tests/                  # æµ‹è¯•ä»£ç ï¼ˆå¦‚test_kg_api.pyï¼‰
+â”œâ”€â”€ manage.py               # Djangoé¡¹ç›®ç®¡ç†è„šæœ¬
+â””â”€â”€ å…¶ä»–é…ç½®æ–‡ä»¶ï¼ˆ.gitignoreã€IDEé…ç½®ç­‰ï¼‰
 
-## ¼¼ÊõÕ»
-- Ç°¶Ë£ºHTML¡¢CSS¡¢JavaScript¡¢D3.js
-- ºó¶Ë£ºPython¡¢Django
-- Êý¾Ý¿â£ºSQLite£¨¿ÉÀ©Õ¹ÎªPostgreSQLµÈ£©
+## æŠ€æœ¯æ ˆ
+- å‰ç«¯ï¼šHTMLã€CSSã€JavaScriptã€D3.js
+- åŽç«¯ï¼šPythonã€Django
+- æ•°æ®åº“ï¼šMYSQLï¼ˆå¯æ‰©å±•ä¸ºPostgreSQLç­‰ï¼‰
 
-## ²¿Êð²½Öè
-1. °²×°ÒÀÀµ£º`pip install -r requirements.txt`
-2. ´´½¨`.env`ÎÄ¼þÅäÖÃ»·¾³±äÁ¿
-3. Êý¾Ý¿âÇ¨ÒÆ£º`python manage.py migrate`
-4. Æô¶¯·þÎñ£º`python manage.py runserver`
+## éƒ¨ç½²æ­¥éª¤
+1. å®‰è£…ä¾èµ–ï¼š`pip install -r requirements.txt`
+2. åˆ›å»º`.env`æ–‡ä»¶é…ç½®çŽ¯å¢ƒå˜é‡
+3. æ•°æ®åº“è¿ç§»ï¼š`python manage.py migrate`
+4. å¯åŠ¨æœåŠ¡ï¼š`python manage.py runserver`

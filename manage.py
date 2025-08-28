@@ -51,8 +51,6 @@ visualizeKnowledgeGraph/
 ├── manage.py               # Django项目管理脚本
 └── 其他配置文件（.gitignore、IDE配置等）
 
-
-
 打包依赖库
 pip freeze > requirements.txt
 安装依赖库
@@ -69,11 +67,10 @@ pip index versions paddlepaddle
 pip index versions paddleocr
 
 conda创建虚拟环境
-conda create -n my_env1 python=3.10
+conda create -n my_env1 python=3.9
 conda activate my_env1
 conda deactivate
 conda env list
 file $(which python3)
-
 
 """
