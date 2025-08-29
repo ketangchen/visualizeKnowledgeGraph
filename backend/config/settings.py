@@ -95,3 +95,12 @@ if DEBUG:
     CORS_ALLOW_ALL_ORIGINS = True  # 生产环境需指定具体域名
 else:
     CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', default=[])
+
+# ChatGPT API 配置
+CHATGPT_API_KEY = env('CHATGPT_API_KEY', default='123456789')
+CHATGPT_API_URL = env('CHATGPT_API_URL', default='https://api.openai.com/v1/')
+CHATGPT_BASE_URL = env('CHATGPT_BASE_URL', default='https://api.openai.com/v1/')
+CHATGPT_MODEL = env('CHATGPT_MODEL', default='gpt-3.5-turbo')
+CHATGPT_MAX_TOKENS = env.int('CHATGPT_MAX_TOKENS', default=300)
+CHATGPT_TEMPERATURE = env.float('CHATGPT_TEMPERATURE', default=0.7)
+CHATGPT_USE_OPENAI_LIB = env.bool('CHATGPT_USE_OPENAI_LIB', default=True)

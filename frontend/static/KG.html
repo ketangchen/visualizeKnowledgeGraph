@@ -145,6 +145,18 @@
             background: linear-gradient(135deg, #90a4ae 0%, #b0bec5 100%);
         }
 
+        .btn-danger {
+            background: linear-gradient(135deg, #f44336 0%, #e57373 100%);
+            color: #ffffff;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(244, 67, 54, 0.3);
+        }
+
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #d32f2f 0%, #f44336 100%);
+            box-shadow: 0 3px 6px rgba(244, 67, 54, 0.4);
+        }
+
         .list-title {
             margin-bottom: 15px;
             padding-bottom: 5px;
@@ -208,6 +220,10 @@
             color: #e53935;
         }
 
+        .copy-btn {
+            color: #1976d2;
+        }
+
         .no-data {
             color: #78909c;
             text-align: center;
@@ -240,6 +256,84 @@
             background: #f1f8e9;
             border-radius: 4px;
             color: #263238;
+        }
+        
+        /* 可调整大小的描述框样式 */
+        .resizable-description {
+            position: relative;
+            min-height: 60px;
+            max-height: 200px;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            border: 1px solid #c8e6c9;
+            resize: vertical;
+            overflow-y: auto;
+            padding: 10px;
+            padding-bottom: 50px; /* 为底部按钮留出空间 */
+            background: #fafafa;
+        }
+        
+        .resizable-description.expanded {
+            max-height: 500px;
+        }
+        
+        .description-text {
+            word-wrap: break-word;
+            line-height: 1.6;
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .description-controls {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            display: flex;
+            gap: 5px;
+            z-index: 10;
+            background: #fafafa;
+            padding: 5px;
+            border-radius: 3px;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            pointer-events: auto;
+        }
+        
+        /* 确保按钮在描述框拉伸时保持位置 */
+        .resizable-description:focus-within .description-controls {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+        }
+        
+        .description-controls button {
+            padding: 3px 8px;
+            font-size: 11px;
+            border: 1px solid #4caf50;
+            background: #4caf50;
+            color: white;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            min-width: 40px;
+            text-align: center;
+        }
+        
+        .description-controls button:hover {
+            background: #45a049;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .description-controls .copy-btn {
+            background: #2196f3;
+            border-color: #2196f3;
+        }
+        
+        .description-controls .copy-btn:hover {
+            background: #1976d2;
         }
 
         /* 实体悬浮信息框样式 */
@@ -296,8 +390,10 @@
 
         /* 箭头标记定义 */
         .arrowhead {
-            fill: #90a4ae;
-            stroke-opacity: 0.6;
+            fill: none;
+            stroke: #90a4ae;
+            stroke-width: 1.5px;
+            stroke-opacity: 0.8;
             transition: all 0.3s ease;
             cursor: pointer;
         }
@@ -314,8 +410,8 @@
         /* 节点文字样式：居中显示在圆内 */
         .nodes text {
             fill: #ffffff; /* 白色文字更清晰 */
-            font-size: 8px;
-            font-weight: 500;
+            font-size: 9px; /* 增大字体 */
+            font-weight: 500; /* 字体粗细 */
             text-anchor: middle;
             dominant-baseline: middle; /* 垂直居中 */
             pointer-events: none; /* 文字不阻碍点击 */
@@ -324,8 +420,9 @@
 
         /* 关系文字样式 */
         .link-labels text {
-            fill: #546e7a;
-            font-size: 8px;
+            fill: #37474f; /* 更深的颜色 */
+            font-size: 9px; /* 增大字体 */
+            font-weight: 500; /* 字体粗细 */
             text-anchor: middle;
             transition: all 0.3s ease;
         }
@@ -338,22 +435,23 @@
         }
 
         .highlighted text {
-            fill: #f57f17; /* 实体名称高亮 */
+            fill: #ffff00; /* 黄色 */
             font-weight: bold;
+            font-size: 10px; /* 增大字体 */
         }
 
-        /* 搜索结果高亮 - 黄色样式 */
+        /* 搜索结果高亮 - 与点击高亮保持一致 */
         .search-highlighted circle {
             stroke: #ffca28; /* 金色/黄色 */
-            stroke-width: 4px;
-            animation: searchPulse 1.2s infinite;
+            stroke-width: 3px;
+            animation: pulse 1.5s infinite;
             fill: #66bb6a;
         }
 
         .search-highlighted text {
-            fill: #f57f17; /* 实体名称高亮 */
+            fill: #ffff00; /* 黄色 */
             font-weight: bold;
-            font-size: 14px;
+            font-size: 10px; /* 与点击高亮保持一致 */
         }
 
         /* 搜索结果的关系高亮 */
@@ -361,12 +459,22 @@
             stroke: #ffca28 !important;
             stroke-width: 3px !important;
             stroke-opacity: 1 !important;
+            animation: pulseLink 1.5s infinite;
         }
 
         /* 高亮状态的箭头 */
         .search-highlighted-arrow, .arrow-highlighted {
-            fill: #ffca28 !important;
+            fill: none !important;
+            stroke: #ffca28 !important;
+            stroke-width: 2px !important;
             stroke-opacity: 1 !important;
+        }
+
+        /* 搜索结果的关系标签高亮 - 与点击高亮保持一致 */
+        .search-highlighted-link-label {
+            fill: #800080 !important; /* 紫色 */
+            font-weight: bold !important;
+            font-size: 15px !important; /* 与点击高亮保持一致 */
         }
 
         /* 未涉及的元素降低可见性 */
@@ -383,9 +491,9 @@
         }
 
         .link-label-highlighted {
-            fill: #f57f17 !important;
+            fill: #800080 !important; /* 紫色 */
             font-weight: bold !important;
-            font-size: 14px !important;
+            font-size: 15px !important; /* 增大字体 */
         }
 
         /* 关系关联实体高亮 */
@@ -396,8 +504,9 @@
         }
 
         .relation-entity-highlighted text {
-            fill: #f57f17 !important;
+            fill: #ffff00 !important; /* 黄色 */
             font-weight: bold !important;
+            font-size: 10px !important; /* 增大字体 */
         }
 
         @keyframes pulse {
@@ -412,11 +521,7 @@
             100% { stroke-width: 3px; }
         }
 
-        @keyframes searchPulse {
-            0% { stroke-width: 4px; stroke-opacity: 1; }
-            50% { stroke-width: 6px; stroke-opacity: 0.8; }
-            100% { stroke-width: 4px; stroke-opacity: 1; }
-        }
+
 
         .search-container {
             display: flex;
@@ -552,6 +657,550 @@
 
         .entity-edit-form .btn-secondary:hover {
             background-color: #5a6268;
+        }
+
+        /* AI问答机器人样式 */
+        .ai-chatbot {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .ai-chatbot:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        /* 史努比简约客服图标样式 */
+        .snoopy-icon {
+            position: relative;
+            width: 50px;
+            height: 50px;
+            margin: auto;
+        }
+
+        .snoopy-head {
+            position: absolute;
+            width: 42px;
+            height: 40px;
+            background: #FFFFFF;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            top: 5px;
+            left: 4px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            border: 2px solid #E0E0E0;
+        }
+
+        .snoopy-ears {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .ear {
+            position: absolute;
+            width: 12px;
+            height: 16px;
+            background: #FFFFFF;
+            border-radius: 50% 50% 0 0;
+            top: -1px;
+            border: 2px solid #E0E0E0;
+        }
+
+        .left-ear {
+            left: 6px;
+            transform: rotate(-25deg);
+        }
+
+        .right-ear {
+            right: 6px;
+            transform: rotate(25deg);
+        }
+
+        .snoopy-eyes {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .eye {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: #000;
+            border-radius: 50%;
+            top: 16px;
+            animation: blink 5s infinite;
+        }
+
+        .left-eye {
+            left: 16px;
+        }
+
+        .right-eye {
+            right: 16px;
+        }
+
+        @keyframes blink {
+            0%, 90%, 100% { opacity: 1; }
+            95% { opacity: 0; }
+        }
+
+        .snoopy-nose {
+            position: absolute;
+            width: 4px;
+            height: 3px;
+            background: #000;
+            border-radius: 50%;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .snoopy-mouth {
+            position: absolute;
+            width: 6px;
+            height: 2px;
+            background: #000;
+            border-radius: 0 0 3px 3px;
+            top: 28px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* 悬停时的动画效果 */
+        .ai-chatbot:hover .snoopy-icon {
+            transform: scale(1.15);
+            transition: transform 0.3s ease;
+        }
+
+        .ai-chatbot:hover .snoopy-ears {
+            animation: wiggle 0.6s ease-in-out;
+        }
+
+        .ai-chatbot:hover .snoopy-head {
+            animation: bounce 0.8s ease-in-out;
+        }
+
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-8deg); }
+            75% { transform: rotate(8deg); }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-3px); }
+        }
+
+        /* 史努比简约动画 */
+        .snoopy-icon {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-2px); }
+        }
+
+
+
+        .ai-chat-window {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 350px;
+            height: 500px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            z-index: 1001;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .ai-chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ai-chat-title {
+            font-weight: bold;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ai-chat-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .ai-switch-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ai-switch-label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .ai-switch {
+            position: relative;
+            width: 50px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .ai-switch.active {
+            background: #4CAF50;
+        }
+
+        .ai-switch-slider {
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background: white;
+            border-radius: 50%;
+            left: 3px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .ai-switch.active .ai-switch-slider {
+            left: 29px;
+        }
+
+        .ai-switch-text {
+            font-size: 10px;
+            color: white;
+            font-weight: bold;
+            z-index: 1;
+            transition: all 0.3s ease;
+        }
+
+        .ai-switch.active .ai-switch-text {
+            color: white;
+        }
+
+        /* 标题中的史努比头像样式 */
+        .snoopy-title-avatar {
+            position: relative;
+            width: 24px;
+            height: 24px;
+            background: #FFFFFF;
+            border-radius: 50%;
+            border: 1px solid #E0E0E0;
+            flex-shrink: 0;
+        }
+
+        .snoopy-title-avatar .snoopy-head {
+            position: absolute;
+            width: 16px;
+            height: 14px;
+            background: #FFFFFF;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            top: 3px;
+            left: 4px;
+            border: 1px solid #E0E0E0;
+        }
+
+        .snoopy-title-avatar .snoopy-ears {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .snoopy-title-avatar .ear {
+            position: absolute;
+            width: 5px;
+            height: 6px;
+            background: #FFFFFF;
+            border-radius: 50% 50% 0 0;
+            top: 0;
+            border: 1px solid #E0E0E0;
+        }
+
+        .snoopy-title-avatar .left-ear {
+            left: 3px;
+            transform: rotate(-20deg);
+        }
+
+        .snoopy-title-avatar .right-ear {
+            right: 3px;
+            transform: rotate(20deg);
+        }
+
+        .snoopy-title-avatar .snoopy-eyes {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .snoopy-title-avatar .eye {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #000;
+            border-radius: 50%;
+            top: 6px;
+        }
+
+        .snoopy-title-avatar .left-eye {
+            left: 6px;
+        }
+
+        .snoopy-title-avatar .right-eye {
+            right: 6px;
+        }
+
+        .snoopy-title-avatar .snoopy-nose {
+            position: absolute;
+            width: 1.5px;
+            height: 1px;
+            background: #000;
+            border-radius: 50%;
+            top: 9px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .ai-chat-close {
+            cursor: pointer;
+            font-size: 20px;
+            color: white;
+        }
+
+        .ai-chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+
+        .ai-message {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .ai-message.user {
+            justify-content: flex-end;
+        }
+
+        .ai-message-content {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 18px;
+            word-wrap: break-word;
+        }
+
+        .ai-message.user .ai-message-content {
+            background: #667eea;
+            color: white;
+        }
+
+        .ai-message.bot .ai-message-content {
+            background: white;
+            color: #333;
+            border: 1px solid #e0e0e0;
+        }
+
+        .ai-message-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            margin: 0 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .ai-message.user .ai-message-avatar {
+            background: #667eea;
+            color: white;
+        }
+
+        .ai-message.bot .ai-message-avatar {
+            background: #764ba2;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 史努比头像样式 */
+        .snoopy-avatar {
+            position: relative;
+            width: 30px;
+            height: 30px;
+            background: #FFFFFF;
+            border-radius: 50%;
+            border: 2px solid #E0E0E0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .snoopy-avatar .snoopy-head {
+            position: absolute;
+            width: 20px;
+            height: 18px;
+            background: #FFFFFF;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            top: 4px;
+            left: 5px;
+            border: 1px solid #E0E0E0;
+        }
+
+        .snoopy-avatar .snoopy-ears {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .snoopy-avatar .ear {
+            position: absolute;
+            width: 6px;
+            height: 8px;
+            background: #FFFFFF;
+            border-radius: 50% 50% 0 0;
+            top: 0;
+            border: 1px solid #E0E0E0;
+        }
+
+        .snoopy-avatar .left-ear {
+            left: 4px;
+            transform: rotate(-20deg);
+        }
+
+        .snoopy-avatar .right-ear {
+            right: 4px;
+            transform: rotate(20deg);
+        }
+
+        .snoopy-avatar .snoopy-eyes {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .snoopy-avatar .eye {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: #000;
+            border-radius: 50%;
+            top: 8px;
+        }
+
+        .snoopy-avatar .left-eye {
+            left: 8px;
+        }
+
+        .snoopy-avatar .right-eye {
+            right: 8px;
+        }
+
+        .snoopy-avatar .snoopy-nose {
+            position: absolute;
+            width: 2px;
+            height: 1.5px;
+            background: #000;
+            border-radius: 50%;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .ai-chat-input {
+            padding: 15px;
+            border-top: 1px solid #e0e0e0;
+            background: white;
+        }
+
+        .ai-input-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        .ai-input-field {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .ai-input-field:focus {
+            border-color: #667eea;
+        }
+
+        .ai-send-btn {
+            padding: 10px 15px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .ai-send-btn:hover {
+            background: #5a6fd8;
+        }
+
+        .ai-send-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .ai-typing {
+            display: none;
+            padding: 10px 15px;
+            color: #666;
+            font-style: italic;
         }
 
         .relation-item {
@@ -696,6 +1345,8 @@
                 </div>
 
                 <button id="save-current-data" class="btn-primary">保存文件</button>
+                
+                <button id="clear-all-data" class="btn-danger" style="width: 100%; margin-top: 10px;">一键清空数据</button>
 
                 <div id="current-file-info" style="font-size: 12px; color: #546e7a; margin-top: -10px; margin-bottom: 10px; display: none;">
                     当前文件: <span id="current-file-name">-</span>
@@ -834,6 +1485,81 @@
         </div>
     </div>
 
+    <!-- AI问答机器人 -->
+    <div class="ai-chatbot" onclick="toggleAIChat()">
+        <div class="snoopy-icon">
+            <div class="snoopy-head"></div>
+            <div class="snoopy-ears">
+                <div class="ear left-ear"></div>
+                <div class="ear right-ear"></div>
+            </div>
+            <div class="snoopy-eyes">
+                <div class="eye left-eye"></div>
+                <div class="eye right-eye"></div>
+            </div>
+            <div class="snoopy-nose"></div>
+            <div class="snoopy-mouth"></div>
+        </div>
+    </div>
+
+    <div class="ai-chat-window" id="aiChatWindow">
+        <div class="ai-chat-header">
+            <div class="ai-chat-title">
+                <div class="snoopy-title-avatar">
+                    <div class="snoopy-head"></div>
+                    <div class="snoopy-ears">
+                        <div class="ear left-ear"></div>
+                        <div class="ear right-ear"></div>
+                    </div>
+                    <div class="snoopy-eyes">
+                        <div class="eye left-eye"></div>
+                        <div class="eye right-eye"></div>
+                    </div>
+                    <div class="snoopy-nose"></div>
+                </div>
+                史努比AI助手
+            </div>
+            <div class="ai-chat-controls">
+                <div class="ai-switch-container">
+                    <span class="ai-switch-label">AI模式</span>
+                    <div class="ai-switch" id="aiSwitch" onclick="toggleAISwitch()">
+                        <div class="ai-switch-slider" id="aiSwitchSlider"></div>
+                        <div class="ai-switch-text" id="aiSwitchText">外部</div>
+                    </div>
+                </div>
+            </div>
+            <div class="ai-chat-close" onclick="toggleAIChat()">×</div>
+        </div>
+        <div class="ai-chat-messages" id="aiChatMessages">
+            <div class="ai-message bot">
+                <div class="ai-message-avatar">
+                    <div class="snoopy-avatar">
+                        <div class="snoopy-head"></div>
+                        <div class="snoopy-ears">
+                            <div class="ear left-ear"></div>
+                            <div class="ear right-ear"></div>
+                        </div>
+                        <div class="snoopy-eyes">
+                            <div class="eye left-eye"></div>
+                            <div class="eye right-eye"></div>
+                        </div>
+                        <div class="snoopy-nose"></div>
+                    </div>
+                </div>
+                <div class="ai-message-content">
+                    您好！我是史努比AI助手！我可以帮您分析图谱数据、查找实体关系、回答关于知识图谱的问题。请问有什么可以为您服务的吗？
+                </div>
+            </div>
+        </div>
+        <div class="ai-typing" id="aiTyping">AI正在思考中...</div>
+        <div class="ai-chat-input">
+            <div class="ai-input-container">
+                <input type="text" class="ai-input-field" id="aiInputField" placeholder="输入您的问题..." onkeypress="handleAIKeyPress(event)">
+                <button class="ai-send-btn" onclick="sendAIMessage()" id="aiSendBtn">发送</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // API基础URL
         const API_BASE_URL = '/api/kg';
@@ -932,7 +1658,7 @@
             try {
                 const result = await apiCall('/relationships', 'POST', relationshipData);
                 console.log('创建关系成功:', result);
-                return true;
+                return result; // 返回API响应结果，包含关系ID
             } catch (error) {
                 console.error('创建关系失败:', error);
                 return false;
@@ -977,6 +1703,18 @@
                 return result.data;
             } catch (error) {
                 console.error('导出数据失败:', error);
+                return null;
+            }
+        }
+
+        // 清空所有数据
+        async function clearAllDataAPI() {
+            try {
+                const result = await apiCall('/clear-all', 'POST');
+                console.log('清空数据成功:', result);
+                return result;
+            } catch (error) {
+                console.error('清空数据失败:', error);
                 return null;
             }
         }
@@ -1109,6 +1847,12 @@
             
             // 设置初始显示值
             domainSelectDisplay.value = '所有领域';
+            
+            // 初始化AI开关状态（默认使用外部AI）
+            const aiSwitch = document.getElementById('aiSwitch');
+            const aiSwitchText = document.getElementById('aiSwitchText');
+            aiSwitch.classList.add('active');
+            aiSwitchText.textContent = '外部';
             
             console.log('系统初始化完成');
         }
@@ -1501,7 +2245,17 @@
 
                 // 创建输入框用于获取文件路径
                 const filePath = prompt('请输入保存路径和文件名（包含.json扩展名）：',
-                                      currentFilePath || `knowledge_graph_${new Date().toISOString().replace(/:/g, '-').split('.')[0]}.json`);
+                                      currentFilePath || (() => {
+                                          const now = new Date();
+                                          const year = now.getFullYear();
+                                          const month = String(now.getMonth() + 1).padStart(2, '0');
+                                          const day = String(now.getDate()).padStart(2, '0');
+                                          const hours = String(now.getHours()).padStart(2, '0');
+                                          const minutes = String(now.getMinutes()).padStart(2, '0');
+                                          const seconds = String(now.getSeconds()).padStart(2, '0');
+                                          const timestamp = `${year}${month}${day}_${hours}${minutes}${seconds}`;
+                                          return `kg_${timestamp}.json`;
+                                      })());
 
                 if (!filePath) {
                     // 用户取消输入
@@ -1647,6 +2401,14 @@
                         targetEntityInput.value = entity.id;
                         targetEntityDisplay.value = entity.name;
                         targetEntityDropdown.classList.remove('visible');
+                    } else if (dropdownElement.id === 'edit-source-entity-dropdown') {
+                        document.getElementById('edit-source-entity').value = entity.id;
+                        document.getElementById('edit-source-entity-display').value = entity.name;
+                        dropdownElement.classList.remove('visible');
+                    } else if (dropdownElement.id === 'edit-target-entity-dropdown') {
+                        document.getElementById('edit-target-entity').value = entity.id;
+                        document.getElementById('edit-target-entity-display').value = entity.name;
+                        dropdownElement.classList.remove('visible');
                     }
                 });
 
@@ -1698,7 +2460,7 @@
                 // 复制按钮事件
                 entityItem.querySelector('.copy-btn').addEventListener('click', (e) => {
                     e.stopPropagation();
-                    copyEntity(node.id);
+                    copyEntityWithRelation(node.id);
                 });
                 // 删除实体按钮事件
                 entityItem.querySelector('.delete-btn').addEventListener('click', (e) => {
@@ -1757,6 +2519,110 @@
             customDomainInput.style.display = 'none';
         }
 
+        // 居中展示实体
+        function centerOnEntity(entityId) {
+            const node = graphData.nodes.find(n => n.id === entityId);
+            if (node && simulation) {
+                // 找到对应的D3节点
+                const d3Node = d3.selectAll('.node').filter(d => d.id === entityId);
+                if (!d3Node.empty()) {
+                    // 获取节点位置
+                    const nodeData = d3Node.datum();
+                    if (nodeData.x !== undefined && nodeData.y !== undefined) {
+                        // 居中到该节点
+                        const container = document.getElementById('graph-container');
+                        const width = container.clientWidth;
+                        const height = container.clientHeight;
+                        
+                        // 计算居中位置
+                        const centerX = width / 2 - nodeData.x;
+                        const centerY = height / 2 - nodeData.y;
+                        
+                        // 应用变换
+                        svg.select('g').transition()
+                            .duration(1000)
+                            .attr('transform', `translate(${centerX}, ${centerY})`);
+                    }
+                }
+            }
+        }
+
+        // 居中展示关系
+        function centerOnRelation(sourceId, targetId, type) {
+            const link = graphData.links.find(l => {
+                const lSourceId = typeof l.source === 'object' ? l.source.id : l.source;
+                const lTargetId = typeof l.target === 'object' ? l.target.id : l.target;
+                return lSourceId === sourceId && lTargetId === targetId && l.type === type;
+            });
+            
+            if (link && simulation) {
+                // 找到对应的D3关系
+                const d3Link = d3.selectAll('.link').filter(d => {
+                    const dSourceId = typeof d.source === 'object' ? d.source.id : d.source;
+                    const dTargetId = typeof d.target === 'object' ? d.target.id : d.target;
+                    return dSourceId === sourceId && dTargetId === targetId && d.type === type;
+                });
+                
+                if (!d3Link.empty()) {
+                    const linkData = d3Link.datum();
+                    const sourceNode = typeof linkData.source === 'object' ? linkData.source : graphData.nodes.find(n => n.id === linkData.source);
+                    const targetNode = typeof linkData.target === 'object' ? linkData.target : graphData.nodes.find(n => n.id === linkData.target);
+                    
+                    if (sourceNode && targetNode) {
+                        // 计算关系的中心点
+                        const centerX = (sourceNode.x + targetNode.x) / 2;
+                        const centerY = (sourceNode.y + targetNode.y) / 2;
+                        
+                        // 居中到关系中心
+                        const container = document.getElementById('graph-container');
+                        const width = container.clientWidth;
+                        const height = container.clientHeight;
+                        
+                        const centerOffsetX = width / 2 - centerX;
+                        const centerOffsetY = height / 2 - centerY;
+                        
+                        svg.select('g').transition()
+                            .duration(1000)
+                            .attr('transform', `translate(${centerOffsetX}, ${centerOffsetY})`);
+                    }
+                }
+            }
+        }
+
+        // 居中展示位置（用于删除操作）
+        function centerOnPosition(x, y) {
+            if (simulation) {
+                const container = document.getElementById('graph-container');
+                const width = container.clientWidth;
+                const height = container.clientHeight;
+                
+                const centerOffsetX = width / 2 - x;
+                const centerOffsetY = height / 2 - y;
+                
+                svg.select('g').transition()
+                    .duration(1000)
+                    .attr('transform', `translate(${centerOffsetX}, ${centerOffsetY})`);
+            }
+        }
+
+        // 局部更新图表数据而不重新加载
+        function updateGraphDataLocally() {
+            // 更新数据存储
+            allGraphData = { ...graphData };
+            filteredGraphData = { ...graphData };
+            
+            // 更新界面元素
+            updateEntityDropdowns();
+            renderEntityList();
+            updateUsedRelationTypes();
+            updateRelationTypeDropdown();
+            updateDomainInfo();
+            updateDomainDropdown();
+            
+            // 重新渲染图表（保持当前视图）
+            reloadGraph();
+        }
+
         async function addEntity() {
             const id = entityIdInput.value.trim();
             const name = entityNameInput.value.trim();
@@ -1790,23 +2656,21 @@
             // 调用后端API创建实体
             const success = await createEntity(newEntity);
             if (success) {
-                // 重新从后端加载数据
-                await loadGraphData();
+                // 将新实体添加到本地数据中
+                graphData.nodes.push(newEntity);
                 
-                // 更新数据存储
-                allGraphData = { ...graphData };
-                filteredGraphData = { ...graphData };
+                // 局部更新数据
+                updateGraphDataLocally();
                 
-                updateEntityDropdowns();
-                renderEntityList();
-                reloadGraph();
                 // 清空表单并填充新的默认值
                 clearEntityForm();
                 populateDefaultEntityValues();
-                // 更新领域信息显示
-                updateDomainInfo();
-                // 更新领域下拉框
-                updateDomainDropdown();
+                
+                // 延迟一下等待图表重新渲染完成后居中展示新实体
+                setTimeout(() => {
+                    centerOnEntity(newEntity.id);
+                }, 100);
+                
                 alert('实体添加成功');
             } else {
                 alert('实体添加失败，请检查网络连接');
@@ -1849,11 +2713,17 @@
             // 调用后端API更新实体
             const success = await updateEntityAPI(editingEntityId, updateData);
             if (success) {
-                // 重新从后端加载数据
-                await loadGraphData();
-                renderEntityList();
-                updateEntityDropdowns();
-                reloadGraph();
+                // 更新本地数据
+                Object.assign(entity, updateData);
+                
+                // 局部更新数据
+                updateGraphDataLocally();
+                
+                // 延迟一下等待图表重新渲染完成后居中展示更新后的实体
+                setTimeout(() => {
+                    centerOnEntity(editingEntityId);
+                }, 100);
+                
                 alert('实体更新成功');
 
                 if (selectedNode && selectedNode.id === editingEntityId) {
@@ -1887,16 +2757,40 @@
             // 调用后端API创建复制的实体
             const success = await createEntity(copiedEntity);
             if (success) {
-                // 重新从后端加载数据
-                await loadGraphData();
+                // 将新实体添加到本地数据中
+                graphData.nodes.push(copiedEntity);
                 
-                // 更新界面
-                updateEntityDropdowns();
-                renderEntityList();
-                reloadGraph();
+                // 局部更新数据
+                updateGraphDataLocally();
 
-                // 自动填充表单并切换到编辑模式（方便用户修改）
-                startEditCopiedEntity(copiedEntity);
+                // 显示新复制实体的详情页（不进入编辑模式）
+                // 确保不设置编辑状态
+                editingEntityId = null;
+                showEntityDetail(copiedEntity);
+
+                // 等待D3.js simulation稳定后居中放大展示原实体（源实体）
+                const waitForSimulation = () => {
+                    if (simulation && simulation.alpha() > 0.01) {
+                        // simulation还在运行，继续等待
+                        setTimeout(waitForSimulation, 50);
+                    } else {
+                        // simulation已稳定，执行居中放大
+                        setTimeout(() => {
+                            // 清除所有高亮
+                            clearAllHighlights();
+                            
+                            // 高亮原实体
+                            const sourceNodeGroup = d3.selectAll('.node').filter(d => d.id === sourceId);
+                            if (!sourceNodeGroup.empty()) {
+                                sourceNodeGroup.classed('highlighted', true);
+                            }
+                            
+                            // 居中放大显示
+                            centerNodeInView(sourceId);
+                        }, 100);
+                    }
+                };
+                waitForSimulation();
 
                 alert(`实体复制成功！新实体ID：${newId}`);
             } else {
@@ -1916,40 +2810,158 @@
             return newId;
         }
 
-        // 复制后自动进入编辑模式
+        // 复制后自动进入编辑模式（已废弃，改为显示详情页）
         function startEditCopiedEntity(entity) {
-            editingEntityId = entity.id;
-            entityFormTitle.textContent = '编辑复制的实体';
-            entityIdInput.value = entity.id;
-            entityIdInput.disabled = true; // 复制的ID不可修改（确保唯一）
-            entityNameInput.value = entity.name;
-            entityDescInput.value = entity.description || '';
+            // 这个函数现在不再使用，改为直接显示详情页
+            showEntityDetail(entity);
+        }
 
-            // 切换按钮状态
-            addEntityBtn.style.display = 'none';
-            updateEntityBtn.style.display = 'block';
-            cancelEditBtn.style.display = 'block';
+        // 复制实体并建立关系功能
+        async function copyEntityWithRelation(sourceId) {
+            const sourceEntity = graphData.nodes.find(n => n.id === sourceId);
+            if (!sourceEntity) {
+                alert('源实体不存在');
+                return;
+            }
 
-            // 滚动到表单区域（提升用户体验）
-            document.querySelector('.form-section').scrollIntoView({ behavior: 'smooth' });
+            // 生成新的唯一ID
+            const newId = generateUniqueEntityId(sourceEntity.id);
+            // 生成新的实体名称（添加"副本"后缀）
+            const newName = `${sourceEntity.name}（副本）`;
+
+            // 创建复制的实体对象
+            const copiedEntity = {
+                id: newId,
+                name: newName,
+                domain: sourceEntity.domain || 'default',
+                ...(sourceEntity.description ? { description: sourceEntity.description } : {})
+            };
+
+            try {
+                // 1. 调用后端API创建复制的实体
+                const entitySuccess = await createEntity(copiedEntity);
+                if (!entitySuccess) {
+                    alert('实体复制失败，请检查网络连接');
+                    return;
+                }
+
+                // 2. 创建从复制实体指向原实体的关系
+                const relationData = {
+                    source: newId,
+                    target: sourceId,
+                    type: '复制自',
+                    description: `从实体"${sourceEntity.name}"复制而来`,
+                    domain: sourceEntity.domain || 'default'
+                };
+
+                const relationResult = await createRelationship(relationData);
+                if (!relationResult) {
+                    alert('实体复制成功，但关系创建失败');
+                    // 即使关系创建失败，实体已经创建成功，所以继续
+                }
+
+                // 3. 更新本地数据
+                graphData.nodes.push(copiedEntity);
+                
+                if (relationResult && relationResult.data && relationResult.data.id) {
+                    // 添加关系到本地数据，包含从后端返回的关系ID
+                    const newRelation = {
+                        id: relationResult.data.id, // 从后端响应的data.id中获取关系ID
+                        source: newId,
+                        target: sourceId,
+                        type: '复制自',
+                        description: relationData.description,
+                        domain: relationData.domain
+                    };
+                    graphData.links.push(newRelation);
+                }
+
+                // 4. 局部更新数据
+                updateGraphDataLocally();
+
+                // 5. 显示新复制实体的详情页（不进入编辑模式）
+                // 确保不设置编辑状态
+                editingEntityId = null;
+                showEntityDetail(copiedEntity);
+
+                // 6. 等待D3.js simulation稳定后居中放大展示原实体（源实体）
+                const waitForSimulation = () => {
+                    if (simulation && simulation.alpha() > 0.01) {
+                        // simulation还在运行，继续等待
+                        setTimeout(waitForSimulation, 50);
+                    } else {
+                        // simulation已稳定，执行居中放大
+                        setTimeout(() => {
+                            // 清除所有高亮
+                            clearAllHighlights();
+                            
+                            // 高亮原实体
+                            const sourceNodeGroup = d3.selectAll('.node').filter(d => d.id === sourceId);
+                            if (!sourceNodeGroup.empty()) {
+                                sourceNodeGroup.classed('highlighted', true);
+                            }
+                            
+                            // 居中放大显示
+                            centerNodeInView(sourceId);
+                        }, 100);
+                    }
+                };
+                waitForSimulation();
+
+                const successMsg = relationResult 
+                    ? `实体复制成功！新实体ID：${newId}，已建立与原实体的关系`
+                    : `实体复制成功！新实体ID：${newId}`;
+                alert(successMsg);
+
+            } catch (error) {
+                console.error('复制实体时发生错误:', error);
+                alert('复制实体时发生错误，请重试');
+            }
         }
 
         async function deleteEntity(id) {
             if (!confirm('确定要删除此实体吗？关联的关系也将被删除')) return;
 
+            // 获取要删除的实体及其关系信息
+            const entityToDelete = graphData.nodes.find(node => node.id === id);
+            if (!entityToDelete) {
+                alert('实体不存在');
+                return;
+            }
+
+            // 查找与被删除实体相关的所有关系
+            const relatedLinks = graphData.links.filter(link => {
+                const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
+                const targetId = typeof link.target === 'object' ? link.target.id : link.target;
+                return sourceId === id || targetId === id;
+            });
+
+            // 获取与被删除实体有关系的其他实体ID
+            const relatedEntityIds = new Set();
+            relatedLinks.forEach(link => {
+                const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
+                const targetId = typeof link.target === 'object' ? link.target.id : link.target;
+                if (sourceId !== id) relatedEntityIds.add(sourceId);
+                if (targetId !== id) relatedEntityIds.add(targetId);
+            });
+
+            const relatedEntities = Array.from(relatedEntityIds);
+
             // 调用后端API删除实体
             const success = await deleteEntityAPI(id);
             if (success) {
-                // 重新从后端加载数据
-                await loadGraphData();
+                // 从本地数据中删除实体
+                graphData.nodes = graphData.nodes.filter(node => node.id !== id);
                 
-                // 更新已使用的关系类型
-                updateUsedRelationTypes();
-                updateRelationTypeDropdown();
-
-                updateEntityDropdowns();
-                renderEntityList();
-                reloadGraph();
+                // 删除相关的所有关系
+                graphData.links = graphData.links.filter(link => {
+                    const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
+                    const targetId = typeof link.target === 'object' ? link.target.id : link.target;
+                    return sourceId !== id && targetId !== id;
+                });
+                
+                // 局部更新数据
+                updateGraphDataLocally();
 
                 // 如果删除的实体是当前选中的源实体或目标实体，则清空
                 if (sourceEntityInput.value === id) {
@@ -1967,8 +2979,60 @@
                 }
 
                 resetSearchState();
-                // 更新领域下拉框
-                updateDomainDropdown();
+
+                // 根据关系数量决定删除后的显示逻辑
+                if (relatedEntities.length === 0) {
+                    // 无任何关系：适配显示
+                    setTimeout(() => {
+                        // 重置视图到默认状态
+                        if (svg && zoom) {
+                            const container = document.getElementById('graph-container');
+                            const containerWidth = container.clientWidth;
+                            const containerHeight = container.clientHeight;
+                            
+                            svg.transition()
+                                .duration(800)
+                                .ease(d3.easeCubic)
+                                .call(zoom.transform,
+                                    d3.zoomIdentity
+                                        .translate(containerWidth / 2, containerHeight / 2)
+                                        .scale(1.0)
+                                );
+                        }
+                    }, 300);
+                } else if (relatedEntities.length === 1) {
+                    // 只与一个实体有关系：居中显示该实体
+                    const relatedEntityId = relatedEntities[0];
+                    setTimeout(() => {
+                        // 清除所有高亮
+                        clearAllHighlights();
+                        
+                        // 高亮相关实体
+                        const relatedNodeGroup = d3.selectAll('.node').filter(d => d.id === relatedEntityId);
+                        if (!relatedNodeGroup.empty()) {
+                            relatedNodeGroup.classed('highlighted', true);
+                        }
+                        
+                        // 居中放大显示相关实体
+                        centerNodeInView(relatedEntityId);
+                    }, 300);
+                } else {
+                    // 与多个实体有关系：居中显示任意其中一个实体
+                    const randomRelatedEntityId = relatedEntities[Math.floor(Math.random() * relatedEntities.length)];
+                    setTimeout(() => {
+                        // 清除所有高亮
+                        clearAllHighlights();
+                        
+                        // 高亮选中的相关实体
+                        const relatedNodeGroup = d3.selectAll('.node').filter(d => d.id === randomRelatedEntityId);
+                        if (!relatedNodeGroup.empty()) {
+                            relatedNodeGroup.classed('highlighted', true);
+                        }
+                        
+                        // 居中放大显示选中的相关实体
+                        centerNodeInView(randomRelatedEntityId);
+                    }, 300);
+                }
 
                 alert('实体删除成功');
             } else {
@@ -2011,26 +3075,27 @@
             const domain = sourceEntity?.domain || targetEntity?.domain || 'default';
 
             // 调用后端API创建关系
-            const success = await createRelationship({
+            const result = await createRelationship({
                 source: sourceId,
                 target: targetId,
                 type: type,
                 domain: domain
             });
 
-            if (success) {
-                // 重新从后端加载数据
-                await loadGraphData();
+            if (result && result.data && result.data.id) {
+                // 将新关系添加到本地数据中，包含关系ID
+                const newLink = {
+                    id: result.data.id, // 从后端响应的data.id中获取关系ID
+                    source: sourceId,
+                    target: targetId,
+                    type: type,
+                    domain: domain
+                };
+                graphData.links.push(newLink);
                 
-                // 更新数据存储
-                allGraphData = { ...graphData };
-                filteredGraphData = { ...graphData };
+                // 局部更新数据
+                updateGraphDataLocally();
                 
-                // 更新已使用的关系类型
-                updateUsedRelationTypes();
-                updateRelationTypeDropdown();
-
-                reloadGraph();
                 clearRelationForm();
 
                 if (selectedNode && (selectedNode.id === sourceId || selectedNode.id === targetId)) {
@@ -2038,10 +3103,11 @@
                 }
 
                 resetSearchState();
-                // 更新领域信息显示
-                updateDomainInfo();
-                // 更新领域下拉框
-                updateDomainDropdown();
+
+                // 延迟一下等待图表重新渲染完成后居中展示新关系
+                setTimeout(() => {
+                    centerOnRelation(sourceId, targetId, type);
+                }, 100);
 
                 alert('关系添加成功');
             } else {
@@ -2164,6 +3230,20 @@
                 return;
             }
 
+            // 记录要删除的关系的位置
+            let deletePosition = null;
+            if (simulation) {
+                const sourceNode = graphData.nodes.find(n => n.id === source);
+                const targetNode = graphData.nodes.find(n => n.id === target);
+                if (sourceNode && targetNode) {
+                    // 计算关系的中心点
+                    deletePosition = {
+                        x: (sourceNode.x + targetNode.x) / 2,
+                        y: (sourceNode.y + targetNode.y) / 2
+                    };
+                }
+            }
+
             // 获取关系ID
             const relationshipId = linkToDelete.id;
             
@@ -2178,18 +3258,15 @@
             // 调用后端API删除关系
             const success = await deleteRelationshipAPI(relationshipId);
             if (success) {
-                // 重新从后端加载数据
-                await loadGraphData();
+                // 从本地数据中删除关系
+                graphData.links = graphData.links.filter(link => {
+                    const linkSource = typeof link.source === 'object' ? link.source.id : link.source;
+                    const linkTarget = typeof link.target === 'object' ? link.target.id : link.target;
+                    return !(linkSource === source && linkTarget === target && link.type === type);
+                });
                 
-                // 更新数据存储
-                allGraphData = { ...graphData };
-                filteredGraphData = { ...graphData };
-                
-                // 更新已使用的关系类型
-                updateUsedRelationTypes();
-                updateRelationTypeDropdown();
-
-                reloadGraph();
+                // 局部更新数据
+                updateGraphDataLocally();
 
                 if (selectedNode && (selectedNode.id === source || selectedNode.id === target)) {
                     showEntityDetail(selectedNode);
@@ -2204,8 +3281,13 @@
                 }
 
                 resetSearchState();
-                // 更新领域下拉框
-                updateDomainDropdown();
+
+                // 延迟一下等待图表重新渲染完成后居中到删除位置
+                if (deletePosition) {
+                    setTimeout(() => {
+                        centerOnPosition(deletePosition.x, deletePosition.y);
+                    }, 100);
+                }
 
                 alert('关系删除成功');
             } else {
@@ -2242,8 +3324,11 @@
                 .attr('markerHeight', 6)
                 .attr('orient', 'auto')
                 .append('path')
-                .attr('d', 'M0,-5L10,0L0,5')
+                .attr('d', 'M0,-5L10,0L0,5Z') // 添加Z闭合路径
                     .attr('class', 'arrowhead')
+                    .attr('fill', 'none') // 设置为空心
+                    .attr('stroke', '#666') // 设置边框颜色
+                    .attr('stroke-width', 1.5) // 设置边框宽度
                     .attr('data-link-index', index)
                     .on('click', function(event) {
                         event.stopPropagation();
@@ -2419,20 +3504,97 @@
             arrowElements = svg.selectAll('.arrowhead');
 
             simulation.on('tick', () => {
+                // 计算双向边的偏移
+                const linkOffsets = calculateLinkOffsets();
+                
                 linkElements
-                    .attr('x1', d => d.source.x)
-                    .attr('y1', d => d.source.y)
-                    .attr('x2', d => d.target.x)
-                    .attr('y2', d => d.target.y);
+                    .attr('x1', (d, i) => d.source.x + (linkOffsets[i] ? linkOffsets[i].x1 : 0))
+                    .attr('y1', (d, i) => d.source.y + (linkOffsets[i] ? linkOffsets[i].y1 : 0))
+                    .attr('x2', (d, i) => d.target.x + (linkOffsets[i] ? linkOffsets[i].x2 : 0))
+                    .attr('y2', (d, i) => d.target.y + (linkOffsets[i] ? linkOffsets[i].y2 : 0));
 
                 linkLabelElements
-                    .attr('x', d => (d.source.x + d.target.x) / 2)
-                    .attr('y', d => (d.source.y + d.target.y) / 2);
+                    .attr('x', (d, i) => {
+                        const offset = linkOffsets[i];
+                        if (offset) {
+                            return (d.source.x + d.target.x) / 2 + offset.labelX;
+                        }
+                        return (d.source.x + d.target.x) / 2;
+                    })
+                    .attr('y', (d, i) => {
+                        const offset = linkOffsets[i];
+                        if (offset) {
+                            return (d.source.y + d.target.y) / 2 + offset.labelY;
+                        }
+                        return (d.source.y + d.target.y) / 2;
+                    });
 
                 nodeGroups.attr('transform', d => `translate(${d.x},${d.y})`);
             });
 
             console.log('图谱初始化完成，节点数：', graphData.nodes.length);
+        }
+
+        // 计算双向边的偏移量
+        function calculateLinkOffsets() {
+            const offsets = new Array(graphData.links.length).fill(null);
+            const offsetDistance = 8; // 平行边的间距
+            
+            // 遍历所有连线，找出双向边
+            for (let i = 0; i < graphData.links.length; i++) {
+                const link1 = graphData.links[i];
+                const source1 = typeof link1.source === 'object' ? link1.source.id : link1.source;
+                const target1 = typeof link1.target === 'object' ? link1.target.id : link1.target;
+                
+                // 检查是否有反向的边
+                for (let j = i + 1; j < graphData.links.length; j++) {
+                    const link2 = graphData.links[j];
+                    const source2 = typeof link2.source === 'object' ? link2.source.id : link2.source;
+                    const target2 = typeof link2.target === 'object' ? link2.target.id : link2.target;
+                    
+                    // 如果找到双向边
+                    if (source1 === target2 && target1 === source2) {
+                        // 计算边的方向向量
+                        const node1 = graphData.nodes.find(n => n.id === source1);
+                        const node2 = graphData.nodes.find(n => n.id === target1);
+                        
+                        if (node1 && node2) {
+                            const dx = node2.x - node1.x;
+                            const dy = node2.y - node1.y;
+                            const length = Math.sqrt(dx * dx + dy * dy);
+                            
+                            if (length > 0) {
+                                // 计算垂直偏移向量
+                                const perpX = -dy / length * offsetDistance;
+                                const perpY = dx / length * offsetDistance;
+                                
+                                // 为第一条边设置偏移
+                                offsets[i] = {
+                                    x1: perpX,
+                                    y1: perpY,
+                                    x2: perpX,
+                                    y2: perpY,
+                                    labelX: perpX,
+                                    labelY: perpY
+                                };
+                                
+                                // 为第二条边设置反向偏移
+                                offsets[j] = {
+                                    x1: -perpX,
+                                    y1: -perpY,
+                                    x2: -perpX,
+                                    y2: -perpY,
+                                    labelX: -perpX,
+                                    labelY: -perpY
+                                };
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+            
+            return offsets;
         }
 
         // 高亮关系及相关实体和箭头
@@ -2532,6 +3694,79 @@
             initializeGraph();
         }
 
+
+        
+        // 获取Cookie的辅助函数
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        // 描述框控制功能
+        function toggleDescription() {
+            const descriptionBox = document.getElementById('entity-description');
+            const descriptionText = document.getElementById('description-text');
+            const expandBtn = document.querySelector('#entity-description .expand-btn');
+            
+            if (descriptionBox && descriptionText) {
+                const isExpanded = descriptionBox.classList.contains('expanded');
+                
+                if (isExpanded) {
+                    // 收起：截断文本
+                    descriptionBox.classList.remove('expanded');
+                    expandBtn.textContent = '展开';
+                    
+                    // 如果文本超过100个字符，截断显示
+                    const fullText = descriptionText.getAttribute('data-full-text');
+                    if (fullText && fullText.length > 100) {
+                        descriptionText.textContent = fullText.substring(0, 100) + '...';
+                    }
+                } else {
+                    // 展开：显示完整文本
+                    descriptionBox.classList.add('expanded');
+                    expandBtn.textContent = '收起';
+                    
+                    // 显示完整文本
+                    const fullText = descriptionText.getAttribute('data-full-text');
+                    if (fullText) {
+                        descriptionText.textContent = fullText;
+                    }
+                }
+            }
+        }
+        
+        function copyDescription() {
+            const descriptionText = document.getElementById('description-text');
+            if (descriptionText) {
+                // 始终复制完整内容
+                const fullText = descriptionText.getAttribute('data-full-text') || descriptionText.textContent;
+                navigator.clipboard.writeText(fullText).then(() => {
+                    // 显示复制成功提示
+                    const copyBtn = document.querySelector('#entity-description .copy-btn');
+                    const originalText = copyBtn.textContent;
+                    copyBtn.textContent = '已复制';
+                    copyBtn.style.background = '#4caf50';
+                    setTimeout(() => {
+                        copyBtn.textContent = originalText;
+                        copyBtn.style.background = '#2196f3';
+                    }, 1000);
+                }).catch(err => {
+                    console.error('复制失败:', err);
+                    alert('复制失败，请手动复制');
+                });
+            }
+        }
+        
         // 视图控制功能
         function zoomIn() {
             if (!svg || !zoom) return;
@@ -2595,8 +3830,36 @@
         function centerNodeInView(nodeId) {
             if (!svg || !zoom) return;
 
-            const node = graphData.nodes.find(n => n.id === nodeId);
-            if (!node) return;
+            // 首先尝试从当前graphData中查找节点
+            let node = graphData.nodes.find(n => n.id === nodeId);
+            
+            // 如果没找到，尝试从allGraphData中查找
+            if (!node && allGraphData && allGraphData.nodes) {
+                node = allGraphData.nodes.find(n => n.id === nodeId);
+            }
+            
+            if (!node) {
+                console.warn(`未找到节点: ${nodeId}`);
+                return;
+            }
+
+            // 如果节点没有位置信息，尝试从D3.js的simulation中获取
+            if (node.x === undefined || node.y === undefined) {
+                const d3Node = d3.selectAll('.node').filter(d => d.id === nodeId);
+                if (!d3Node.empty()) {
+                    const nodeData = d3Node.datum();
+                    if (nodeData.x !== undefined && nodeData.y !== undefined) {
+                        node.x = nodeData.x;
+                        node.y = nodeData.y;
+                    } else {
+                        console.warn(`节点 ${nodeId} 在D3.js中没有位置信息`);
+                        return;
+                    }
+                } else {
+                    console.warn(`未找到节点 ${nodeId} 的D3.js元素`);
+                    return;
+                }
+            }
 
             const container = document.getElementById('graph-container');
             const containerWidth = container.clientWidth;
@@ -2832,13 +4095,22 @@
                 </div>
                 <div class="detail-section">
                     <h3>实体描述</h3>
-                    <div class="detail-content">${entity.description || '无描述'}</div>
+                    <div class="detail-content resizable-description" id="entity-description">
+                        <div class="description-text" id="description-text" data-full-text="${entity.description || '无描述'}">${entity.description && entity.description.length > 100 ? entity.description.substring(0, 100) + '...' : (entity.description || '无描述')}</div>
+                        <div class="description-controls" style="display: ${entity.description && entity.description !== '无描述' ? 'flex' : 'none'}">
+                            <button class="expand-btn" onclick="toggleDescription()" style="display: ${entity.description && entity.description.length > 100 ? 'inline-block' : 'none'}">展开</button>
+                            <button class="copy-btn" onclick="copyDescription()">复制</button>
+                        </div>
+                    </div>
                 </div>
                 <div class="detail-section">
                     <h3>操作</h3>
                     <div class="entity-actions">
                         <div class="action-btn edit-btn" onclick="startEditEntity('${entity.id}')">
                             编辑实体
+                        </div>
+                        <div class="action-btn copy-btn" onclick="copyEntityWithRelation('${entity.id}')">
+                            复制实体
                         </div>
                         <div class="action-btn delete-btn" onclick="deleteEntity('${entity.id}')">
                             删除实体
@@ -2991,15 +4263,6 @@
                 editSourceDropdown.classList.add('visible');
             });
 
-            // 为源实体下拉框中的选项添加点击事件
-            editSourceDropdown.querySelectorAll('.dropdown-item').forEach(item => {
-                item.addEventListener('click', () => {
-                    editSourceInput.value = item.dataset.id;
-                    editSourceDisplay.value = item.dataset.name;
-                    editSourceDropdown.classList.remove('visible');
-                });
-            });
-
             // 为目标实体输入框添加事件监听
             editTargetDisplay.addEventListener('focus', () => {
                 editTargetDropdown.classList.add('visible');
@@ -3011,13 +4274,14 @@
                 editTargetDropdown.classList.add('visible');
             });
 
-            // 为目标实体下拉框中的选项添加点击事件
-            editTargetDropdown.querySelectorAll('.dropdown-item').forEach(item => {
-                item.addEventListener('click', () => {
-                    editTargetInput.value = item.dataset.id;
-                    editTargetDisplay.value = item.dataset.name;
+            // 添加点击外部关闭下拉框的事件
+            document.addEventListener('click', (e) => {
+                if (!editSourceDisplay.contains(e.target) && !editSourceDropdown.contains(e.target)) {
+                    editSourceDropdown.classList.remove('visible');
+                }
+                if (!editTargetDisplay.contains(e.target) && !editTargetDropdown.contains(e.target)) {
                     editTargetDropdown.classList.remove('visible');
-                });
+                }
             });
         }
 
@@ -3133,7 +4397,7 @@
         }
 
         // 保存关系编辑
-        function saveRelationEdit(linkIndex) {
+        async function saveRelationEdit(linkIndex) {
             if (linkIndex < 0 || linkIndex >= graphData.links.length) return;
 
             const sourceId = document.getElementById('edit-source-entity').value;
@@ -3164,26 +4428,102 @@
                 return;
             }
 
-            // 记录旧的关系类型，用于更新关系类型集合
-            const oldType = graphData.links[linkIndex].type;
+            // 获取原始关系数据用于API调用
+            const originalLink = graphData.links[linkIndex];
+            const originalSourceId = typeof originalLink.source === 'object' ? originalLink.source.id : originalLink.source;
+            const originalTargetId = typeof originalLink.target === 'object' ? originalLink.target.id : originalLink.target;
+            const originalType = originalLink.type;
 
-            // 更新关系数据
-            graphData.links[linkIndex] = {
-                source: sourceId,
-                target: targetId,
-                type: type
-            };
+            try {
+                // 首先获取关系的ID
+                console.log('开始获取关系数据...');
+                const relationshipResponse = await fetch('/api/kg/data');
+                if (!relationshipResponse.ok) {
+                    throw new Error(`Failed to fetch relationship data: ${relationshipResponse.status}`);
+                }
+                const relationshipData = await relationshipResponse.json();
+                console.log('获取到的关系数据:', relationshipData);
+                
+                // 检查数据结构
+                if (!relationshipData.data || !relationshipData.data.links) {
+                    throw new Error('Invalid data structure: missing data.links');
+                }
+                
+                // 找到要更新的关系
+                const relationshipToUpdate = relationshipData.data.links.find(link => 
+                    link.source === originalSourceId && 
+                    link.target === originalTargetId && 
+                    link.type === originalType
+                );
+                
+                console.log('要更新的关系:', relationshipToUpdate);
+                console.log('搜索条件:', { originalSourceId, originalTargetId, originalType });
+                
+                if (!relationshipToUpdate) {
+                    throw new Error('Relationship not found');
+                }
+                
+                // 调用后端API更新关系
+                const updateData = {
+                    source: sourceId,
+                    target: targetId,
+                    type: type
+                };
+                
+                console.log('发送更新数据:', updateData);
+                console.log('API URL:', `/api/kg/relationships/${relationshipToUpdate.id}`);
+                
+                const response = await fetch(`/api/kg/relationships/${relationshipToUpdate.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify(updateData)
+                });
 
-            // 更新已使用的关系类型
-            updateUsedRelationTypes();
-            updateRelationTypeDropdown();
+                console.log('API响应状态:', response.status);
+                console.log('API响应头:', response.headers);
 
-            // 刷新界面
-            reloadGraph();
-            alert('关系更新成功');
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('API错误响应:', errorText);
+                    throw new Error(`HTTP error! status: ${response.status}, response: ${errorText}`);
+                }
 
-            // 重新显示更新后的关系详情
-            showRelationDetail(graphData.links[linkIndex]);
+                const result = await response.json();
+                console.log('API响应结果:', result);
+                
+                if (result.success || result.ret === 0) {
+                    // 更新本地数据
+                    graphData.links[linkIndex] = {
+                        source: sourceId,
+                        target: targetId,
+                        type: type
+                    };
+
+                    // 局部更新数据
+                    updateGraphDataLocally();
+                    
+                    alert('关系更新成功');
+
+                    // 重新显示更新后的关系详情
+                    showRelationDetail(graphData.links[linkIndex]);
+                    
+                    // 重置编辑状态
+                    editingLinkIndex = -1;
+
+                    // 延迟一下等待图表重新渲染完成后居中展示更新后的关系
+                    setTimeout(() => {
+                        centerOnRelation(sourceId, targetId, type);
+                    }, 100);
+                } else {
+                    alert('关系更新失败: ' + (result.message || result.msg || '未知错误'));
+                }
+            } catch (error) {
+                console.error('更新关系失败:', error);
+                alert('关系更新失败: ' + error.message);
+            }
         }
 
         // 取消关系编辑
@@ -3304,23 +4644,45 @@
             // 调用后端API更新实体
             const success = await updateEntityAPI(editingEntityId, updateData);
             if (success) {
-                // 重新从后端加载数据
-                await loadGraphData();
+                // 更新本地数据
+                Object.assign(entity, updateData);
                 
-                // 更新数据存储
-                allGraphData = { ...graphData };
-                filteredGraphData = { ...graphData };
-                
-                renderEntityList();
-                updateEntityDropdowns();
-                reloadGraph();
+                // 局部更新数据
+                updateGraphDataLocally();
                 
                 // 更新详情视图
                 const updatedEntity = graphData.nodes.find(n => n.id === editingEntityId);
                 if (updatedEntity) {
+                    // 保存实体ID用于居中展示
+                    const entityIdToCenter = editingEntityId;
+                    
                     // 重置编辑状态并显示详情页
                     editingEntityId = null;
                     showEntityDetail(updatedEntity);
+                    
+                    // 等待D3.js simulation稳定后居中放大展示更新后的实体
+                    const waitForSimulation = () => {
+                        if (simulation && simulation.alpha() > 0.01) {
+                            // simulation还在运行，继续等待
+                            setTimeout(waitForSimulation, 50);
+                        } else {
+                            // simulation已稳定，执行居中放大
+                            setTimeout(() => {
+                                // 清除所有高亮
+                                clearAllHighlights();
+                                
+                                // 高亮更新后的实体
+                                const updatedNodeGroup = d3.selectAll('.node').filter(d => d.id === entityIdToCenter);
+                                if (!updatedNodeGroup.empty()) {
+                                    updatedNodeGroup.classed('highlighted', true);
+                                }
+                                
+                                // 居中放大显示
+                                centerNodeInView(entityIdToCenter);
+                            }, 100);
+                        }
+                    };
+                    waitForSimulation();
                 }
 
                 alert('实体更新成功');
@@ -3483,15 +4845,18 @@
             addRelationBtn.addEventListener('click', addRelation);
             clearRelationFormBtn.addEventListener('click', clearRelationForm);
 
+            // 清空所有数据按钮事件
+            document.getElementById('clear-all-data').addEventListener('click', clearAllData);
+
             searchBtn.addEventListener('click', searchAndLocate);
             searchInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') searchAndLocate();
             });
 
-            zoomInBtn.addEventListener('click', zoomIn);
-            zoomOutBtn.addEventListener('click', zoomOut);
-            fitViewBtn.addEventListener('click', fitView);
-            resetViewBtn.addEventListener('click', resetLayout);
+                    zoomInBtn.addEventListener('click', zoomIn);
+        zoomOutBtn.addEventListener('click', zoomOut);
+        fitViewBtn.addEventListener('click', fitView);
+        resetViewBtn.addEventListener('click', resetLayout);
 
             // 源实体选择框事件
             sourceEntityDisplay.addEventListener('focus', () => {
@@ -3622,6 +4987,396 @@
         window.cancelRelationEdit = cancelRelationEdit;
         window.saveEntityEdit = saveEntityEdit;
         window.cancelEntityEdit = cancelEntityEdit;
+        window.toggleDescription = toggleDescription;
+        window.copyDescription = copyDescription;
+        window.copyEntityWithRelation = copyEntityWithRelation;
+
+        // AI聊天机器人功能
+        let aiChatOpen = false;
+
+        // 切换AI聊天窗口
+        function toggleAIChat() {
+            const chatWindow = document.getElementById('aiChatWindow');
+            aiChatOpen = !aiChatOpen;
+            
+            if (aiChatOpen) {
+                chatWindow.style.display = 'flex';
+                document.getElementById('aiInputField').focus();
+            } else {
+                chatWindow.style.display = 'none';
+            }
+        }
+
+        // 处理AI输入框回车键
+        function handleAIKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendAIMessage();
+            }
+        }
+
+        // 发送AI消息
+        async function sendAIMessage() {
+            const inputField = document.getElementById('aiInputField');
+            const sendBtn = document.getElementById('aiSendBtn');
+            const message = inputField.value.trim();
+            
+            if (!message) return;
+
+            // 禁用输入和发送按钮
+            inputField.disabled = true;
+            sendBtn.disabled = true;
+
+            // 添加用户消息
+            addAIMessage(message, 'user');
+            inputField.value = '';
+
+            // 显示AI正在输入
+            showAITyping();
+
+            try {
+                // 调用AI问答API
+                const response = await getAIResponse(message);
+                hideAITyping();
+                addAIMessage(response, 'bot');
+            } catch (error) {
+                hideAITyping();
+                addAIMessage('抱歉，我遇到了一些问题。请稍后再试。', 'bot');
+                console.error('AI响应错误:', error);
+            }
+
+            // 重新启用输入和发送按钮
+            inputField.disabled = false;
+            sendBtn.disabled = false;
+            inputField.focus();
+        }
+
+        // 添加AI消息到聊天窗口
+        function addAIMessage(content, sender) {
+            const messagesContainer = document.getElementById('aiChatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `ai-message ${sender}`;
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'ai-message-avatar';
+            
+            if (sender === 'user') {
+                avatar.textContent = '我';
+            } else {
+                // 为AI消息创建史努比头像
+                avatar.innerHTML = `
+                    <div class="snoopy-avatar">
+                        <div class="snoopy-head"></div>
+                        <div class="snoopy-ears">
+                            <div class="ear left-ear"></div>
+                            <div class="ear right-ear"></div>
+                        </div>
+                        <div class="snoopy-eyes">
+                            <div class="eye left-eye"></div>
+                            <div class="eye right-eye"></div>
+                        </div>
+                        <div class="snoopy-nose"></div>
+                    </div>
+                `;
+            }
+            
+            const messageContent = document.createElement('div');
+            messageContent.className = 'ai-message-content';
+            messageContent.textContent = content;
+            
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(messageContent);
+            messagesContainer.appendChild(messageDiv);
+            
+            // 滚动到底部
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // 显示AI正在输入
+        function showAITyping() {
+            document.getElementById('aiTyping').style.display = 'block';
+            const messagesContainer = document.getElementById('aiChatMessages');
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // 隐藏AI正在输入
+        function hideAITyping() {
+            document.getElementById('aiTyping').style.display = 'none';
+        }
+
+        // 获取AI响应
+        async function getAIResponse(userMessage) {
+            try {
+                // 获取AI开关状态
+                const useExternalAI = document.getElementById('aiSwitch').classList.contains('active');
+                
+                // 准备上下文数据
+                const contextData = {
+                    message: userMessage,
+                    graphData: {
+                        nodes: graphData.nodes,
+                        links: graphData.links
+                    },
+                    currentDomain: currentDomain,
+                    selectedNode: selectedNode,
+                    selectedLink: selectedLink,
+                    useExternalAI: useExternalAI  // 添加AI开关状态
+                };
+
+                // 调用后端AI问答API
+                const response = await fetch('/api/kg/ai-chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(contextData)
+                });
+
+                if (!response.ok) {
+                    throw new Error('AI服务暂时不可用');
+                }
+
+                const result = await response.json();
+                return result.response || '抱歉，我无法理解您的问题。';
+            } catch (error) {
+                // 如果API不可用，使用本地智能回复
+                return generateLocalAIResponse(userMessage);
+            }
+        }
+
+        // AI开关切换函数
+        function toggleAISwitch() {
+            const aiSwitch = document.getElementById('aiSwitch');
+            const aiSwitchText = document.getElementById('aiSwitchText');
+            
+            if (aiSwitch.classList.contains('active')) {
+                // 切换到本地AI
+                aiSwitch.classList.remove('active');
+                aiSwitchText.textContent = '本地';
+                aiSwitchText.style.color = 'white';
+            } else {
+                // 切换到外部AI
+                aiSwitch.classList.add('active');
+                aiSwitchText.textContent = '外部';
+                aiSwitchText.style.color = 'white';
+            }
+        }
+
+        // 本地智能回复（当后端AI服务不可用时）
+        function generateLocalAIResponse(userMessage) {
+            const message = userMessage.toLowerCase();
+            
+            // 模糊搜索实体
+            function fuzzySearchEntities(query) {
+                const results = [];
+                const queryLower = query.toLowerCase();
+                for (const node of graphData.nodes) {
+                    const nodeName = node.name.toLowerCase();
+                    const nodeId = node.id.toLowerCase();
+                    const nodeDesc = (node.description || '').toLowerCase();
+                    
+                    if (queryLower.includes(nodeName) || 
+                        queryLower.includes(nodeId) || 
+                        queryLower.includes(nodeDesc)) {
+                        results.push(node);
+                    }
+                }
+                return results;
+            }
+            
+            // 实体相关查询
+            if (message.includes('实体') || message.includes('节点') || message.includes('什么') || message.includes('哪些') || message.includes('谁') || message.includes('哪里')) {
+                // 模糊搜索
+                const searchResults = fuzzySearchEntities(message);
+                if (searchResults.length > 0) {
+                    if (searchResults.length === 1) {
+                        const node = searchResults[0];
+                        const relatedLinks = graphData.links.filter(l => 
+                            (typeof l.source === 'object' ? l.source.id : l.source) === node.id ||
+                            (typeof l.target === 'object' ? l.target.id : l.target) === node.id
+                        );
+                        return `我找到了实体：${node.name}（${node.domain || 'default'}领域），有 ${relatedLinks.length} 个相关关系。`;
+                    } else {
+                        const names = searchResults.slice(0, 5).map(n => n.name);
+                        return `我找到了${searchResults.length}个相关实体：${names.join('、')}`;
+                    }
+                }
+                
+                if (message.includes('数量') || message.includes('多少个')) {
+                    return `当前知识图谱中共有 ${graphData.nodes.length} 个实体。`;
+                }
+                if (message.includes('列表') || message.includes('所有')) {
+                    const entityNames = graphData.nodes.map(n => n.name).join('、');
+                    return `所有实体包括：${entityNames}`;
+                }
+                if (message.includes('领域') || message.includes('domain')) {
+                    const domains = [...new Set(graphData.nodes.map(n => n.domain || 'default'))];
+                    return `图谱中的领域包括：${domains.join('、')}`;
+                }
+            }
+            
+            // 关系相关查询
+            if (message.includes('关系') || message.includes('连接') || message.includes('link') || message.includes('关联')) {
+                if (message.includes('数量') || message.includes('多少个')) {
+                    return `当前知识图谱中共有 ${graphData.links.length} 个关系。`;
+                }
+                if (message.includes('类型') || message.includes('关系类型')) {
+                    const relationTypes = [...new Set(graphData.links.map(l => l.type))];
+                    return `关系类型包括：${relationTypes.join('、')}`;
+                }
+            }
+            
+            // 统计信息查询
+            if (message.includes('统计') || message.includes('总结') || message.includes('概况')) {
+                const domains = [...new Set(graphData.nodes.map(n => n.domain || 'default'))];
+                const relationTypes = [...new Set(graphData.links.map(l => l.type))];
+                return `知识图谱统计：共有 ${graphData.nodes.length} 个实体，${graphData.links.length} 个关系，涉及 ${domains.length} 个领域，${relationTypes.length} 种关系类型。`;
+            }
+            
+            // 帮助信息
+            if (message.includes('帮助') || message.includes('help') || message.includes('能做什么')) {
+                return `我是史努比AI助手，可以帮您：
+
+1. 查询实体信息：询问特定实体、实体数量、列表等
+2. 查询关系信息：询问关系类型、连接情况等
+3. 模糊搜索：即使不知道确切名称也能找到相关实体
+4. 统计分析：图谱整体概况和统计信息
+5. 智能问答：基于知识图谱数据回答各种问题
+
+请告诉我您想了解什么？`;
+            }
+            
+            // 通用回复
+            return "我理解您的问题，让我为您搜索相关信息。您可以询问实体、关系、统计信息，或者直接描述您想了解的内容，我会尽力帮您找到答案。";
+        }
+
+        // 清空所有数据
+        async function clearAllData() {
+            // 确认对话框
+            const confirmMessage = `确定要清空所有数据吗？\n\n此操作将：\n1. 自动备份当前数据为JSON文件\n2. 删除MySQL数据库中的所有数据\n3. 清空界面显示\n\n此操作不可撤销！`;
+            
+            if (!confirm(confirmMessage)) {
+                return;
+            }
+            
+            try {
+                // 显示加载状态
+                const clearButton = document.getElementById('clear-all-data');
+                if (clearButton) {
+                    const originalText = clearButton.textContent;
+                    clearButton.textContent = '清空中...';
+                    clearButton.disabled = true;
+                }
+                
+                // 1. 自动备份当前数据
+                const backupData = {
+                    nodes: graphData.nodes.map(node => ({
+                        id: node.id,
+                        name: node.name,
+                        description: node.description || '',
+                        domain: node.domain || 'default'
+                    })),
+                    links: graphData.links.map(link => ({
+                        source: typeof link.source === 'object' ? link.source.id : link.source,
+                        target: typeof link.target === 'object' ? link.target.id : link.target,
+                        type: link.type,
+                        description: link.description || '',
+                        domain: link.domain || 'default'
+                    }))
+                };
+                
+                // 创建并下载备份文件
+                const backupBlob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+                const backupUrl = URL.createObjectURL(backupBlob);
+                const backupLink = document.createElement('a');
+                backupLink.href = backupUrl;
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const day = String(now.getDate()).padStart(2, '0');
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const seconds = String(now.getSeconds()).padStart(2, '0');
+                const timestamp = `${year}${month}${day}_${hours}${minutes}${seconds}`;
+                backupLink.download = `kg_${timestamp}_backup.json`;
+                document.body.appendChild(backupLink);
+                backupLink.click();
+                document.body.removeChild(backupLink);
+                URL.revokeObjectURL(backupUrl);
+                
+                console.log('数据备份完成');
+                
+                // 2. 调用后端API清空数据
+                const result = await clearAllDataAPI();
+                
+                if (result && (result.success || result.ret === 0)) {
+                    // 3. 清空本地数据
+                    graphData = { nodes: [], links: [] };
+                    allGraphData = { nodes: [], links: [] };
+                    filteredGraphData = { nodes: [], links: [] };
+                    
+                    // 4. 更新界面
+                    updateGraphDataLocally();
+                    
+                    // 5. 清空实体列表
+                    renderEntityList();
+                    
+                    // 6. 清空搜索状态
+                    searchResults = [];
+                    currentResultIndex = -1;
+                    lastSearchKeyword = '';
+                    lastSearchType = 'entityName';
+                    
+                    // 7. 清空选中状态
+                    selectedNode = null;
+                    selectedLink = null;
+                    editingEntityId = null;
+                    editingLinkIndex = -1;
+                    
+                    // 8. 重置领域选择
+                    currentDomain = 'all';
+                    const domainSelect = document.getElementById('domain-select');
+                    if (domainSelect) {
+                        domainSelect.value = 'all';
+                    }
+                    
+                    // 9. 清空右侧详情面板
+                    const detailPanel = document.getElementById('entity-detail-panel');
+                    if (detailPanel) {
+                        detailPanel.innerHTML = '<div class="no-data">暂无数据</div>';
+                    } else {
+                        // 如果没有找到entity-detail-panel，尝试清空detail-view
+                        const detailView = document.getElementById('detail-view');
+                        if (detailView) {
+                            detailView.innerHTML = '<div class="no-data">暂无数据</div>';
+                        }
+                    }
+                    
+                    // 10. 显示成功消息
+                    const successMessage = `数据清空成功！\n\n已删除：\n- ${result.deleted_count.entities} 个实体\n- ${result.deleted_count.relationships} 个关系\n\n数据已自动备份到本地文件。`;
+                    alert(successMessage);
+                    
+                } else {
+                    throw new Error(result ? result.message : '清空数据失败');
+                }
+                
+            } catch (error) {
+                console.error('清空数据失败:', error);
+                alert(`清空数据失败：${error.message}\n\n数据备份已完成，但数据库清空失败。`);
+            } finally {
+                // 恢复按钮状态
+                const clearButton = document.getElementById('clear-all-data');
+                if (clearButton) {
+                    clearButton.textContent = '一键清空数据';
+                    clearButton.disabled = false;
+                }
+            }
+        }
+
+        // 全局函数，用于AI聊天
+        window.toggleAIChat = toggleAIChat;
+        window.handleAIKeyPress = handleAIKeyPress;
+        window.sendAIMessage = sendAIMessage;
+        window.toggleAISwitch = toggleAISwitch;
     </script>
 </body>
 </html>

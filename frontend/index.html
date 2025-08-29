@@ -891,7 +891,17 @@
             try {
                 // 创建输入框用于获取文件路径
                 const filePath = prompt('请输入保存路径和文件名（包含.json扩展名）：',
-                                      currentFilePath || `knowledge_graph_${new Date().toISOString().replace(/:/g, '-').split('.')[0]}.json`);
+                                      currentFilePath || (() => {
+                                          const now = new Date();
+                                          const year = now.getFullYear();
+                                          const month = String(now.getMonth() + 1).padStart(2, '0');
+                                          const day = String(now.getDate()).padStart(2, '0');
+                                          const hours = String(now.getHours()).padStart(2, '0');
+                                          const minutes = String(now.getMinutes()).padStart(2, '0');
+                                          const seconds = String(now.getSeconds()).padStart(2, '0');
+                                          const timestamp = `${year}${month}${day}_${hours}${minutes}${seconds}`;
+                                          return `kg_${timestamp}.json`;
+                                      })());
 
                 if (!filePath) {
                     // 用户取消输入
