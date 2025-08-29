@@ -5113,8 +5113,8 @@
                 const contextData = {
                     message: userMessage,
                     graphData: {
-                        nodes: graphData.nodes,
-                        links: graphData.links
+                        nodes: graphData.nodes || [],
+                        links: graphData.links || []
                     },
                     currentDomain: currentDomain,
                     selectedNode: selectedNode,
