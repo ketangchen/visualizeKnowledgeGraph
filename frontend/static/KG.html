@@ -60,6 +60,236 @@
             gap: 10px;
         }
 
+        .mode-switcher {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .mode-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .mode-btn.preview {
+            background: linear-gradient(135deg, #4dd0e1 0%, #80deea 100%);
+            color: #263238;
+        }
+
+        .mode-btn.preview:hover {
+            background: linear-gradient(135deg, #26c6da 0%, #4dd0e1 100%);
+        }
+
+        .mode-btn.data {
+            background: linear-gradient(135deg, #ff9800 0%, #ffb74d 100%);
+            color: #263238;
+        }
+
+        .mode-btn.data:hover {
+            background: linear-gradient(135deg, #f57c00 0%, #ff9800 100%);
+        }
+
+        .mode-btn.active {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .data-editor {
+            display: none;
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            overflow-y: auto;
+        }
+
+        .data-editor.active {
+            display: block;
+        }
+
+        .preview-mode {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .json-editor {
+            width: 100%;
+            height: calc(100% - 200px);
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            background: #ffffff;
+            resize: none;
+        }
+
+        .data-controls {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .data-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .data-btn.save {
+            background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+            color: white;
+        }
+
+        .data-btn.save:hover {
+            background: linear-gradient(135deg, #388e3c 0%, #4caf50 100%);
+        }
+
+        .data-btn.cancel {
+            background: linear-gradient(135deg, #f44336 0%, #ef5350 100%);
+            color: white;
+        }
+
+        .data-btn.cancel:hover {
+            background: linear-gradient(135deg, #d32f2f 0%, #f44336 100%);
+        }
+
+        /* 禁用状态的样式 */
+        .domain-select-disabled {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .domain-select-disabled input,
+        .domain-select-disabled select,
+        .domain-select-disabled button {
+            background-color: #f5f5f5 !important;
+            cursor: not-allowed !important;
+            color: #999 !important;
+        }
+
+        /* 确保下拉框在恢复后正常显示 */
+        .domain-dropdown {
+            display: none;
+        }
+
+        .domain-dropdown.visible {
+            display: block;
+        }
+
+        /* 互换实体按钮样式 */
+        .swap-entities-container {
+            display: flex;
+            justify-content: center;
+            margin: 10px 0;
+        }
+
+        .btn-swap {
+            background: #f0f0f0;
+            color: #333;
+            border: 1px solid #ddd;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-swap:hover {
+            background: #e0e0e0;
+            border-color: #ccc;
+        }
+
+        .swap-icon {
+            font-size: 14px;
+            margin-right: 4px;
+        }
+
+        .domain-info-disabled {
+            color: #666 !important;
+            font-style: italic !important;
+        }
+
+        /* 数据模式下的禁用样式 */
+        .data-mode-disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .data-mode-disabled input,
+        .data-mode-disabled select,
+        .data-mode-disabled button {
+            background-color: #f5f5f5 !important;
+            cursor: not-allowed !important;
+            color: #999 !important;
+        }
+
+        /* 编辑按钮禁用样式 */
+        .btn-edit:disabled,
+        .btn-save:disabled,
+        .btn-cancel:disabled,
+        .btn-delete:disabled,
+        .btn-copy:disabled,
+        .btn-update:disabled {
+            background-color: #f5f5f5 !important;
+            color: #999 !important;
+            cursor: not-allowed !important;
+            opacity: 0.5 !important;
+        }
+
+        /* 数据模式下禁用的编辑按钮 */
+        .data-mode .btn-edit,
+        .data-mode .btn-save,
+        .data-mode .btn-cancel,
+        .data-mode .btn-delete,
+        .data-mode .btn-copy,
+        .data-mode .btn-update {
+            pointer-events: none;
+        }
+
+        /* 实体列表按钮禁用样式 */
+        .action-btn[style*="pointer-events: none"] {
+            opacity: 0.3 !important;
+            cursor: not-allowed !important;
+        }
+
+        /* 数据模式下实体列表按钮禁用 */
+        .data-mode .action-btn {
+            pointer-events: none !important;
+            opacity: 0.3 !important;
+            cursor: not-allowed !important;
+        }
+
+        /* 数据模式下实体列表项禁用 */
+        .data-mode .entity-item {
+            pointer-events: none !important;
+            opacity: 0.7 !important;
+            cursor: not-allowed !important;
+        }
+
+        /* 实体列表项禁用样式 */
+        .entity-item[style*="pointer-events: none"] {
+            opacity: 0.7 !important;
+            cursor: not-allowed !important;
+        }
+
         .control-btn {
             width: 40px;
             height: 40px;
@@ -1429,20 +1659,43 @@
         </div>
 
         <div class="visualization-panel">
-            <div id="graph-container"></div>
-            <!-- 新增：实体悬浮信息框 -->
-            <div id="entity-tooltip" class="entity-tooltip">
-                <h4 id="tooltip-title"></h4>
-                <p><strong>ID：</strong><span id="tooltip-id"></span></p>
-                <p><strong>领域：</strong><span id="tooltip-domain"></span></p>
-                <p><strong>描述：</strong><span id="tooltip-desc"></span></p>
+            <!-- 模式切换按钮 -->
+            <div class="mode-switcher">
+                <button class="mode-btn preview active" onclick="switchToPreviewMode()">预览模式</button>
+                <button class="mode-btn data" onclick="switchToDataMode()">数据模式</button>
             </div>
-            <!-- 原有控制按钮 -->
-            <div class="controls">
-                <div class="control-btn" id="zoom-in" title="放大">+</div>
-                <div class="control-btn" id="zoom-out" title="缩小">-</div>
-                <div class="control-btn" id="fit-view" title="适配显示">⟲</div>
-                <div class="control-btn" id="reset-view" title="重置布局">⟳</div>
+            
+            <!-- 预览模式内容 -->
+            <div id="preview-mode" class="preview-mode">
+                <div id="graph-container"></div>
+                <!-- 新增：实体悬浮信息框 -->
+                <div id="entity-tooltip" class="entity-tooltip">
+                    <h4 id="tooltip-title"></h4>
+                    <p><strong>ID：</strong><span id="tooltip-id"></span></p>
+                    <p><strong>领域：</strong><span id="tooltip-domain"></span></p>
+                    <p><strong>描述：</strong><span id="tooltip-desc"></span></p>
+                </div>
+                <!-- 原有控制按钮 -->
+                <div class="controls">
+                    <div class="control-btn" id="zoom-in" title="放大">+</div>
+                    <div class="control-btn" id="zoom-out" title="缩小">-</div>
+                    <div class="control-btn" id="fit-view" title="适配显示">⟲</div>
+                    <div class="control-btn" id="reset-view" title="重置布局">⟳</div>
+                </div>
+            </div>
+            
+            <!-- 数据模式内容 -->
+            <div id="data-mode" class="data-editor">
+                <h3 style="margin-bottom: 15px; color: #333;">知识图谱数据编辑器</h3>
+                <div id="data-mode-info" style="margin-bottom: 10px; padding: 10px; background: #e3f2fd; border-radius: 4px; font-size: 14px;">
+                    <strong>当前编辑范围：</strong><span id="edit-scope">所有领域</span><br>
+                    <small style="color: #666; margin-top: 5px; display: block;">💡 数据模式下领域筛选功能已禁用，编辑范围基于进入数据模式时的领域选择</small>
+                </div>
+                <textarea id="json-editor" class="json-editor" placeholder="JSON数据将在这里显示..."></textarea>
+                <div class="data-controls" style="margin-top: 20px; padding: 10px; background: #e8f5e8; border-radius: 4px;">
+                    <button class="data-btn save" onclick="saveJsonData()" style="margin-right: 10px;">保存到数据库</button>
+                    <button class="data-btn cancel" onclick="cancelDataEdit()">取消编辑</button>
+                </div>
             </div>
         </div>
 
@@ -2455,19 +2708,35 @@
                 // 添加实体按钮事件
                 entityItem.querySelector('.edit-btn').addEventListener('click', (e) => {
                     e.stopPropagation();
+                    if (currentMode === 'data') {
+                        alert('数据模式下编辑功能已禁用');
+                        return;
+                    }
                     startEditEntity(node.id);
                 });
                 // 复制按钮事件
                 entityItem.querySelector('.copy-btn').addEventListener('click', (e) => {
                     e.stopPropagation();
+                    if (currentMode === 'data') {
+                        alert('数据模式下复制功能已禁用');
+                        return;
+                    }
                     copyEntityWithRelation(node.id);
                 });
                 // 删除实体按钮事件
                 entityItem.querySelector('.delete-btn').addEventListener('click', (e) => {
                     e.stopPropagation();
+                    if (currentMode === 'data') {
+                        alert('数据模式下删除功能已禁用');
+                        return;
+                    }
                     deleteEntity(node.id);
                 });
                 entityItem.addEventListener('click', () => {
+                    if (currentMode === 'data') {
+                        alert('数据模式下实体详情查看已禁用');
+                        return;
+                    }
                     showEntityDetail(node);
                     centerNodeInView(node.id);
                     resetSearchState();
@@ -2477,6 +2746,25 @@
                 });
                 entitiesContainer.appendChild(entityItem);
             });
+            
+            // 如果在数据模式下，禁用所有新生成的按钮和实体项
+            if (currentMode === 'data') {
+                const actionButtons = entitiesContainer.querySelectorAll('.action-btn');
+                actionButtons.forEach(btn => {
+                    btn.style.pointerEvents = 'none';
+                    btn.style.opacity = '0.3';
+                    btn.style.cursor = 'not-allowed';
+                    btn.title = '数据模式下已禁用';
+                });
+                
+                // 禁用实体列表项的点击
+                const entityItems = entitiesContainer.querySelectorAll('.entity-item');
+                entityItems.forEach(item => {
+                    item.style.pointerEvents = 'none';
+                    item.style.opacity = '0.7';
+                    item.style.cursor = 'not-allowed';
+                });
+            }
         }
 
         function startEditEntity(id) {
@@ -4193,6 +4481,14 @@
                             <div class="entity-dropdown" id="edit-source-entity-dropdown"></div>
                         </div>
                     </div>
+                    
+                    <!-- 互换值按钮 -->
+                    <div class="swap-entities-container">
+                        <button type="button" class="btn-swap" onclick="swapEntities()" title="互换源实体和目标实体">
+                            ⇄ 互换
+                        </button>
+                    </div>
+                    
                     <div class="form-group">
                         <label for="edit-target-entity-display">目标实体</label>
                         <div class="entity-select-container">
@@ -5372,11 +5668,844 @@
             }
         }
 
+        // 互换源实体和目标实体
+        function swapEntities() {
+            console.log('开始互换实体...');
+            
+            // 获取当前编辑中的源实体和目标实体元素
+            const sourceDisplay = document.getElementById('edit-source-entity-display');
+            const sourceInput = document.getElementById('edit-source-entity');
+            const targetDisplay = document.getElementById('edit-target-entity-display');
+            const targetInput = document.getElementById('edit-target-entity');
+            
+            if (!sourceDisplay || !sourceInput || !targetDisplay || !targetInput) {
+                console.error('找不到实体输入元素');
+                return;
+            }
+            
+            // 保存当前值
+            const sourceDisplayValue = sourceDisplay.value;
+            const sourceInputValue = sourceInput.value;
+            const targetDisplayValue = targetDisplay.value;
+            const targetInputValue = targetInput.value;
+            
+            console.log('互换前 - 源实体:', sourceDisplayValue, '目标实体:', targetDisplayValue);
+            
+            // 互换显示值
+            sourceDisplay.value = targetDisplayValue;
+            sourceInput.value = targetInputValue;
+            targetDisplay.value = sourceDisplayValue;
+            targetInput.value = sourceInputValue;
+            
+            console.log('互换后 - 源实体:', sourceDisplay.value, '目标实体:', targetDisplay.value);
+            
+            // 添加简单的视觉反馈（只改变颜色，不改变文字）
+            const swapButton = document.querySelector('.btn-swap');
+            if (swapButton) {
+                swapButton.style.background = '#d4edda';
+                swapButton.style.color = '#155724';
+                swapButton.style.borderColor = '#c3e6cb';
+                
+                // 1秒后恢复原样式
+                setTimeout(() => {
+                    swapButton.style.background = '';
+                    swapButton.style.color = '';
+                    swapButton.style.borderColor = '';
+                }, 1000);
+            }
+            
+            // 触发输入事件以更新下拉框
+            sourceDisplay.dispatchEvent(new Event('input'));
+            targetDisplay.dispatchEvent(new Event('input'));
+        }
+
         // 全局函数，用于AI聊天
         window.toggleAIChat = toggleAIChat;
         window.handleAIKeyPress = handleAIKeyPress;
         window.sendAIMessage = sendAIMessage;
         window.toggleAISwitch = toggleAISwitch;
+        window.switchToPreviewMode = switchToPreviewMode;
+        window.switchToDataMode = switchToDataMode;
+        window.saveJsonData = saveJsonData;
+        window.cancelDataEdit = cancelDataEdit;
+        window.swapEntities = swapEntities;
+
+        // 禁用右侧面板功能
+        function disableRightPanel() {
+            console.log('禁用右侧面板功能...');
+            
+            // 禁用领域选择器
+            const domainSelectContainer = document.querySelector('.domain-selector-container');
+            const domainSelectDisplay = document.getElementById('domain-select-display');
+            const domainSelect = document.getElementById('domain-select');
+            const domainDropdown = document.getElementById('domain-dropdown');
+            const currentDomainInfo = document.getElementById('current-domain-info');
+            
+            if (domainSelectContainer) {
+                domainSelectContainer.classList.add('domain-select-disabled');
+            }
+            
+            if (domainSelectDisplay) {
+                domainSelectDisplay.disabled = true;
+                domainSelectDisplay.placeholder = '数据模式下已禁用';
+            }
+            
+            if (domainSelect) {
+                domainSelect.disabled = true;
+            }
+            
+            if (domainDropdown) {
+                domainDropdown.style.display = 'none';
+            }
+            
+            if (currentDomainInfo) {
+                currentDomainInfo.textContent = '数据模式下功能已禁用';
+                currentDomainInfo.classList.add('domain-info-disabled');
+            }
+            
+            // 禁用搜索功能
+            const searchInput = document.getElementById('search-input');
+            const searchBtn = document.getElementById('search-btn');
+            const searchType = document.getElementById('search-type');
+            
+            if (searchInput) {
+                searchInput.disabled = true;
+                searchInput.placeholder = '数据模式下搜索已禁用';
+            }
+            
+            if (searchBtn) {
+                searchBtn.disabled = true;
+                searchBtn.textContent = '搜索已禁用';
+            }
+            
+            if (searchType) {
+                searchType.disabled = true;
+            }
+            
+            // 禁用AI聊天功能
+            const aiChatbot = document.querySelector('.ai-chatbot');
+            if (aiChatbot) {
+                aiChatbot.style.pointerEvents = 'none';
+                aiChatbot.style.opacity = '0.5';
+            }
+            
+            // 禁用详情面板
+            const detailView = document.getElementById('detail-view');
+            if (detailView) {
+                detailView.innerHTML = '<div class="no-data">数据模式下详情查看已禁用</div>';
+            }
+            
+            // 禁用所有编辑功能
+            const allEditButtons = document.querySelectorAll('.btn-edit, .btn-save, .btn-cancel, .btn-delete, .btn-copy, .btn-update');
+            allEditButtons.forEach(btn => {
+                // 检查按钮是否属于数据模式相关功能
+                if (btn.closest('.data-controls') || btn.closest('.mode-switcher')) {
+                    return; // 不禁用数据模式相关的按钮
+                }
+                btn.disabled = true;
+                btn.style.opacity = '0.5';
+                btn.style.cursor = 'not-allowed';
+            });
+            
+            // 禁用实体描述编辑功能
+            const entityDetailPanel = document.getElementById('entity-detail-panel');
+            if (entityDetailPanel) {
+                const editButtons = entityDetailPanel.querySelectorAll('.btn-edit, .btn-save, .btn-cancel');
+                editButtons.forEach(btn => {
+                    btn.disabled = true;
+                    btn.style.opacity = '0.5';
+                    btn.style.cursor = 'not-allowed';
+                });
+            }
+            
+            // 禁用实体列表编辑功能
+            const entityList = document.getElementById('entity-list');
+            if (entityList) {
+                // 禁用实体列表中的操作按钮
+                const actionButtons = entityList.querySelectorAll('.action-btn');
+                actionButtons.forEach(btn => {
+                    btn.style.pointerEvents = 'none';
+                    btn.style.opacity = '0.3';
+                    btn.style.cursor = 'not-allowed';
+                    btn.title = '数据模式下已禁用';
+                });
+                
+                // 禁用实体列表中的编辑、复制、删除按钮
+                const editButtons = entityList.querySelectorAll('.edit-btn, .copy-btn, .delete-btn');
+                editButtons.forEach(btn => {
+                    btn.style.pointerEvents = 'none';
+                    btn.style.opacity = '0.3';
+                    btn.style.cursor = 'not-allowed';
+                    btn.title = '数据模式下已禁用';
+                });
+                
+                // 为实体列表添加禁用标识
+                entityList.setAttribute('data-mode-disabled', 'true');
+                
+                // 禁用实体列表项的点击
+                const entityItems = entityList.querySelectorAll('.entity-item');
+                entityItems.forEach(item => {
+                    item.style.pointerEvents = 'none';
+                    item.style.opacity = '0.7';
+                    item.style.cursor = 'not-allowed';
+                });
+            }
+            
+            // 监听实体列表的动态变化
+            const entitiesContainer = document.getElementById('entities-container');
+            if (entitiesContainer) {
+                // 创建一个观察器来监听实体列表的变化
+                const observer = new MutationObserver((mutations) => {
+                    if (currentMode === 'data') {
+                        mutations.forEach((mutation) => {
+                            mutation.addedNodes.forEach((node) => {
+                                if (node.nodeType === 1) { // 元素节点
+                                    // 禁用新添加的操作按钮
+                                    const actionButtons = node.querySelectorAll('.action-btn');
+                                    actionButtons.forEach(btn => {
+                                        btn.style.pointerEvents = 'none';
+                                        btn.style.opacity = '0.3';
+                                        btn.style.cursor = 'not-allowed';
+                                        btn.title = '数据模式下已禁用';
+                                    });
+                                    
+                                    // 禁用新添加的实体项
+                                    const entityItems = node.querySelectorAll('.entity-item');
+                                    entityItems.forEach(item => {
+                                        item.style.pointerEvents = 'none';
+                                        item.style.opacity = '0.7';
+                                        item.style.cursor = 'not-allowed';
+                                    });
+                                    
+                                    // 如果添加的节点本身就是实体项
+                                    if (node.classList && node.classList.contains('entity-item')) {
+                                        node.style.pointerEvents = 'none';
+                                        node.style.opacity = '0.7';
+                                        node.style.cursor = 'not-allowed';
+                                    }
+                                }
+                            });
+                        });
+                    }
+                });
+                
+                observer.observe(entitiesContainer, {
+                    childList: true,
+                    subtree: true
+                });
+            }
+            
+            // 禁用关系编辑功能
+            const relationEditButtons = document.querySelectorAll('[onclick*="edit"], [onclick*="Edit"]');
+            relationEditButtons.forEach(btn => {
+                if (btn.closest('.data-controls') || btn.closest('.mode-switcher')) {
+                    return; // 不禁用数据模式相关的按钮
+                }
+                btn.disabled = true;
+                btn.style.opacity = '0.5';
+                btn.style.cursor = 'not-allowed';
+            });
+            
+            // 禁用所有可能的编辑输入框
+            const editInputs = document.querySelectorAll('input[type="text"], textarea');
+            editInputs.forEach(input => {
+                if (input.closest('.data-controls') || 
+                    input.closest('.mode-switcher') || 
+                    input.id === 'json-editor') {
+                    return; // 不禁用数据模式相关的输入框
+                }
+                input.disabled = true;
+                input.style.opacity = '0.5';
+                input.style.cursor = 'not-allowed';
+            });
+            
+            // 禁用所有可能的编辑下拉框
+            const editSelects = document.querySelectorAll('select');
+            editSelects.forEach(select => {
+                if (select.closest('.data-controls') || 
+                    select.closest('.mode-switcher')) {
+                    return; // 不禁用数据模式相关的下拉框
+                }
+                select.disabled = true;
+                select.style.opacity = '0.5';
+                select.style.cursor = 'not-allowed';
+            });
+            
+            console.log('右侧面板功能已禁用');
+            
+            // 禁用左侧面板功能（如果有的话）
+            const leftPanel = document.querySelector('.left-panel');
+            if (leftPanel) {
+                const leftPanelInputs = leftPanel.querySelectorAll('input, select, button');
+                leftPanelInputs.forEach(element => {
+                    if (element.classList.contains('data-btn') || 
+                        element.closest('.data-controls') || 
+                        element.closest('.mode-switcher')) {
+                        // 不禁用数据模式相关的按钮
+                        return;
+                    }
+                    element.disabled = true;
+                    element.style.opacity = '0.5';
+                    element.style.cursor = 'not-allowed';
+                });
+            }
+        }
+
+        // 重置领域筛选器到所有领域
+        function resetDomainSelector() {
+            console.log('重置领域筛选器...');
+            
+            // 重置领域选择为"所有领域"
+            if (domainSelect) {
+                domainSelect.value = 'all';
+                console.log('domainSelect 已重置为 all');
+            }
+            if (domainSelectDisplay) {
+                domainSelectDisplay.value = '所有领域';
+                console.log('domainSelectDisplay 已重置为 所有领域');
+            }
+            currentDomain = 'all';
+            console.log('currentDomain 已重置为 all');
+            
+            // 确保下拉框可见性正确
+            if (domainDropdown) {
+                domainDropdown.style.display = ''; // 恢复显示
+                domainDropdown.classList.remove('visible');
+                console.log('下拉框显示状态已重置');
+            }
+            
+            // 重新初始化领域选择器
+            if (typeof initializeDomainSelector === 'function') {
+                initializeDomainSelector();
+                console.log('领域选择器已重新初始化');
+            }
+            
+            // 重新筛选数据为所有领域
+            if (typeof filterDataByDomain === 'function') {
+                filterDataByDomain();
+                console.log('数据已重新筛选为所有领域');
+            }
+            
+            // 重新更新领域信息
+            if (typeof updateDomainInfo === 'function') {
+                updateDomainInfo();
+                console.log('领域信息已更新');
+            }
+            
+            // 测试下拉框功能
+            setTimeout(() => {
+                console.log('测试下拉框功能...');
+                console.log('domainSelectDisplay:', domainSelectDisplay);
+                console.log('domainDropdown:', domainDropdown);
+                console.log('domainSelectDisplay.disabled:', domainSelectDisplay?.disabled);
+                console.log('domainDropdown.style.display:', domainDropdown?.style.display);
+                console.log('domainDropdown.classList:', domainDropdown?.classList);
+                
+                // 测试点击事件
+                if (domainSelectDisplay && !domainSelectDisplay.disabled) {
+                    console.log('领域选择器已启用，可以正常使用');
+                } else {
+                    console.log('领域选择器仍然被禁用');
+                }
+            }, 100);
+            
+            console.log('领域筛选器已重置为所有领域');
+        }
+
+        // 启用右侧面板功能
+        function enableRightPanel() {
+            console.log('启用右侧面板功能...');
+            
+            // 启用领域选择器
+            const domainSelectContainer = document.querySelector('.domain-selector-container');
+            const domainSelectDisplay = document.getElementById('domain-select-display');
+            const domainSelect = document.getElementById('domain-select');
+            const currentDomainInfo = document.getElementById('current-domain-info');
+            
+            if (domainSelectContainer) {
+                domainSelectContainer.classList.remove('domain-select-disabled');
+                console.log('领域选择器容器禁用样式已移除');
+            }
+            
+            if (domainSelectDisplay) {
+                domainSelectDisplay.disabled = false;
+                domainSelectDisplay.placeholder = '输入或选择领域';
+            }
+            
+            if (domainSelect) {
+                domainSelect.disabled = false;
+            }
+            
+            // 恢复下拉框显示
+            if (domainDropdown) {
+                domainDropdown.style.display = '';
+            }
+            
+            if (currentDomainInfo) {
+                currentDomainInfo.classList.remove('domain-info-disabled');
+            }
+            
+            // 重置领域筛选器到所有领域
+            resetDomainSelector();
+            
+            // 启用搜索功能
+            const searchInput = document.getElementById('search-input');
+            const searchBtn = document.getElementById('search-btn');
+            const searchType = document.getElementById('search-type');
+            
+            if (searchInput) {
+                searchInput.disabled = false;
+                searchInput.placeholder = '请输入搜索内容...';
+            }
+            
+            if (searchBtn) {
+                searchBtn.disabled = false;
+                searchBtn.textContent = '搜索';
+            }
+            
+            if (searchType) {
+                searchType.disabled = false;
+            }
+            
+            // 启用AI聊天功能
+            const aiChatbot = document.querySelector('.ai-chatbot');
+            if (aiChatbot) {
+                aiChatbot.style.pointerEvents = 'auto';
+                aiChatbot.style.opacity = '1';
+            }
+            
+            // 恢复详情面板
+            const detailView = document.getElementById('detail-view');
+            if (detailView) {
+                detailView.innerHTML = '<div class="no-data">选择一个实体或关系查看详情</div>';
+            }
+            
+            // 恢复所有编辑功能
+            const allEditButtons = document.querySelectorAll('.btn-edit, .btn-save, .btn-cancel, .btn-delete, .btn-copy, .btn-update');
+            allEditButtons.forEach(btn => {
+                btn.disabled = false;
+                btn.style.opacity = '';
+                btn.style.cursor = '';
+            });
+            
+            // 恢复实体描述编辑功能
+            const entityDetailPanel = document.getElementById('entity-detail-panel');
+            if (entityDetailPanel) {
+                const editButtons = entityDetailPanel.querySelectorAll('.btn-edit, .btn-save, .btn-cancel');
+                editButtons.forEach(btn => {
+                    btn.disabled = false;
+                    btn.style.opacity = '';
+                    btn.style.cursor = '';
+                });
+            }
+            
+            // 恢复实体列表编辑功能
+            const entityList = document.getElementById('entity-list');
+            if (entityList) {
+                // 恢复实体列表中的操作按钮
+                const actionButtons = entityList.querySelectorAll('.action-btn');
+                actionButtons.forEach(btn => {
+                    btn.style.pointerEvents = 'auto';
+                    btn.style.opacity = '';
+                    btn.style.cursor = '';
+                    // 恢复原始标题
+                    if (btn.classList.contains('edit-btn')) {
+                        btn.title = '编辑';
+                    } else if (btn.classList.contains('copy-btn')) {
+                        btn.title = '复制';
+                    } else if (btn.classList.contains('delete-btn')) {
+                        btn.title = '删除';
+                    }
+                });
+                
+                // 恢复实体列表中的编辑、复制、删除按钮
+                const editButtons = entityList.querySelectorAll('.edit-btn, .copy-btn, .delete-btn');
+                editButtons.forEach(btn => {
+                    btn.style.pointerEvents = 'auto';
+                    btn.style.opacity = '';
+                    btn.style.cursor = '';
+                    // 恢复原始标题
+                    if (btn.classList.contains('edit-btn')) {
+                        btn.title = '编辑';
+                    } else if (btn.classList.contains('copy-btn')) {
+                        btn.title = '复制';
+                    } else if (btn.classList.contains('delete-btn')) {
+                        btn.title = '删除';
+                    }
+                });
+                
+                // 恢复实体列表项的点击
+                const entityItems = entityList.querySelectorAll('.entity-item');
+                entityItems.forEach(item => {
+                    item.style.pointerEvents = 'auto';
+                    item.style.opacity = '';
+                    item.style.cursor = '';
+                });
+            }
+            
+            // 恢复关系编辑功能
+            const relationEditButtons = document.querySelectorAll('[onclick*="edit"], [onclick*="Edit"]');
+            relationEditButtons.forEach(btn => {
+                btn.disabled = false;
+                btn.style.opacity = '';
+                btn.style.cursor = '';
+            });
+            
+            // 恢复所有编辑输入框
+            const editInputs = document.querySelectorAll('input[type="text"], textarea');
+            editInputs.forEach(input => {
+                if (input.id === 'json-editor') {
+                    return; // 不恢复JSON编辑器，因为它属于数据模式
+                }
+                input.disabled = false;
+                input.style.opacity = '';
+                input.style.cursor = '';
+            });
+            
+            // 恢复所有编辑下拉框
+            const editSelects = document.querySelectorAll('select');
+            editSelects.forEach(select => {
+                select.disabled = false;
+                select.style.opacity = '';
+                select.style.cursor = '';
+            });
+            
+            console.log('右侧面板功能已启用');
+            
+            // 启用左侧面板功能
+            const leftPanel = document.querySelector('.left-panel');
+            if (leftPanel) {
+                const leftPanelInputs = leftPanel.querySelectorAll('input, select, button');
+                leftPanelInputs.forEach(element => {
+                    element.disabled = false;
+                    element.style.opacity = '';
+                    element.style.cursor = '';
+                });
+            }
+        }
+
+        // 模式切换相关变量
+        let currentMode = 'preview'; // 'preview' 或 'data'
+        let originalJsonData = null; // 保存原始数据用于取消编辑
+
+        // 切换到预览模式
+        function switchToPreviewMode() {
+            if (currentMode === 'preview') return;
+            
+            currentMode = 'preview';
+            
+            // 更新按钮状态
+            document.querySelector('.mode-btn.preview').classList.add('active');
+            document.querySelector('.mode-btn.data').classList.remove('active');
+            
+            // 显示预览模式，隐藏数据模式
+            document.getElementById('preview-mode').style.display = 'block';
+            document.getElementById('data-mode').classList.remove('active');
+            
+            // 重新启用右侧面板功能
+            enableRightPanel();
+            
+            // 重新初始化图形
+            if (graphData && graphData.nodes && graphData.nodes.length > 0) {
+                // 确保数据格式正确
+                console.log('切换到预览模式，当前数据:', graphData);
+                initializeGraph();
+            } else {
+                console.log('没有数据，重新加载...');
+                // 如果没有数据，重新加载
+                loadGraphData();
+            }
+        }
+
+        // 切换到数据模式
+        function switchToDataMode() {
+            console.log('切换到数据模式...');
+            
+            if (currentMode === 'data') {
+                console.log('已经在数据模式');
+                return;
+            }
+            
+            currentMode = 'data';
+            console.log('当前模式设置为:', currentMode);
+            
+            // 更新按钮状态
+            const previewBtn = document.querySelector('.mode-btn.preview');
+            const dataBtn = document.querySelector('.mode-btn.data');
+            
+            if (previewBtn) previewBtn.classList.remove('active');
+            if (dataBtn) dataBtn.classList.add('active');
+            
+            // 隐藏预览模式，显示数据模式
+            const previewMode = document.getElementById('preview-mode');
+            const dataMode = document.getElementById('data-mode');
+            
+            if (previewMode) {
+                previewMode.style.display = 'none';
+                console.log('隐藏预览模式');
+            }
+            
+            if (dataMode) {
+                dataMode.classList.add('active');
+                console.log('显示数据模式');
+            } else {
+                console.error('找不到数据模式元素');
+            }
+            
+            // 禁用右侧面板功能
+            disableRightPanel();
+            
+            // 准备JSON数据
+            prepareJsonData();
+            
+            console.log('数据模式切换完成');
+            
+            // 测试按钮是否可见
+            setTimeout(() => {
+                const saveBtn = document.querySelector('.data-btn.save');
+                const cancelBtn = document.querySelector('.data-btn.cancel');
+                const dataControls = document.querySelector('.data-controls');
+                
+                console.log('按钮检查:');
+                console.log('- 保存按钮:', saveBtn);
+                console.log('- 取消按钮:', cancelBtn);
+                console.log('- 按钮容器:', dataControls);
+                
+                if (saveBtn && cancelBtn) {
+                    console.log('按钮已找到，应该可见');
+                } else {
+                    console.error('按钮未找到');
+                }
+            }, 100);
+        }
+
+        // 准备JSON数据用于编辑
+        function prepareJsonData() {
+            console.log('准备JSON数据...');
+            
+            // 获取当前选择的领域
+            const domainSelect = document.getElementById('domain-select');
+            if (!domainSelect) {
+                console.error('找不到领域选择器');
+                return;
+            }
+            
+            const currentDomain = domainSelect.value;
+            console.log('当前选择的领域:', currentDomain);
+            
+            let dataToEdit;
+            
+            if (currentDomain === 'all') {
+                // 如果选择所有领域，使用完整数据
+                dataToEdit = allGraphData;
+                console.log('使用所有领域数据');
+            } else {
+                // 如果选择特定领域，只使用该领域的数据
+                dataToEdit = filteredGraphData;
+                console.log('使用特定领域数据:', currentDomain);
+            }
+            
+            // 确保关系数据格式正确
+            const processedLinks = (dataToEdit.links || []).map(link => {
+                // 如果source或target是对象，提取ID
+                const source = typeof link.source === 'object' ? link.source.id : link.source;
+                const target = typeof link.target === 'object' ? link.target.id : link.target;
+                
+                return {
+                    source: source,
+                    target: target,
+                    type: link.type || '',
+                    description: link.description || '',
+                    id: link.id,
+                    domain: link.domain || 'default'
+                };
+            });
+            
+            const jsonData = {
+                nodes: dataToEdit.nodes || [],
+                links: processedLinks,
+                currentDomain: currentDomain // 添加当前领域信息
+            };
+            
+            // 保存原始数据
+            originalJsonData = JSON.stringify(jsonData, null, 2);
+            
+            // 显示到编辑器
+            document.getElementById('json-editor').value = originalJsonData;
+            
+            // 更新编辑范围信息
+            const editScopeElement = document.getElementById('edit-scope');
+            if (currentDomain === 'all') {
+                editScopeElement.textContent = '所有领域';
+            } else {
+                editScopeElement.textContent = `领域：${currentDomain}`;
+            }
+            
+            console.log('准备的数据:', jsonData);
+            console.log('数据模式准备完成');
+        }
+
+        // 保存JSON数据到数据库
+        async function saveJsonData() {
+            try {
+                console.log('开始保存数据...');
+                
+                const jsonEditor = document.getElementById('json-editor');
+                if (!jsonEditor) {
+                    alert('找不到JSON编辑器');
+                    return;
+                }
+                
+                const jsonText = jsonEditor.value.trim();
+                
+                if (!jsonText) {
+                    alert('请输入有效的JSON数据');
+                    return;
+                }
+                
+                // 验证JSON格式
+                let parsedData;
+                try {
+                    parsedData = JSON.parse(jsonText);
+                } catch (e) {
+                    alert('JSON格式错误，请检查语法');
+                    return;
+                }
+                
+                // 验证数据结构
+                if (!parsedData.nodes || !parsedData.links) {
+                    alert('JSON数据必须包含 nodes 和 links 字段');
+                    return;
+                }
+                
+                // 显示确认对话框
+                const currentDomain = parsedData.currentDomain || 'all';
+                let confirmMessage;
+                if (currentDomain === 'all') {
+                    confirmMessage = `确认要更新所有领域的数据吗？\n\n这将覆盖所有现有的实体和关系数据。\n\n实体数量：${parsedData.nodes.length}\n关系数量：${parsedData.links.length}`;
+                } else {
+                    confirmMessage = `确认要更新领域"${currentDomain}"的数据吗？\n\n这将只更新该领域的实体和关系，其他领域的数据不受影响。\n\n实体数量：${parsedData.nodes.length}\n关系数量：${parsedData.links.length}`;
+                }
+                
+                if (!confirm(confirmMessage)) {
+                    return;
+                }
+                
+                // 显示保存中状态
+                const saveBtn = document.querySelector('.data-btn.save');
+                if (saveBtn) {
+                    saveBtn.textContent = '保存中...';
+                    saveBtn.disabled = true;
+                }
+                
+                // 调用后端API保存数据
+                const requestBody = {
+                    nodes: parsedData.nodes,
+                    links: parsedData.links,
+                    currentDomain: parsedData.currentDomain || 'all'
+                };
+                
+                console.log('发送到后端的数据:', requestBody);
+                
+                const response = await fetch('/api/kg/save-data', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+                
+                if (!response.ok) {
+                    throw new Error('保存失败');
+                }
+                
+                const result = await response.json();
+                
+                if (result.ret === 0) {
+                    alert('数据保存成功！');
+                    
+                    // 重新加载数据以确保格式正确
+                    try {
+                        if (typeof loadGraphData === 'function') {
+                            const loadSuccess = await loadGraphData();
+                            if (loadSuccess) {
+                                // 更新本地数据
+                                if (typeof allGraphData !== 'undefined') {
+                                    allGraphData = { ...graphData };
+                                }
+                                if (typeof filteredGraphData !== 'undefined') {
+                                    filteredGraphData = { ...graphData };
+                                }
+                                
+                                // 更新原始数据
+                                originalJsonData = JSON.stringify(graphData, null, 2);
+                                
+                                // 自动切换到预览模式
+                                switchToPreviewMode();
+                                
+                                // 刷新相关显示
+                                if (typeof updateEntityDropdowns === 'function') {
+                                    updateEntityDropdowns();
+                                }
+                                if (typeof updateRelationTypeDropdown === 'function') {
+                                    updateRelationTypeDropdown();
+                                }
+                                if (typeof renderEntityList === 'function') {
+                                    renderEntityList();
+                                }
+                                
+                                console.log('数据保存并重新加载成功:', graphData);
+                            } else {
+                                throw new Error('重新加载数据失败');
+                            }
+                        } else {
+                            console.log('loadGraphData函数不存在，跳过重新加载');
+                            switchToPreviewMode();
+                        }
+                    } catch (dataError) {
+                        console.error('重新加载数据失败:', dataError);
+                        alert('数据保存成功，但重新加载数据失败，请刷新页面');
+                    }
+                    
+                } else {
+                    throw new Error(result.msg || '保存失败');
+                }
+                
+            } catch (error) {
+                console.error('保存数据失败:', error);
+                alert('保存失败: ' + error.message);
+            } finally {
+                // 恢复按钮状态
+                const saveBtn = document.querySelector('.data-btn.save');
+                if (saveBtn) {
+                    saveBtn.textContent = '保存到数据库';
+                    saveBtn.disabled = false;
+                }
+            }
+        }
+
+        // 取消数据编辑
+        function cancelDataEdit() {
+            try {
+                console.log('取消数据编辑...');
+                
+                const jsonEditor = document.getElementById('json-editor');
+                if (!jsonEditor) {
+                    alert('找不到JSON编辑器');
+                    return;
+                }
+                
+                if (originalJsonData) {
+                    jsonEditor.value = originalJsonData;
+                    alert('已恢复到原始数据');
+                } else {
+                    alert('没有原始数据可恢复');
+                }
+            } catch (error) {
+                console.error('取消编辑失败:', error);
+                alert('取消编辑失败: ' + error.message);
+            }
+        }
     </script>
 </body>
 </html>

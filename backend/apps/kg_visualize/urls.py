@@ -24,4 +24,7 @@ urlpatterns = [
     # AI Chat
     path('kg/ai-chat', views.ai_chat, name='ai_chat'),
     path('kg/clear-all', views.clear_all_data, name='clear_all_data'),
+    
+    # Data Mode
+    path('kg/save-data', views.save_data_mode, name='save_data_mode'),
 ]

@@ -1316,3 +1316,110 @@ def clear_all_data(request):
             "success": False,
             "message": f"清空数据失败: {str(e)}"
         }, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def save_data_mode(request):
+    """保存数据模式编辑的数据"""
+    try:
+        data = json.loads(request.body or b"{}")
+        nodes = data.get("nodes", [])
+        links = data.get("links", [])
+        current_domain = data.get("currentDomain", "all")
+        
+        print(f"接收到的数据 - 实体数量: {len(nodes)}, 关系数量: {len(links)}, 当前领域: {current_domain}")
+        print(f"关系数据示例: {links[:2] if links else '无关系数据'}")
+        
+        if not isinstance(nodes, list) or not isinstance(links, list):
+            return JsonResponse({"ret": 1, "msg": "数据格式错误"})
+        
+        # 根据领域决定更新策略
+        if current_domain == "all":
+            # 更新所有数据
+            print("更新所有领域的数据")
+            Entity.objects.all().delete()
+            Relationship.objects.all().delete()
+        else:
+            # 只更新特定领域的数据
+            print(f"只更新领域 '{current_domain}' 的数据")
+            # 删除该领域的实体和关系
+            Entity.objects.filter(domain=current_domain).delete()
+            Relationship.objects.filter(domain=current_domain).delete()
+        
+        # 保存新数据
+        saved_entities = 0
+        saved_relationships = 0
+        
+        # 保存实体
+        for node in nodes:
+            try:
+                # 如果更新特定领域，确保实体的领域字段正确
+                if current_domain != "all":
+                    node["domain"] = current_domain
+                
+                Entity.objects.create(
+                    id=node.get("id", ""),
+                    name=node.get("name", ""),
+                    type=node.get("type", ""),
+                    description=node.get("description", ""),
+                    domain=node.get("domain", "default")
+                )
+                saved_entities += 1
+                print(f"保存实体成功: {node.get('id')} - {node.get('name')}")
+            except Exception as e:
+                print(f"保存实体失败: {e}")
+                continue
+        
+        # 保存关系
+        for i, link in enumerate(links):
+            try:
+                source_id = link.get("source", "")
+                target_id = link.get("target", "")
+                
+                print(f"处理关系 {i+1}: source={source_id}, target={target_id}, type={link.get('type', '')}")
+                
+                # 确保源实体和目标实体存在
+                source_entity = Entity.objects.filter(id=source_id).first()
+                target_entity = Entity.objects.filter(id=target_id).first()
+                
+                if source_entity and target_entity:
+                    # 如果更新特定领域，确保关系的领域字段正确
+                    if current_domain != "all":
+                        link["domain"] = current_domain
+                    
+                    Relationship.objects.create(
+                        source=source_entity,
+                        target=target_entity,
+                        type=link.get("type", ""),
+                        description=link.get("description", ""),
+                        domain=link.get("domain", "default")
+                    )
+                    saved_relationships += 1
+                    print(f"关系 {i+1} 保存成功")
+                else:
+                    print(f"关系 {i+1} 保存失败: 源实体或目标实体不存在")
+                    if not source_entity:
+                        print(f"  源实体 {source_id} 不存在")
+                    if not target_entity:
+                        print(f"  目标实体 {target_id} 不存在")
+            except Exception as e:
+                print(f"保存关系 {i+1} 失败: {e}")
+                continue
+        
+        return JsonResponse({
+            "ret": 0,
+            "msg": "数据保存成功",
+            "data": {
+                "saved_entities": saved_entities,
+                "saved_relationships": saved_relationships
+            }
+        })
+        
+    except json.JSONDecodeError:
+        return JsonResponse({"ret": 1, "msg": "无效的JSON数据"})
+    except Exception as e:
+        return JsonResponse({
+            "ret": 1,
+            "msg": f"保存数据失败: {str(e)}"
+        }, status=500)
