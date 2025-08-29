@@ -48,6 +48,12 @@ def get_graph_data(request): #获取知识图谱完整数据：实体+关系"""
                     } for r in relations
                 ]
             }
+            
+            # 添加调试信息
+            print(f"后端返回数据 - 领域: {domain}, 实体数: {len(graph_data['nodes'])}, 关系数: {len(graph_data['links'])}")
+            print(f"实体领域分布: {[e.get('domain', 'default') for e in entities]}")
+            print(f"关系领域分布: {[r.get('domain', 'default') for r in relations]}")
+            
             return JsonResponse({"ret": 0, "data": graph_data, "domain": domain})
         except Exception as e:
             return JsonResponse({"ret": 1, "msg": f"Finding data failed: {str(e)}"})

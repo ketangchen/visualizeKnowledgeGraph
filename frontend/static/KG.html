@@ -138,9 +138,11 @@
 
         .data-controls {
             margin-top: 15px;
-            display: flex;
+            display: flex !important;
             gap: 10px;
             justify-content: center;
+            visibility: visible !important;
+            opacity: 1 !important;
         }
 
         .data-btn {
@@ -220,6 +222,56 @@
         .swap-icon {
             font-size: 14px;
             margin-right: 4px;
+        }
+
+        /* 简化的JSON编辑器样式 */
+        .simple-json-editor {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            outline: none;
+            resize: vertical;
+            min-height: 400px;
+            background: #fafafa;
+            color: #333;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .simple-json-editor:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+            background: #fff;
+        }
+
+        /* 自定义领域提示样式 */
+        .custom-domain-info {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+
+        .custom-domain-info::before {
+            content: "💡 ";
+            margin-right: 5px;
+        }
+
+        /* 自定义选项样式（领域和关系类型） */
+        .dropdown-item[style*="color: #2e7d32"] {
+            background: #f1f8e9;
+            border-left: 3px solid #2e7d32;
+            font-weight: 500;
+        }
+
+        .dropdown-item[style*="color: #2e7d32"]:hover {
+            background: #e8f5e8;
         }
 
         .domain-info-disabled {
@@ -1691,9 +1743,15 @@
                     <strong>当前编辑范围：</strong><span id="edit-scope">所有领域</span><br>
                     <small style="color: #666; margin-top: 5px; display: block;">💡 数据模式下领域筛选功能已禁用，编辑范围基于进入数据模式时的领域选择</small>
                 </div>
-                <textarea id="json-editor" class="json-editor" placeholder="JSON数据将在这里显示..."></textarea>
-                <div class="data-controls" style="margin-top: 20px; padding: 10px; background: #e8f5e8; border-radius: 4px;">
-                    <button class="data-btn save" onclick="saveJsonData()" style="margin-right: 10px;">保存到数据库</button>
+                <div id="custom-domain-tip" class="custom-domain-info" style="display: none;">
+                    检测到自定义领域，可以生成初始化数据作为起点，或直接编辑空白数据。
+                </div>
+                
+                <!-- 简化的JSON编辑器 -->
+                <textarea id="json-editor" class="simple-json-editor" placeholder="JSON数据将在这里显示..."></textarea>
+                
+                <div class="data-controls">
+                    <button class="data-btn save" onclick="saveJsonData()">保存到数据库</button>
                     <button class="data-btn cancel" onclick="cancelDataEdit()">取消编辑</button>
                 </div>
             </div>
@@ -1862,7 +1920,21 @@
                     domain: link.domain || 'default'
                 }));
                 
-                console.log('从后端加载数据成功:', graphData);
+                // 同时更新 allGraphData 和 filteredGraphData
+                allGraphData = {
+                    nodes: [...graphData.nodes],
+                    links: [...graphData.links]
+                };
+                filteredGraphData = {
+                    nodes: [...graphData.nodes],
+                    links: [...graphData.links]
+                };
+                
+                console.log('从后端加载数据成功:', {
+                    graphData: graphData,
+                    allGraphData: allGraphData,
+                    domains: [...new Set(graphData.nodes.map(n => n.domain))]
+                });
                 return true;
             } catch (error) {
                 console.error('加载数据失败:', error);
@@ -2080,9 +2152,24 @@
                 };
             }
 
-            // 初始化数据存储
-            allGraphData = { ...graphData };
-            filteredGraphData = { ...graphData };
+            // 如果从后端加载数据失败，则初始化数据存储
+            if (!loadSuccess) {
+                allGraphData = { 
+                    nodes: [...graphData.nodes], 
+                    links: [...graphData.links] 
+                };
+                filteredGraphData = { 
+                    nodes: [...graphData.nodes], 
+                    links: [...graphData.links] 
+                };
+                
+                console.log('使用默认数据初始化数据存储:', {
+                    allGraphData: allGraphData,
+                    graphData: graphData
+                });
+            } else {
+                console.log('使用后端数据，数据存储已在 loadGraphData 中完成');
+            }
 
             // 初始化已使用的关系类型集合
             updateUsedRelationTypes();
@@ -2107,13 +2194,28 @@
             aiSwitch.classList.add('active');
             aiSwitchText.textContent = '外部';
             
+            // 设置JSON编辑器快捷键
+            setupJsonEditorShortcuts();
+            
             console.log('系统初始化完成');
+            console.log('初始化后的数据状态:', {
+                graphData: {
+                    nodes: graphData.nodes.length,
+                    links: graphData.links.length,
+                    domains: [...new Set(graphData.nodes.map(n => n.domain))]
+                },
+                allGraphData: {
+                    nodes: allGraphData.nodes.length,
+                    links: allGraphData.links.length,
+                    domains: [...new Set(allGraphData.nodes.map(n => n.domain))]
+                }
+            });
         }
 
         // 初始化领域选择器
         function initializeDomainSelector() {
             // 更新领域下拉框
-            updateDomainDropdown();
+            updateDomainDropdown(null, '');
             
             // 更新领域信息显示
             updateDomainInfo();
@@ -2126,7 +2228,7 @@
             domainSelectDisplay.addEventListener('input', () => {
                 const inputValue = domainSelectDisplay.value.trim();
                 const filtered = filterDomains(inputValue);
-                updateDomainDropdown(filtered);
+                updateDomainDropdown(filtered, inputValue);
                 domainDropdown.classList.add('visible');
             });
 
@@ -2136,6 +2238,9 @@
                 if (inputValue) {
                     domainSelect.value = inputValue;
                     currentDomain = inputValue;
+                    // 如果是自定义领域，更新数据筛选
+                    filterDataByDomain();
+                    updateDomainInfo();
                     setTimeout(() => {
                         domainDropdown.classList.remove('visible');
                     }, 200);
@@ -2152,14 +2257,34 @@
 
         // 根据领域筛选数据
         function filterDataByDomain() {
+            console.log('开始领域筛选，当前领域:', currentDomain);
+            console.log('allGraphData 包含:', {
+                nodes: allGraphData.nodes.length,
+                links: allGraphData.links.length,
+                domains: [...new Set(allGraphData.nodes.map(n => n.domain))]
+            });
+            
             if (currentDomain === 'all') {
                 // 显示所有数据
                 filteredGraphData = { ...allGraphData };
+                console.log('选择所有领域，显示所有数据');
             } else {
-                // 筛选指定领域的实体
+                // 筛选指定领域的实体和关系
                 const filteredNodes = allGraphData.nodes.filter(node => 
                     node.domain === currentDomain
                 );
+                
+                const filteredLinks = allGraphData.links.filter(link => 
+                    link.domain === currentDomain
+                );
+                
+                console.log(`筛选领域 "${currentDomain}" 的数据:`, {
+                    totalNodes: allGraphData.nodes.length,
+                    totalLinks: allGraphData.links.length,
+                    filteredNodes: filteredNodes.length,
+                    filteredLinks: filteredLinks.length,
+                    filteredNodeIds: filteredNodes.map(n => n.id)
+                });
                 
                 // 获取筛选出的实体的ID集合
                 const filteredNodeIds = new Set(filteredNodes.map(node => node.id));
@@ -2167,16 +2292,12 @@
                 // 找到所有与筛选实体有关系的实体ID
                 const relatedNodeIds = new Set(filteredNodeIds);
                 
-                // 遍历所有关系，找到与筛选实体相关的所有实体
-                allGraphData.links.forEach(link => {
+                // 遍历筛选出的关系，找到相关的所有实体
+                filteredLinks.forEach(link => {
                     const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
                     const targetId = typeof link.target === 'object' ? link.target.id : link.target;
-                    
-                    // 如果关系的源实体或目标实体在筛选结果中，则包含整个关系
-                    if (filteredNodeIds.has(sourceId) || filteredNodeIds.has(targetId)) {
-                        relatedNodeIds.add(sourceId);
-                        relatedNodeIds.add(targetId);
-                    }
+                    relatedNodeIds.add(sourceId);
+                    relatedNodeIds.add(targetId);
                 });
                 
                 // 获取所有相关实体
@@ -2184,11 +2305,17 @@
                     relatedNodeIds.has(node.id)
                 );
                 
-                // 获取所有相关关系
+                // 获取所有相关关系（包括跨领域的关系）
                 const allRelatedLinks = allGraphData.links.filter(link => {
                     const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
                     const targetId = typeof link.target === 'object' ? link.target.id : link.target;
                     return relatedNodeIds.has(sourceId) && relatedNodeIds.has(targetId);
+                });
+                
+                console.log('筛选结果:', {
+                    relatedNodes: allRelatedNodes.length,
+                    relatedLinks: allRelatedLinks.length,
+                    relatedNodeIds: Array.from(relatedNodeIds)
                 });
                 
                 filteredGraphData = {
@@ -2213,9 +2340,6 @@
             detailView.innerHTML = '<div class="no-data">选择一个实体或关系查看详情</div>';
             resetSearchState();
             
-            // 更新领域下拉框
-            updateDomainDropdown();
-            
             console.log(`领域筛选完成：${currentDomain}，实体数：${graphData.nodes.length}，关系数：${graphData.links.length}`);
         }
 
@@ -2223,21 +2347,27 @@
         function getAvailableDomains() {
             const domains = new Set();
             
-            // 从实体中获取领域
-            graphData.nodes.forEach(node => {
-                if (node.domain) {
-                    domains.add(node.domain);
-                }
-            });
+            // 从 allGraphData 中获取领域（包含所有数据）
+            if (allGraphData && allGraphData.nodes) {
+                allGraphData.nodes.forEach(node => {
+                    if (node.domain) {
+                        domains.add(node.domain);
+                    }
+                });
+            }
             
-            // 从关系中获取领域
-            graphData.links.forEach(link => {
-                if (link.domain) {
-                    domains.add(link.domain);
-                }
-            });
+            // 从 allGraphData 的关系中获取领域
+            if (allGraphData && allGraphData.links) {
+                allGraphData.links.forEach(link => {
+                    if (link.domain) {
+                        domains.add(link.domain);
+                    }
+                });
+            }
             
-            return Array.from(domains).sort();
+            const domainList = Array.from(domains).sort();
+            console.log('获取可用领域:', domainList);
+            return domainList;
         }
 
         // 过滤领域
@@ -2255,20 +2385,10 @@
         }
 
         // 更新领域下拉框
-        function updateDomainDropdown(filteredDomains = null) {
+        function updateDomainDropdown(filteredDomains = null, inputValue = '') {
             domainDropdown.innerHTML = '';
 
             const domains = filteredDomains || getAvailableDomains();
-
-            if (domains.length === 0) {
-                const emptyItem = document.createElement('div');
-                emptyItem.className = 'dropdown-item';
-                emptyItem.textContent = '暂无领域数据';
-                emptyItem.style.cursor = 'default';
-                emptyItem.style.opacity = '0.7';
-                domainDropdown.appendChild(emptyItem);
-                return;
-            }
 
             // 添加"所有领域"选项
             const allItem = document.createElement('div');
@@ -2285,24 +2405,55 @@
             });
             domainDropdown.appendChild(allItem);
 
-            // 添加领域选项
-            domains.forEach(domain => {
-                const item = document.createElement('div');
-                item.className = 'dropdown-item';
-                item.textContent = domain;
-                item.dataset.domain = domain;
+            // 1. 若输入不为空且不在现有领域中，添加"自定义"选项
+            if (inputValue && inputValue.trim() && !domains.includes(inputValue.trim()) && inputValue.trim() !== '所有领域') {
+                const customItem = document.createElement('div');
+                customItem.className = 'dropdown-item';
+                customItem.textContent = `自定义: ${inputValue.trim()}`;
+                customItem.dataset.domain = inputValue.trim();
+                customItem.style.color = '#2e7d32'; // 高亮自定义选项
 
-                item.addEventListener('click', () => {
-                    domainSelect.value = domain;
-                    domainSelectDisplay.value = domain;
-                    currentDomain = domain;
+                customItem.addEventListener('click', () => {
+                    domainSelect.value = inputValue.trim();
+                    domainSelectDisplay.value = inputValue.trim();
+                    currentDomain = inputValue.trim();
                     filterDataByDomain();
                     updateDomainInfo();
                     domainDropdown.classList.remove('visible');
                 });
 
-                domainDropdown.appendChild(item);
-            });
+                domainDropdown.appendChild(customItem);
+            }
+
+            // 2. 添加过滤后的现有领域选项
+            if (domains.length === 0 && !inputValue) {
+                const emptyItem = document.createElement('div');
+                emptyItem.className = 'dropdown-item';
+                emptyItem.textContent = '暂无领域数据';
+                emptyItem.style.cursor = 'default';
+                emptyItem.style.opacity = '0.7';
+                domainDropdown.appendChild(emptyItem);
+            } else {
+                domains.forEach(domain => {
+                    const item = document.createElement('div');
+                    item.className = 'dropdown-item';
+                    item.textContent = domain;
+                    item.dataset.domain = domain;
+
+                                    item.addEventListener('click', () => {
+                    console.log('点击领域选项:', domain);
+                    domainSelect.value = domain;
+                    domainSelectDisplay.value = domain;
+                    currentDomain = domain;
+                    console.log('设置当前领域为:', currentDomain);
+                    filterDataByDomain();
+                    updateDomainInfo();
+                    domainDropdown.classList.remove('visible');
+                });
+
+                    domainDropdown.appendChild(item);
+                });
+            }
         }
 
         // 更新领域信息显示
@@ -2463,8 +2614,8 @@
                         populateDefaultEntityValues();
                         // 更新领域信息显示
                         updateDomainInfo();
-                        // 更新领域下拉框
-                        updateDomainDropdown();
+                                    // 更新领域下拉框
+            updateDomainDropdown(null, '');
                         alert(`数据导入成功！共导入 ${graphData.nodes.length} 个实体和 ${graphData.links.length} 个关系`);
                     } else {
                         alert('数据导入失败，请检查网络连接');
@@ -2905,7 +3056,7 @@
             updateUsedRelationTypes();
             updateRelationTypeDropdown();
             updateDomainInfo();
-            updateDomainDropdown();
+            updateDomainDropdown(null, '');
             
             // 重新渲染图表（保持当前视图）
             reloadGraph();
@@ -5719,6 +5870,135 @@
             targetDisplay.dispatchEvent(new Event('input'));
         }
 
+        // 强制刷新数据并更新显示
+        async function forceRefreshData() {
+            console.log('强制刷新数据...');
+            
+            try {
+                // 重新加载数据
+                const loadSuccess = await loadGraphData();
+                if (loadSuccess) {
+                    console.log('数据刷新成功');
+                    
+                    // 更新界面
+                    updateEntityDropdowns();
+                    updateRelationTypeDropdown();
+                    renderEntityList();
+                    reloadGraph();
+                    
+                    // 更新领域信息
+                    updateDomainInfo();
+                    
+                    console.log('界面更新完成');
+                    return true;
+                } else {
+                    console.error('数据刷新失败');
+                    return false;
+                }
+            } catch (error) {
+                console.error('强制刷新数据时出错:', error);
+                return false;
+            }
+        }
+
+        // 更新领域选择器，添加新的自定义领域
+        function updateDomainSelectorWithCustom(domainName) {
+            console.log('更新领域选择器，添加自定义领域:', domainName);
+            
+            // 更新领域下拉框
+            if (typeof updateDomainDropdown === 'function') {
+                updateDomainDropdown(null, '');
+            }
+            
+            // 更新领域信息显示
+            if (typeof updateDomainInfo === 'function') {
+                updateDomainInfo();
+            }
+            
+            // 如果当前选择的是这个自定义领域，更新显示
+            const domainSelect = document.getElementById('domain-select');
+            const domainSelectDisplay = document.getElementById('domain-select-display');
+            
+            if (domainSelect && domainSelect.value === domainName) {
+                if (domainSelectDisplay) {
+                    domainSelectDisplay.value = domainName;
+                }
+            }
+            
+            console.log('领域选择器更新完成');
+        }
+
+        // 测试数据加载和显示
+        function testDataLoading() {
+            console.log('=== 数据加载测试 ===');
+            console.log('graphData:', {
+                nodes: graphData.nodes.length,
+                links: graphData.links.length,
+                domains: [...new Set(graphData.nodes.map(n => n.domain))]
+            });
+            console.log('allGraphData:', {
+                nodes: allGraphData.nodes.length,
+                links: allGraphData.links.length,
+                domains: [...new Set(allGraphData.nodes.map(n => n.domain))]
+            });
+            console.log('filteredGraphData:', {
+                nodes: filteredGraphData.nodes.length,
+                links: filteredGraphData.links.length,
+                domains: [...new Set(filteredGraphData.nodes.map(n => n.domain))]
+            });
+            console.log('currentDomain:', currentDomain);
+            console.log('=== 测试完成 ===');
+        }
+
+        // 测试特定领域的数据筛选
+        function testDomainFilter(domainName) {
+            console.log(`=== 测试领域筛选: ${domainName} ===`);
+            
+            // 检查 allGraphData 中是否有该领域的数据
+            const domainNodes = allGraphData.nodes.filter(n => n.domain === domainName);
+            const domainLinks = allGraphData.links.filter(l => l.domain === domainName);
+            
+            console.log('该领域的数据:', {
+                nodes: domainNodes.length,
+                links: domainLinks.length,
+                nodeIds: domainNodes.map(n => n.id),
+                linkInfo: domainLinks.map(l => ({
+                    source: typeof l.source === 'object' ? l.source.id : l.source,
+                    target: typeof l.target === 'object' ? l.target.id : l.target,
+                    type: l.type
+                }))
+            });
+            
+            // 模拟筛选过程
+            const filteredNodeIds = new Set(domainNodes.map(n => n.id));
+            const relatedNodeIds = new Set(filteredNodeIds);
+            
+            domainLinks.forEach(link => {
+                const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
+                const targetId = typeof link.target === 'object' ? link.target.id : link.target;
+                relatedNodeIds.add(sourceId);
+                relatedNodeIds.add(targetId);
+            });
+            
+            const allRelatedNodes = allGraphData.nodes.filter(node => 
+                relatedNodeIds.has(node.id)
+            );
+            
+            const allRelatedLinks = allGraphData.links.filter(link => {
+                const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
+                const targetId = typeof link.target === 'object' ? link.target.id : link.target;
+                return relatedNodeIds.has(sourceId) && relatedNodeIds.has(targetId);
+            });
+            
+            console.log('筛选结果:', {
+                relatedNodes: allRelatedNodes.length,
+                relatedLinks: allRelatedLinks.length,
+                relatedNodeIds: Array.from(relatedNodeIds)
+            });
+            
+            console.log('=== 筛选测试完成 ===');
+        }
+
         // 全局函数，用于AI聊天
         window.toggleAIChat = toggleAIChat;
         window.handleAIKeyPress = handleAIKeyPress;
@@ -5729,6 +6009,287 @@
         window.saveJsonData = saveJsonData;
         window.cancelDataEdit = cancelDataEdit;
         window.swapEntities = swapEntities;
+        
+        // 导出JSON编辑器相关函数
+        window.parseAndRenderJson = parseAndRenderJson;
+
+        window.testDataLoading = testDataLoading;
+        window.testDomainFilter = testDomainFilter;
+
+        // 简化的JSON编辑器功能
+        let jsonData = null;
+
+        // 简化的JSON处理
+        function parseAndRenderJson(jsonString) {
+            try {
+                jsonData = JSON.parse(jsonString);
+                const jsonEditor = document.getElementById('json-editor');
+                if (jsonEditor) {
+                    jsonEditor.value = JSON.stringify(jsonData, null, 2);
+                }
+            } catch (error) {
+                console.error('JSON解析错误:', error);
+                alert('JSON格式错误: ' + error.message);
+            }
+        }
+
+
+
+        // 滚动到底部
+        function scrollToBottom() {
+            const contentDiv = document.getElementById('json-content');
+            const lineNumbersDiv = document.getElementById('line-numbers');
+            const jsonEditor = document.getElementById('json-editor');
+            
+            if (contentDiv && contentDiv.style.display !== 'none') {
+                contentDiv.scrollTop = contentDiv.scrollHeight;
+            }
+            if (lineNumbersDiv && lineNumbersDiv.style.display !== 'none') {
+                lineNumbersDiv.scrollTop = lineNumbersDiv.scrollHeight;
+            }
+            if (jsonEditor && jsonEditor.style.display !== 'none') {
+                jsonEditor.scrollTop = jsonEditor.scrollHeight;
+            }
+        }
+
+        // JSON搜索功能
+        function searchInJson(query) {
+            const searchCount = document.getElementById('search-count');
+            
+            if (!searchCount) return;
+            
+            // 清除之前的搜索高亮
+            clearSearchHighlights();
+            
+            if (!query.trim()) {
+                searchCount.textContent = '';
+                return;
+            }
+            
+            const contentDiv = document.getElementById('json-content');
+            if (!contentDiv) return;
+            
+            const text = contentDiv.textContent;
+            const regex = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+            const matches = [];
+            let match;
+            
+            while ((match = regex.exec(text)) !== null) {
+                matches.push({
+                    index: match.index,
+                    length: match[0].length,
+                    text: match[0]
+                });
+            }
+            
+            jsonSearchResults = matches;
+            currentJsonSearchIndex = -1;
+            
+            if (matches.length > 0) {
+                searchCount.textContent = `${matches.length} 个结果`;
+                highlightSearchResults();
+                navigateToNextMatch();
+            } else {
+                searchCount.textContent = '无结果';
+            }
+        }
+
+        // 清除搜索高亮
+        function clearSearchHighlights() {
+            const highlights = document.querySelectorAll('.search-highlight');
+            highlights.forEach(highlight => {
+                const parent = highlight.parentNode;
+                parent.replaceChild(document.createTextNode(highlight.textContent), highlight);
+                parent.normalize();
+            });
+        }
+
+        // 高亮搜索结果
+        function highlightSearchResults() {
+            const contentDiv = document.getElementById('json-content');
+            if (!contentDiv || jsonSearchResults.length === 0) return;
+            
+            const text = contentDiv.textContent;
+            let highlightedText = text;
+            let offset = 0;
+            
+            jsonSearchResults.forEach((match, index) => {
+                const start = match.index + offset;
+                const end = start + match.length;
+                
+                const before = highlightedText.substring(0, start);
+                const after = highlightedText.substring(end);
+                const highlighted = `<span class="search-highlight" data-index="${index}">${match.text}</span>`;
+                
+                highlightedText = before + highlighted + after;
+                offset += highlighted.length - match.text.length;
+            });
+            
+            // 创建临时显示层
+            const container = contentDiv.parentElement;
+            const highlightDiv = document.createElement('div');
+            highlightDiv.className = 'json-highlight-display';
+            highlightDiv.style.cssText = `
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: transparent;
+                pointer-events: none;
+                font-family: inherit;
+                font-size: inherit;
+                line-height: inherit;
+                padding: inherit;
+                white-space: pre-wrap;
+                word-wrap: break-word;
+                overflow: hidden;
+                z-index: 1;
+            `;
+            highlightDiv.innerHTML = highlightedText;
+            
+            // 移除之前的显示
+            const existingDisplay = container.querySelector('.json-highlight-display');
+            if (existingDisplay) {
+                existingDisplay.remove();
+            }
+            
+            container.appendChild(highlightDiv);
+        }
+
+        // 导航到下一个匹配项
+        function navigateToNextMatch() {
+            if (jsonSearchResults.length === 0) return;
+            
+            currentJsonSearchIndex = (currentJsonSearchIndex + 1) % jsonSearchResults.length;
+            const match = jsonSearchResults[currentJsonSearchIndex];
+            const searchCount = document.getElementById('search-count');
+            
+            if (searchCount) {
+                searchCount.textContent = `${currentJsonSearchIndex + 1}/${jsonSearchResults.length}`;
+            }
+            
+            // 滚动到匹配项
+            const contentDiv = document.getElementById('json-content');
+            if (contentDiv) {
+                const text = contentDiv.textContent;
+                const beforeMatch = text.substring(0, match.index);
+                const lines = beforeMatch.split('\n');
+                const lineNumber = lines.length - 1;
+                const lineHeight = 20;
+                const scrollTop = lineNumber * lineHeight;
+                
+                contentDiv.scrollTop = Math.max(0, scrollTop - 100);
+            }
+            
+            // 高亮当前匹配项
+            const currentHighlight = document.querySelector('.search-highlight.current');
+            if (currentHighlight) {
+                currentHighlight.classList.remove('current');
+            }
+            
+            const highlights = document.querySelectorAll('.search-highlight');
+            if (highlights[currentJsonSearchIndex]) {
+                highlights[currentJsonSearchIndex].classList.add('current');
+            }
+        }
+
+        // 键盘快捷键
+        function setupJsonEditorShortcuts() {
+            const searchInput = document.getElementById('json-search');
+            if (searchInput) {
+                searchInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (e.shiftKey) {
+                            // Shift+Enter: 上一个匹配项
+                            if (jsonSearchResults.length > 0) {
+                                currentJsonSearchIndex = currentJsonSearchIndex <= 0 ? jsonSearchResults.length - 1 : currentJsonSearchIndex - 1;
+                                const match = jsonSearchResults[currentJsonSearchIndex];
+                                navigateToMatch(match);
+                                
+                                const searchCount = document.getElementById('search-count');
+                                if (searchCount) {
+                                    searchCount.textContent = `${currentJsonSearchIndex + 1}/${jsonSearchResults.length}`;
+                                }
+                            }
+                        } else {
+                            // Enter: 下一个匹配项
+                            navigateToNextMatch();
+                        }
+                    }
+                });
+            }
+        }
+
+        // 导航到指定匹配项
+        function navigateToMatch(match) {
+            const contentDiv = document.getElementById('json-content');
+            if (contentDiv) {
+                const text = contentDiv.textContent;
+                const beforeMatch = text.substring(0, match.index);
+                const lines = beforeMatch.split('\n');
+                const lineNumber = lines.length - 1;
+                const lineHeight = 20;
+                const scrollTop = lineNumber * lineHeight;
+                
+                contentDiv.scrollTop = Math.max(0, scrollTop - 100);
+            }
+            
+            // 高亮当前匹配项
+            const currentHighlight = document.querySelector('.search-highlight.current');
+            if (currentHighlight) {
+                currentHighlight.classList.remove('current');
+            }
+            
+            const highlights = document.querySelectorAll('.search-highlight');
+            if (highlights[currentJsonSearchIndex]) {
+                highlights[currentJsonSearchIndex].classList.add('current');
+            }
+        }
+
+        // 切换编辑模式
+        function toggleEditMode() {
+            const jsonEditor = document.getElementById('json-editor');
+            const jsonContent = document.getElementById('json-content');
+            const lineNumbers = document.getElementById('line-numbers');
+            const editBtn = document.querySelector('.toolbar-btn[onclick="toggleEditMode()"]');
+            
+            if (!jsonEditor || !jsonContent || !lineNumbers) return;
+            
+            if (jsonEditor.style.display === 'none') {
+                // 切换到编辑模式
+                jsonEditor.style.display = 'block';
+                jsonContent.style.display = 'none';
+                lineNumbers.style.display = 'none';
+                editBtn.textContent = '👁️ 预览';
+                editBtn.title = '切换到预览模式';
+                
+                // 同步数据到textarea
+                if (jsonData) {
+                    jsonEditor.value = JSON.stringify(jsonData, null, 2);
+                }
+            } else {
+                // 切换到预览模式
+                jsonEditor.style.display = 'none';
+                jsonContent.style.display = 'block';
+                lineNumbers.style.display = 'block';
+                editBtn.textContent = '✏️ 编辑';
+                editBtn.title = '切换到编辑模式';
+                
+                // 从textarea同步数据并重新渲染
+                try {
+                    const newData = JSON.parse(jsonEditor.value);
+                    jsonData = newData;
+                    parseAndRenderJson(jsonEditor.value);
+                } catch (error) {
+                    alert('JSON格式错误，无法切换到预览模式');
+                    return;
+                }
+            }
+        }
+
+
 
         // 禁用右侧面板功能
         function disableRightPanel() {
@@ -5782,6 +6343,13 @@
                 searchType.disabled = true;
             }
             
+            // 不禁用JSON编辑器搜索功能 - 数据编辑器功能应该保持可用
+            // const jsonSearchInput = document.getElementById('json-search');
+            // if (jsonSearchInput) {
+            //     jsonSearchInput.disabled = true;
+            //     jsonSearchInput.placeholder = '数据模式下搜索功能已禁用';
+            // }
+            
             // 禁用AI聊天功能
             const aiChatbot = document.querySelector('.ai-chatbot');
             if (aiChatbot) {
@@ -5795,12 +6363,12 @@
                 detailView.innerHTML = '<div class="no-data">数据模式下详情查看已禁用</div>';
             }
             
-            // 禁用所有编辑功能
+            // 禁用所有编辑功能，但保留JSON编辑器和数据模式相关功能
             const allEditButtons = document.querySelectorAll('.btn-edit, .btn-save, .btn-cancel, .btn-delete, .btn-copy, .btn-update');
             allEditButtons.forEach(btn => {
-                // 检查按钮是否属于数据模式相关功能
-                if (btn.closest('.data-controls') || btn.closest('.mode-switcher')) {
-                    return; // 不禁用数据模式相关的按钮
+                // 检查按钮是否属于数据模式相关功能或JSON编辑器功能
+                if (btn.closest('.data-controls') || btn.closest('.mode-switcher') || btn.closest('.json-editor-toolbar') || btn.closest('.json-editor-container')) {
+                    return; // 不禁用数据模式相关的按钮和JSON编辑器按钮
                 }
                 btn.disabled = true;
                 btn.style.opacity = '0.5';
@@ -6067,6 +6635,13 @@
                 searchType.disabled = false;
             }
             
+            // JSON编辑器搜索功能始终保持可用，无需恢复
+            // const jsonSearchInput = document.getElementById('json-search');
+            // if (jsonSearchInput) {
+            //     jsonSearchInput.disabled = false;
+            //     jsonSearchInput.placeholder = '搜索JSON内容...';
+            // }
+            
             // 启用AI聊天功能
             const aiChatbot = document.querySelector('.ai-chatbot');
             if (aiChatbot) {
@@ -6259,24 +6834,112 @@
             prepareJsonData();
             
             console.log('数据模式切换完成');
+        }
+
+        // 生成自定义领域的初始化数据
+        function generateCustomDomainData(domainName) {
+            console.log('为自定义领域生成初始化数据:', domainName);
             
-            // 测试按钮是否可见
-            setTimeout(() => {
-                const saveBtn = document.querySelector('.data-btn.save');
-                const cancelBtn = document.querySelector('.data-btn.cancel');
-                const dataControls = document.querySelector('.data-controls');
-                
-                console.log('按钮检查:');
-                console.log('- 保存按钮:', saveBtn);
-                console.log('- 取消按钮:', cancelBtn);
-                console.log('- 按钮容器:', dataControls);
-                
-                if (saveBtn && cancelBtn) {
-                    console.log('按钮已找到，应该可见');
-                } else {
-                    console.error('按钮未找到');
-                }
-            }, 100);
+            // 生成时间戳作为ID前缀
+            const timestamp = Date.now();
+            
+            // 根据领域名称生成相关的实体和关系
+            const sampleData = {
+                nodes: [
+                    {
+                        id: `${timestamp}_1`,
+                        name: `${domainName}核心概念`,
+                        description: `${domainName}领域的基础核心概念`,
+                        domain: domainName
+                    },
+                    {
+                        id: `${timestamp}_2`,
+                        name: `${domainName}主要技术`,
+                        description: `${domainName}领域的主要技术方法`,
+                        domain: domainName
+                    },
+                    {
+                        id: `${timestamp}_3`,
+                        name: `${domainName}应用场景`,
+                        description: `${domainName}领域的典型应用场景`,
+                        domain: domainName
+                    },
+                    {
+                        id: `${timestamp}_4`,
+                        name: `${domainName}发展趋势`,
+                        description: `${domainName}领域的发展趋势和前景`,
+                        domain: domainName
+                    },
+                    {
+                        id: `${timestamp}_5`,
+                        name: `${domainName}相关工具`,
+                        description: `${domainName}领域常用的工具和平台`,
+                        domain: domainName
+                    }
+                ],
+                links: [
+                    {
+                        source: `${timestamp}_1`,
+                        target: `${timestamp}_2`,
+                        type: "支撑",
+                        description: "核心概念支撑主要技术",
+                        domain: domainName
+                    },
+                    {
+                        source: `${timestamp}_2`,
+                        target: `${timestamp}_3`,
+                        type: "应用",
+                        description: "主要技术应用于具体场景",
+                        domain: domainName
+                    },
+                    {
+                        source: `${timestamp}_3`,
+                        target: `${timestamp}_4`,
+                        type: "影响",
+                        description: "应用场景影响发展趋势",
+                        domain: domainName
+                    },
+                    {
+                        source: `${timestamp}_1`,
+                        target: `${timestamp}_5`,
+                        type: "需要",
+                        description: "核心概念需要相关工具支持",
+                        domain: domainName
+                    },
+                    {
+                        source: `${timestamp}_2`,
+                        target: `${timestamp}_5`,
+                        type: "使用",
+                        description: "主要技术使用相关工具",
+                        domain: domainName
+                    }
+                ]
+            };
+            
+            console.log('生成的初始化数据:', sampleData);
+            return sampleData;
+        }
+
+        // 检查是否为自定义领域
+        function isCustomDomain(domainName) {
+            // 获取所有现有领域
+            const existingDomains = new Set();
+            if (allGraphData && allGraphData.nodes) {
+                allGraphData.nodes.forEach(node => {
+                    if (node.domain) {
+                        existingDomains.add(node.domain);
+                    }
+                });
+            }
+            
+            console.log('检查自定义领域:', {
+                domainName: domainName,
+                existingDomains: Array.from(existingDomains),
+                isCustom: domainName !== 'all' && !existingDomains.has(domainName)
+            });
+            
+            // 如果领域名称不在现有领域中，且不是"all"，则认为是自定义领域
+            return domainName !== 'all' && !existingDomains.has(domainName);
         }
 
         // 准备JSON数据用于编辑
@@ -6299,6 +6962,10 @@
                 // 如果选择所有领域，使用完整数据
                 dataToEdit = allGraphData;
                 console.log('使用所有领域数据');
+            } else if (isCustomDomain(currentDomain)) {
+                // 如果是自定义领域，生成初始化数据
+                console.log('检测到自定义领域，自动生成初始化数据');
+                dataToEdit = generateCustomDomainData(currentDomain);
             } else {
                 // 如果选择特定领域，只使用该领域的数据
                 dataToEdit = filteredGraphData;
@@ -6331,14 +6998,24 @@
             originalJsonData = JSON.stringify(jsonData, null, 2);
             
             // 显示到编辑器
-            document.getElementById('json-editor').value = originalJsonData;
+            const jsonEditor = document.getElementById('json-editor');
+            if (jsonEditor) {
+                jsonEditor.value = originalJsonData;
+            }
             
             // 更新编辑范围信息
             const editScopeElement = document.getElementById('edit-scope');
+            const customDomainTip = document.getElementById('custom-domain-tip');
+            
             if (currentDomain === 'all') {
                 editScopeElement.textContent = '所有领域';
+                if (customDomainTip) customDomainTip.style.display = 'none';
+            } else if (isCustomDomain(currentDomain)) {
+                editScopeElement.textContent = `新领域：${currentDomain}`;
+                if (customDomainTip) customDomainTip.style.display = 'block';
             } else {
                 editScopeElement.textContent = `领域：${currentDomain}`;
+                if (customDomainTip) customDomainTip.style.display = 'none';
             }
             
             console.log('准备的数据:', jsonData);
@@ -6383,6 +7060,8 @@
                 let confirmMessage;
                 if (currentDomain === 'all') {
                     confirmMessage = `确认要更新所有领域的数据吗？\n\n这将覆盖所有现有的实体和关系数据。\n\n实体数量：${parsedData.nodes.length}\n关系数量：${parsedData.links.length}`;
+                } else if (isCustomDomain(currentDomain)) {
+                    confirmMessage = `确认要创建新领域"${currentDomain}"的数据吗？\n\n这将创建新的实体和关系，不会影响其他领域的数据。\n\n实体数量：${parsedData.nodes.length}\n关系数量：${parsedData.links.length}`;
                 } else {
                     confirmMessage = `确认要更新领域"${currentDomain}"的数据吗？\n\n这将只更新该领域的实体和关系，其他领域的数据不受影响。\n\n实体数量：${parsedData.nodes.length}\n关系数量：${parsedData.links.length}`;
                 }
@@ -6424,47 +7103,26 @@
                 if (result.ret === 0) {
                     alert('数据保存成功！');
                     
-                    // 重新加载数据以确保格式正确
+                    // 强制刷新数据并更新显示
                     try {
-                        if (typeof loadGraphData === 'function') {
-                            const loadSuccess = await loadGraphData();
-                            if (loadSuccess) {
-                                // 更新本地数据
-                                if (typeof allGraphData !== 'undefined') {
-                                    allGraphData = { ...graphData };
-                                }
-                                if (typeof filteredGraphData !== 'undefined') {
-                                    filteredGraphData = { ...graphData };
-                                }
-                                
-                                // 更新原始数据
-                                originalJsonData = JSON.stringify(graphData, null, 2);
-                                
-                                // 自动切换到预览模式
-                                switchToPreviewMode();
-                                
-                                // 刷新相关显示
-                                if (typeof updateEntityDropdowns === 'function') {
-                                    updateEntityDropdowns();
-                                }
-                                if (typeof updateRelationTypeDropdown === 'function') {
-                                    updateRelationTypeDropdown();
-                                }
-                                if (typeof renderEntityList === 'function') {
-                                    renderEntityList();
-                                }
-                                
-                                console.log('数据保存并重新加载成功:', graphData);
-                            } else {
-                                throw new Error('重新加载数据失败');
-                            }
-                        } else {
-                            console.log('loadGraphData函数不存在，跳过重新加载');
+                        const refreshSuccess = await forceRefreshData();
+                        if (refreshSuccess) {
+                            // 自动切换到预览模式
                             switchToPreviewMode();
+                            
+                            // 如果是自定义领域，更新领域选择器
+                            if (isCustomDomain(currentDomain)) {
+                                console.log('检测到自定义领域，更新领域选择器');
+                                updateDomainSelectorWithCustom(currentDomain);
+                            }
+                            
+                            console.log('数据保存并刷新成功:', graphData);
+                        } else {
+                            throw new Error('刷新数据失败');
                         }
                     } catch (dataError) {
-                        console.error('重新加载数据失败:', dataError);
-                        alert('数据保存成功，但重新加载数据失败，请刷新页面');
+                        console.error('刷新数据失败:', dataError);
+                        alert('数据保存成功，但刷新数据失败，请手动刷新页面');
                     }
                     
                 } else {
