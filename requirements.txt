@@ -29,3 +29,4 @@ requests==2.32.4
 PyMySQL==1.1.2
 django-environ==0.11.2
 openai==1.102.0
+djangorestframework==3.14.0

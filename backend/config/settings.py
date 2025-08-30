@@ -31,7 +31,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # 修正应用注册路径，使用AppConfig类的完整路径
     'backend.apps.kg_visualize',
+    # 'backend.apps.user_management',  # 暂时注释掉
     'corsheaders',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -89,6 +91,21 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'frontend/static')]
 
 # 默认主键字段
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# 暂时使用Django默认用户模型
+# AUTH_USER_MODEL = 'user_management.User'
+
+# REST Framework 配置
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
+}
 
 # 跨域配置（开发环境）
 if DEBUG:

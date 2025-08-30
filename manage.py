@@ -28,7 +28,9 @@ if __name__ == '__main__':
     main()
 
 """
-python manage.py runserver
+
+env:my_env_py_310
+python manage.py runserver 8000
 http://127.0.0.1:8000/api/
 
 http://127.0.0.1:8000

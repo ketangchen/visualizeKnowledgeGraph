@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系统导航 - 知识图谱系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo h1 {
+            color: white;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-name {
+            color: white;
+            font-weight: 500;
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .main-content {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .welcome-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .welcome-title {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .welcome-subtitle {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .module-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .module-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .module-icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+        }
+
+        .module-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .module-description {
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .stats-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .stats-title {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .modules-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <h1>知识图谱系统</h1>
+            </div>
+            <div class="user-info">
+                <span class="user-name" id="userName">管理员</span>
+                <button class="logout-btn" onclick="logout()">退出登录</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <section class="welcome-section">
+            <h2 class="welcome-title">欢迎使用知识图谱系统</h2>
+            <p class="welcome-subtitle">选择下方功能模块开始使用系统</p>
+        </section>
+
+        <section class="modules-grid">
+            <a href="/frontend/static/KG.html" target="_blank" class="module-card">
+                <div class="module-icon">📊</div>
+                <h3 class="module-title">知识图谱可视化</h3>
+                <p class="module-description">交互式知识图谱展示，支持实体关系管理和数据可视化</p>
+            </a>
+
+            <a href="#" onclick="openModule('data-analysis')" class="module-card">
+                <div class="module-icon">📈</div>
+                <h3 class="module-title">数据分析</h3>
+                <p class="module-description">深度分析知识图谱数据，生成统计报告和洞察</p>
+            </a>
+
+            <a href="#" onclick="openModule('smart-search')" class="module-card">
+                <div class="module-icon">🔍</div>
+                <h3 class="module-title">智能搜索</h3>
+                <p class="module-description">基于语义的智能搜索，快速定位相关实体和关系</p>
+            </a>
+
+            <a href="/frontend/admin.html" target="_blank" class="module-card">
+                <div class="module-icon">⚙️</div>
+                <h3 class="module-title">系统管理</h3>
+                <p class="module-description">用户管理、权限控制、系统配置和数据备份</p>
+            </a>
+
+            <a href="#" onclick="openModule('knowledge-base')" class="module-card">
+                <div class="module-icon">📚</div>
+                <h3 class="module-title">知识库</h3>
+                <p class="module-description">知识图谱数据管理和维护，支持批量导入导出</p>
+            </a>
+
+            <a href="#" onclick="openModule('ai-assistant')" class="module-card">
+                <div class="module-icon">🤖</div>
+                <h3 class="module-title">AI助手</h3>
+                <p class="module-description">智能问答系统，基于知识图谱提供准确答案</p>
+            </a>
+        </section>
+
+        <section class="stats-section">
+            <h3 class="stats-title">系统概览</h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="entityCount">0</div>
+                    <div class="stat-label">实体总数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="relationshipCount">0</div>
+                    <div class="stat-label">关系总数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="domainCount">0</div>
+                    <div class="stat-label">领域数量</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="userCount">1</div>
+                    <div class="stat-label">在线用户</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2024 知识图谱系统. 保留所有权利.</p>
+    </footer>
+
+    <script>
+        // 检查登录状态
+        function checkLogin() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            const username = localStorage.getItem('username');
+            
+            if (!isLoggedIn || !username) {
+                window.location.href = '/frontend/login.html';
+                return;
+            }
+            
+            // 显示用户名
+            document.getElementById('userName').textContent = username;
+        }
+
+        // 退出登录
+        function logout() {
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('username');
+            window.location.href = '/frontend/login.html';
+        }
+
+        // 打开功能模块
+        function openModule(moduleType) {
+            const moduleUrls = {
+                'data-analysis': '/frontend/static/KG.html?mode=analysis',
+                'smart-search': '/frontend/static/KG.html?mode=search',
+                'system-management': '/frontend/admin.html',
+                'knowledge-base': '/frontend/static/KG.html?mode=knowledge',
+                'ai-assistant': '/frontend/static/KG.html?mode=ai'
+            };
+            
+            const url = moduleUrls[moduleType];
+            if (url) {
+                window.open(url, '_blank');
+            } else {
+                alert('该功能正在开发中...');
+            }
+        }
+
+        // 加载统计数据
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/kg/data/');
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.ret === 0 && result.data) {
+                        const data = result.data;
+                        document.getElementById('entityCount').textContent = data.nodes ? data.nodes.length : 0;
+                        document.getElementById('relationshipCount').textContent = data.links ? data.links.length : 0;
+                        
+                        // 计算领域数量
+                        if (data.nodes) {
+                            const domains = new Set(data.nodes.map(node => node.domain).filter(domain => domain));
+                            document.getElementById('domainCount').textContent = domains.size;
+                        }
+                    }
+                }
+            } catch (error) {
+                console.log('无法获取统计数据');
+            }
+        }
+
+        // 页面加载时执行
+        document.addEventListener('DOMContentLoaded', function() {
+            checkLogin();
+            loadStats();
+        });
+
+        // 定期刷新统计数据
+        setInterval(loadStats, 30000);
+    </script>
+</body>
+</html>

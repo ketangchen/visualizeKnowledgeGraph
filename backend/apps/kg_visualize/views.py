@@ -239,12 +239,25 @@ def list_or_create_relationships(request):
 
 
 @csrf_exempt
-@require_http_methods(["PUT", "PATCH", "DELETE"]) 
+@require_http_methods(["GET", "PUT", "PATCH", "DELETE"]) 
 def relationship_detail(request, rel_id: int):
     try:
         rel = Relationship.objects.get(id=rel_id)
     except Relationship.DoesNotExist:
         return _json_error("relationship not found")
+
+    if request.method == "GET":
+        return JsonResponse({
+            "ret": 0,
+            "data": {
+                "id": rel.id,
+                "source": rel.source_id,
+                "target": rel.target_id,
+                "type": rel.type,
+                "description": rel.description,
+                "domain": rel.domain,
+            }
+        })
 
     if request.method in ("PUT", "PATCH"):
         try:
@@ -253,19 +266,45 @@ def relationship_detail(request, rel_id: int):
             return _json_error("Invalid JSON")
 
         update_fields = False
+        
+        # 更新源实体
+        if "source" in data:
+            try:
+                source_entity = Entity.objects.get(id=data["source"])
+                rel.source = source_entity
+                update_fields = True
+            except Entity.DoesNotExist:
+                return _json_error(f"Source entity {data['source']} not found")
+        
+        # 更新目标实体
+        if "target" in data:
+            try:
+                target_entity = Entity.objects.get(id=data["target"])
+                rel.target = target_entity
+                update_fields = True
+            except Entity.DoesNotExist:
+                return _json_error(f"Target entity {data['target']} not found")
+        
+        # 更新关系类型
         if "type" in data:
             rel.type = data.get("type") or rel.type
             update_fields = True
+        
+        # 更新描述
         if "description" in data:
             rel.description = data.get("description") or ""
             update_fields = True
+        
+        # 更新领域
         if "domain" in data:
             rel.domain = data.get("domain") or "default"
             update_fields = True
 
         if update_fields:
             rel.save()
-        return JsonResponse({"ret": 0, "msg": "updated"})
+            return JsonResponse({"ret": 0, "msg": "updated"})
+        else:
+            return JsonResponse({"ret": 0, "msg": "no changes"})
 
     # DELETE
     rel.delete()
@@ -515,7 +554,7 @@ def import_graph(request):
             })
 
     return JsonResponse({
-        "ret": 0,
+        "ret": 0, 
         "msg": "import completed",
         "data": {
             "import_stats": import_stats,

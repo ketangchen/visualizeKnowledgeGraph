@@ -1719,20 +1719,20 @@
             
             <!-- 预览模式内容 -->
             <div id="preview-mode" class="preview-mode">
-                <div id="graph-container"></div>
-                <!-- 新增：实体悬浮信息框 -->
-                <div id="entity-tooltip" class="entity-tooltip">
-                    <h4 id="tooltip-title"></h4>
-                    <p><strong>ID：</strong><span id="tooltip-id"></span></p>
-                    <p><strong>领域：</strong><span id="tooltip-domain"></span></p>
-                    <p><strong>描述：</strong><span id="tooltip-desc"></span></p>
-                </div>
-                <!-- 原有控制按钮 -->
-                <div class="controls">
-                    <div class="control-btn" id="zoom-in" title="放大">+</div>
-                    <div class="control-btn" id="zoom-out" title="缩小">-</div>
-                    <div class="control-btn" id="fit-view" title="适配显示">⟲</div>
-                    <div class="control-btn" id="reset-view" title="重置布局">⟳</div>
+            <div id="graph-container"></div>
+            <!-- 新增：实体悬浮信息框 -->
+            <div id="entity-tooltip" class="entity-tooltip">
+                <h4 id="tooltip-title"></h4>
+                <p><strong>ID：</strong><span id="tooltip-id"></span></p>
+                <p><strong>领域：</strong><span id="tooltip-domain"></span></p>
+                <p><strong>描述：</strong><span id="tooltip-desc"></span></p>
+            </div>
+            <!-- 原有控制按钮 -->
+            <div class="controls">
+                <div class="control-btn" id="zoom-in" title="放大">+</div>
+                <div class="control-btn" id="zoom-out" title="缩小">-</div>
+                <div class="control-btn" id="fit-view" title="适配显示">⟲</div>
+                <div class="control-btn" id="reset-view" title="重置布局">⟳</div>
                 </div>
             </div>
             
@@ -3690,20 +3690,48 @@
             console.log('关系ID:', relationshipId);
             
             if (!relationshipId) {
-                alert('关系ID不存在，无法删除');
-                return;
+                // 如果关系ID不存在，尝试通过API获取关系列表来找到ID
+                console.log('关系ID不存在，尝试通过API获取关系ID...');
+                try {
+                    const response = await fetch('/api/kg/relationships');
+                    if (response.ok) {
+                        const result = await response.json();
+                        if (result.ret === 0 && result.data) {
+                            const relationship = result.data.find(rel => 
+                                rel.source === source && rel.target === target && rel.type === type
+                            );
+                            if (relationship) {
+                                relationshipId = relationship.id;
+                                console.log('通过API找到关系ID:', relationshipId);
+                            } else {
+                                alert('无法找到关系ID，删除失败');
+                                return;
+                            }
+                        } else {
+                            alert('获取关系列表失败');
+                            return;
+                        }
+                    } else {
+                        alert('获取关系列表失败');
+                        return;
+                    }
+                } catch (error) {
+                    console.error('获取关系列表失败:', error);
+                    alert('获取关系列表失败');
+                    return;
+                }
             }
 
             // 调用后端API删除关系
             const success = await deleteRelationshipAPI(relationshipId);
             if (success) {
                 // 从本地数据中删除关系
-                graphData.links = graphData.links.filter(link => {
-                    const linkSource = typeof link.source === 'object' ? link.source.id : link.source;
-                    const linkTarget = typeof link.target === 'object' ? link.target.id : link.target;
-                    return !(linkSource === source && linkTarget === target && link.type === type);
-                });
-                
+            graphData.links = graphData.links.filter(link => {
+                const linkSource = typeof link.source === 'object' ? link.source.id : link.source;
+                const linkTarget = typeof link.target === 'object' ? link.target.id : link.target;
+                return !(linkSource === source && linkTarget === target && link.type === type);
+            });
+
                 // 局部更新数据
                 updateGraphDataLocally();
 
@@ -3715,9 +3743,9 @@
                     (typeof selectedLink.source === 'object' ? selectedLink.source.id : selectedLink.source) === source &&
                     (typeof selectedLink.target === 'object' ? selectedLink.target.id : selectedLink.target) === target &&
                     selectedLink.type === type) {
-                    selectedLink = null;
-                    detailView.innerHTML = '<div class="no-data">选择一个实体或关系查看详情</div>';
-                }
+                selectedLink = null;
+                detailView.innerHTML = '<div class="no-data">选择一个实体或关系查看详情</div>';
+            }
 
                 resetSearchState();
 
@@ -4205,7 +4233,7 @@
                 });
             }
         }
-        
+
         // 视图控制功能
         function zoomIn() {
             if (!svg || !zoom) return;
@@ -4672,11 +4700,11 @@
 
             // 只有在编辑状态下才初始化下拉框
             if (isEditing) {
-                // 初始化编辑关系时的实体选择下拉框
-                initEditRelationDropdowns();
+            // 初始化编辑关系时的实体选择下拉框
+            initEditRelationDropdowns();
 
-                // 初始化编辑关系时的关系类型下拉框
-                initEditRelationTypeDropdown();
+            // 初始化编辑关系时的关系类型下拉框
+            initEditRelationTypeDropdown();
             }
         }
 
@@ -4882,32 +4910,35 @@
             const originalType = originalLink.type;
 
             try {
-                // 首先获取关系的ID
-                console.log('开始获取关系数据...');
-                const relationshipResponse = await fetch('/api/kg/data');
-                if (!relationshipResponse.ok) {
-                    throw new Error(`Failed to fetch relationship data: ${relationshipResponse.status}`);
-                }
-                const relationshipData = await relationshipResponse.json();
-                console.log('获取到的关系数据:', relationshipData);
+                // 从本地数据中获取关系ID
+                const relationshipId = originalLink.id;
+                console.log('本地关系ID:', relationshipId);
                 
-                // 检查数据结构
-                if (!relationshipData.data || !relationshipData.data.links) {
-                    throw new Error('Invalid data structure: missing data.links');
-                }
-                
-                // 找到要更新的关系
-                const relationshipToUpdate = relationshipData.data.links.find(link => 
-                    link.source === originalSourceId && 
-                    link.target === originalTargetId && 
-                    link.type === originalType
-                );
-                
-                console.log('要更新的关系:', relationshipToUpdate);
-                console.log('搜索条件:', { originalSourceId, originalTargetId, originalType });
-                
-                if (!relationshipToUpdate) {
-                    throw new Error('Relationship not found');
+                if (!relationshipId) {
+                    // 如果本地数据中没有ID，尝试通过API获取
+                    console.log('本地数据中没有关系ID，尝试通过API获取...');
+                    const relationshipResponse = await fetch('/api/kg/data');
+                    if (!relationshipResponse.ok) {
+                        throw new Error(`Failed to fetch relationship data: ${relationshipResponse.status}`);
+                    }
+                    const relationshipData = await relationshipResponse.json();
+                    
+                    if (!relationshipData.data || !relationshipData.data.links) {
+                        throw new Error('Invalid data structure: missing data.links');
+                    }
+                    
+                    const relationshipToUpdate = relationshipData.data.links.find(link => 
+                        link.source === originalSourceId && 
+                        link.target === originalTargetId && 
+                        link.type === originalType
+                    );
+                    
+                    if (!relationshipToUpdate) {
+                        throw new Error('Relationship not found in API data');
+                    }
+                    
+                    relationshipId = relationshipToUpdate.id;
+                    console.log('通过API获取的关系ID:', relationshipId);
                 }
                 
                 // 调用后端API更新关系
@@ -4918,13 +4949,12 @@
                 };
                 
                 console.log('发送更新数据:', updateData);
-                console.log('API URL:', `/api/kg/relationships/${relationshipToUpdate.id}`);
+                console.log('API URL:', `/api/kg/relationships/${relationshipId}`);
                 
-                const response = await fetch(`/api/kg/relationships/${relationshipToUpdate.id}`, {
+                const response = await fetch(`/api/kg/relationships/${relationshipId}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRFToken': getCookie('csrftoken')
                     },
                     body: JSON.stringify(updateData)
                 });
@@ -4942,20 +4972,22 @@
                 console.log('API响应结果:', result);
                 
                 if (result.success || result.ret === 0) {
-                    // 更新本地数据
+                    // 更新本地数据，保留关系ID
                     graphData.links[linkIndex] = {
                         source: sourceId,
                         target: targetId,
-                        type: type
+                        type: type,
+                        id: relationshipId,  // 保留关系ID
+                        domain: originalLink.domain || 'default'  // 保留领域信息
                     };
 
                     // 局部更新数据
                     updateGraphDataLocally();
-                    
-                    alert('关系更新成功');
 
-                    // 重新显示更新后的关系详情
-                    showRelationDetail(graphData.links[linkIndex]);
+            alert('关系更新成功');
+
+            // 重新显示更新后的关系详情
+            showRelationDetail(graphData.links[linkIndex]);
                     
                     // 重置编辑状态
                     editingLinkIndex = -1;
@@ -5300,10 +5332,10 @@
                 if (e.key === 'Enter') searchAndLocate();
             });
 
-                    zoomInBtn.addEventListener('click', zoomIn);
-        zoomOutBtn.addEventListener('click', zoomOut);
-        fitViewBtn.addEventListener('click', fitView);
-        resetViewBtn.addEventListener('click', resetLayout);
+            zoomInBtn.addEventListener('click', zoomIn);
+            zoomOutBtn.addEventListener('click', zoomOut);
+            fitViewBtn.addEventListener('click', fitView);
+            resetViewBtn.addEventListener('click', resetLayout);
 
             // 源实体选择框事件
             sourceEntityDisplay.addEventListener('focus', () => {

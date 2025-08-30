@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        .link {
+            display: inline-block;
+            margin: 10px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        .link:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✅ 前端页面访问成功！</h1>
+        <p>Django静态文件配置正确，前端页面可以正常访问。</p>
+        
+        <h3>可用链接：</h3>
+        <a href="/frontend/login.html" class="link">登录页面</a>
+        <a href="/frontend/navigation.html" class="link">导航页面</a>
+        <a href="/frontend/static/KG.html" class="link" target="_blank">知识图谱</a>
+        <a href="/" class="link">返回首页</a>
+    </div>
+</body>
+</html>
