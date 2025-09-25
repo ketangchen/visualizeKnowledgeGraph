@@ -28,7 +28,7 @@ if __name__ == '__main__':
     main()
 
 """
-python manage.py runserver 8000
+kill -9 $(lsof -t -i :8000) 2>/dev/null && python manage.py runserver 8000
 http://127.0.0.1:8000/api/
 
 http://127.0.0.1:8000

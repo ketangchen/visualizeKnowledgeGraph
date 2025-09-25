@@ -635,7 +635,7 @@
             border: 2px solid #4dd0e1;
             border-radius: 8px;
             padding: 10px;
-            background: rgba(255, 255, 255, 0.98);
+            background: transparent; /* 透明背景 */
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             font-size: 14px;
             z-index: 1000;
@@ -5636,9 +5636,7 @@
             if (tooltip) {
                 tooltip.addEventListener('mouseenter', function() {
                     // 鼠标进入tooltip时保持显示
-                    if (tooltipShouldShow) {
-                        this.classList.add('visible');
-                    }
+                    this.classList.add('visible');
                 });
                 
                 tooltip.addEventListener('mouseleave', function() {
