@@ -1,0 +1,17 @@
+# Django 配置
+SECRET_KEY=django-insecure-example-key-for-dev-only
+DEBUG=true
+ALLOWED_HOSTS=localhost,127.0.0.1
+
+# 数据库配置 - MySQL
+DATABASE_URL=mysql://root:lin21lee@localhost:3306/kg_visualize?charset=utf8mb4
+
+# 跨域配置（开发环境）
+CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+
+
+# api_url配置
+CHATGPT_API_URL=https://free.v36.cm
+
+# api_key配置
+CHATGPT_API_KEY=sk-jaRSXNMxl1xdjOzu5e8e780c79Ee40D99aE43c0b74A90fF6

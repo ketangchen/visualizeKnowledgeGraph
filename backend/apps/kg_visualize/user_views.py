@@ -14,10 +14,30 @@ def user_list(request):
     """
     if request.method == 'GET':
         try:
-            users = User.objects.all()
+            # 支持模糊搜索与限制条数
+            query = request.GET.get('q', '').strip()
+            limit = request.GET.get('limit')
+
+            users_qs = User.objects.all()
+            if query:
+                users_qs = users_qs.filter(
+                    Q(username__icontains=query) |
+                    Q(email__icontains=query) |
+                    Q(first_name__icontains=query) |
+                    Q(last_name__icontains=query)
+                )
+
+            if limit:
+                try:
+                    limit_int = int(limit)
+                    if limit_int > 0:
+                        users_qs = users_qs[:limit_int]
+                except Exception:
+                    pass
+
             user_list = []
-            
-            for user in users:
+
+            for user in users_qs:
                 user_list.append({
                     'id': user.id,
                     'username': user.username,

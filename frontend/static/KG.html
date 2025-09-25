@@ -173,6 +173,15 @@
             background: linear-gradient(135deg, #d32f2f 0%, #f44336 100%);
         }
 
+        .data-btn.reorder {
+            background: linear-gradient(135deg, #ff9800 0%, #ffb74d 100%);
+            color: white;
+        }
+
+        .data-btn.reorder:hover {
+            background: linear-gradient(135deg, #f57c00 0%, #ff9800 100%);
+        }
+
         /* 禁用状态的样式 */
         .domain-select-disabled {
             opacity: 0.6;
@@ -543,34 +552,31 @@
         /* 可调整大小的描述框样式 */
         .resizable-description {
             position: relative;
-            min-height: 60px;
-            max-height: 200px;
-            overflow: hidden;
-            transition: max-height 0.3s ease;
+            height: 300px; /* 固定高度 - 增加一倍 */
+            overflow-y: auto; /* 垂直滚动条 */
             border: 1px solid #c8e6c9;
-            resize: vertical;
-            overflow-y: auto;
             padding: 10px;
-            padding-bottom: 50px; /* 为底部按钮留出空间 */
             background: #fafafa;
+            display: flex;
+            flex-direction: column;
         }
         
-        .resizable-description.expanded {
-            max-height: 500px;
-        }
         
         .description-text {
             word-wrap: break-word;
             line-height: 1.6;
             margin-bottom: 10px;
+            white-space: pre-wrap; /* 保留换行符和空格 */
+            word-break: break-word; /* 长单词自动换行 */
             color: #333;
             font-size: 14px;
+            flex: 1;
+            overflow-y: auto;
         }
         
         .description-controls {
-            position: absolute;
-            bottom: 5px;
-            right: 5px;
+            position: sticky;
+            bottom: 0;
             display: flex;
             gap: 5px;
             z-index: 10;
@@ -580,13 +586,16 @@
             border: 1px solid #e0e0e0;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             pointer-events: auto;
+            margin-top: auto;
+            margin-left: auto;
+            width: fit-content;
+            flex-shrink: 0;
         }
         
         /* 确保按钮在描述框拉伸时保持位置 */
         .resizable-description:focus-within .description-controls {
-            position: absolute;
-            bottom: 5px;
-            right: 5px;
+            position: sticky;
+            bottom: 0;
         }
         
         .description-controls button {
@@ -620,29 +629,24 @@
 
         /* 实体悬浮信息框样式 */
         .entity-tooltip {
-            position: absolute;
-            /* 1. 设置宽度（固定宽度或最大宽度） */
-            width: 300px; /* 固定宽度（例如300px） */
-            /* 或使用最大宽度（推荐，自适应内容）：
-            max-width: 300px; */
-
-            /* 2. 设置边框样式 */
-            border: 2px solid #4dd0e1; /* 边框宽度、样式、颜色 */
-            border-radius: 8px; /* 边框圆角（可选，让边角更圆润） */
-
-            /* 以下为原有其他样式（保持不变） */
+            position: fixed; /* 使用fixed定位，相对于视口 */
+            width: 280px; /* 固定宽度 */
+            height: 400px; /* 固定高度 - 增加一倍 */
+            border: 2px solid #4dd0e1;
+            border-radius: 8px;
             padding: 10px;
-            background: rgba(255, 255, 255, 0.95);
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             font-size: 14px;
             z-index: 1000;
-            pointer-events: none;
+            pointer-events: auto; /* 允许鼠标交互 */
             opacity: 0;
-            transition: opacity 0.2s ease;
+            transition: opacity 0.3s ease;
             left: 0;
             top: 0;
-            transform: translate(-50%, -50%);
+            overflow-y: auto; /* 垂直滚动条 */
         }
+
 
         .entity-tooltip h4 {
             margin: 0 0 5px 0;
@@ -656,6 +660,8 @@
             margin: 3px 0;
             color: #263238;
             font-size: 13px;
+            white-space: pre-wrap; /* 保留换行符和空格 */
+            word-wrap: break-word; /* 长单词自动换行 */
         }
 
         /* 显示悬浮框时的样式 */
@@ -827,8 +833,49 @@
             width: 100%;
         }
 
-        #search-input {
+        .search-input-container {
+            position: relative;
             flex: 1;
+        }
+
+        #search-input {
+            width: 100%;
+        }
+
+        .search-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+
+        .search-suggestion-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+        }
+
+        .search-suggestion-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        .search-suggestion-item:last-child {
+            border-bottom: none;
+        }
+
+        .search-suggestion-highlight {
+            background-color: #ffeb3b;
+            font-weight: bold;
         }
 
         .search-results-info {
@@ -1751,6 +1798,7 @@
                 <textarea id="json-editor" class="simple-json-editor" placeholder="JSON数据将在这里显示..."></textarea>
                 
                 <div class="data-controls">
+                    <button class="data-btn reorder" onclick="reorderEntityIds()">重新排序</button>
                     <button class="data-btn save" onclick="saveJsonData()">保存到数据库</button>
                     <button class="data-btn cancel" onclick="cancelDataEdit()">取消编辑</button>
                 </div>
@@ -1785,7 +1833,10 @@
                     </select>
                 </div>
                 <div class="search-input-group">
-                    <input type="text" id="search-input" placeholder="请输入搜索内容...">
+                    <div class="search-input-container">
+                        <input type="text" id="search-input" placeholder="请输入搜索内容...">
+                        <div id="search-suggestions" class="search-suggestions"></div>
+                    </div>
                     <button id="search-btn" class="btn-primary">搜索</button>
                 </div>
             </div>
@@ -2067,6 +2118,8 @@
         let currentDomain = 'all'; // 当前选中的领域
         let allGraphData = { nodes: [], links: [] }; // 存储所有数据
         let filteredGraphData = { nodes: [], links: [] }; // 存储筛选后的数据
+        let searchSuggestions = []; // 存储搜索建议
+        let searchTimer = null; // 搜索防抖定时器
 
         // DOM元素
         const entityDomainSelect = document.getElementById('entity-domain');
@@ -2095,6 +2148,7 @@
         const searchBtn = document.getElementById('search-btn');
         const searchTypeSelect = document.getElementById('search-type');
         const searchResultsInfo = document.getElementById('search-results-info');
+        const searchSuggestionsEl = document.getElementById('search-suggestions');
         const zoomInBtn = document.getElementById('zoom-in');
         const zoomOutBtn = document.getElementById('zoom-out');
         const fitViewBtn = document.getElementById('fit-view');
@@ -3925,6 +3979,9 @@
             // 节点组的鼠标事件绑定（替换原有代码）
             nodeGroups
                 .on('mouseover', function(event, d) {
+                    // 设置悬浮窗口应该显示
+                    tooltipShouldShow = true;
+                    
                     const tooltip = document.getElementById('entity-tooltip');
                     const titleEl = document.getElementById('tooltip-title');
                     const idEl = document.getElementById('tooltip-id');
@@ -3935,36 +3992,92 @@
                     titleEl.textContent = d.name;
                     idEl.textContent = d.id;
                     domainEl.textContent = d.domain || 'default';
-                    descEl.textContent = d.description || '无';
+                    // 处理描述中的换行符
+                    const description = d.description || '无';
+                    descEl.textContent = description;
 
-                    // 2. 获取可视化面板的DOM元素及位置信息
-                    const visualizationPanel = document.querySelector('.visualization-panel');
-                    const panelRect = visualizationPanel.getBoundingClientRect(); // 面板在页面中的位置
-
-                    // 3. 计算面板中心点坐标（相对于页面左上角）
-                    const centerX = panelRect.left + panelRect.width / 2;
-                    const centerY = panelRect.top + panelRect.height / 2;
-
-                    // 4. 设置tooltip位置（基于页面坐标）
-                    tooltip.style.left = `${centerX}px`;
-                    tooltip.style.top = `${centerY}px`;
-                    tooltip.classList.add('visible');
-                })
-                .on('mousemove', function(event, d) {
-                    // 鼠标移动时保持居中（与mouseover逻辑一致）
-                    const tooltip = document.getElementById('entity-tooltip');
+                    // 2. 获取节点在SVG中的实际位置
+                    const nodeElement = d3.select(this);
+                    const nodeRect = nodeElement.node().getBoundingClientRect();
+                    
+                    // 3. 计算节点中心位置（更精确的计算）
+                    const nodeCenterX = nodeRect.left + nodeRect.width / 2;
+                    const nodeCenterY = nodeRect.top + nodeRect.height / 2;
+                    
+                    // 4. 获取可视化面板的滚动偏移
                     const visualizationPanel = document.querySelector('.visualization-panel');
                     const panelRect = visualizationPanel.getBoundingClientRect();
-
-                    const centerX = panelRect.left + panelRect.width / 2;
-                    const centerY = panelRect.top + panelRect.height / 2;
-
-                    tooltip.style.left = `${centerX}px`;
-                    tooltip.style.top = `${centerY}px`;
+                    
+                    // 5. 设置tooltip位置（基于节点位置，避免超出屏幕）
+                    let tooltipX = nodeCenterX + 15; // 节点右侧15px
+                    let tooltipY = nodeCenterY - 200; // 节点中心上方200px（tooltip高度的一半）
+                    
+                    // 检查是否超出右边界
+                    if (tooltipX + 280 > window.innerWidth) {
+                        tooltipX = nodeCenterX - 295; // 节点左侧
+                    }
+                    
+                    // 检查是否超出上边界
+                    if (tooltipY < 0) {
+                        tooltipY = nodeCenterY + 15; // 节点下方
+                    }
+                    
+                    // 检查是否超出下边界
+                    if (tooltipY + 400 > window.innerHeight) {
+                        tooltipY = nodeCenterY - 400; // 节点上方
+                    }
+                    
+                    tooltip.style.left = `${tooltipX}px`;
+                    tooltip.style.top = `${tooltipY}px`;
+                    tooltip.classList.add('visible');
+                    
+                    // 不显示背景遮罩，只在节点上显示悬浮窗口
+                })
+                .on('mousemove', function(event, d) {
+                    // 鼠标移动时保持tooltip位置（基于节点位置）
+                    const tooltip = document.getElementById('entity-tooltip');
+                    
+                    // 获取节点在SVG中的位置
+                    const nodeElement = d3.select(this);
+                    const nodeRect = nodeElement.node().getBoundingClientRect();
+                    
+                    // 计算节点中心位置
+                    const nodeCenterX = nodeRect.left + nodeRect.width / 2;
+                    const nodeCenterY = nodeRect.top + nodeRect.height / 2;
+                    
+                    // 设置tooltip位置（基于节点位置，避免超出屏幕）
+                    let tooltipX = nodeCenterX + 15; // 节点右侧15px
+                    let tooltipY = nodeCenterY - 200; // 节点中心上方200px
+                    
+                    // 检查是否超出右边界
+                    if (tooltipX + 280 > window.innerWidth) {
+                        tooltipX = nodeCenterX - 295; // 节点左侧
+                    }
+                    
+                    // 检查是否超出上边界
+                    if (tooltipY < 0) {
+                        tooltipY = nodeCenterY + 15; // 节点下方
+                    }
+                    
+                    // 检查是否超出下边界
+                    if (tooltipY + 400 > window.innerHeight) {
+                        tooltipY = nodeCenterY - 400; // 节点上方
+                    }
+                    
+                    tooltip.style.left = `${tooltipX}px`;
+                    tooltip.style.top = `${tooltipY}px`;
                 })
                 .on('mouseout', function() {
-                    const tooltip = document.getElementById('entity-tooltip');
-                    tooltip.classList.remove('visible');
+                    // 设置悬浮窗口不应该显示
+                    tooltipShouldShow = false;
+                    
+                    // 延迟隐藏tooltip，给用户时间移动到tooltip上
+                    setTimeout(() => {
+                        const tooltip = document.getElementById('entity-tooltip');
+                        if (!tooltip.matches(':hover') && !tooltipShouldShow) {
+                            tooltip.classList.remove('visible');
+                        }
+                    }, 100);
                 });
 
             // 存储箭头元素引用，添加数据属性标识对应的关系索引
@@ -4196,7 +4309,8 @@
                     // 如果文本超过100个字符，截断显示
                     const fullText = descriptionText.getAttribute('data-full-text');
                     if (fullText && fullText.length > 100) {
-                        descriptionText.textContent = fullText.substring(0, 100) + '...';
+                        const truncatedText = fullText.substring(0, 100) + '...';
+                        descriptionText.innerHTML = truncatedText.replace(/\n/g, '<br>');
                     }
                 } else {
                     // 展开：显示完整文本
@@ -4206,7 +4320,7 @@
                     // 显示完整文本
                     const fullText = descriptionText.getAttribute('data-full-text');
                     if (fullText) {
-                        descriptionText.textContent = fullText;
+                        descriptionText.innerHTML = fullText.replace(/\n/g, '<br>');
                     }
                 }
             }
@@ -4235,8 +4349,21 @@
         }
 
         // 视图控制功能
+        // 隐藏悬浮窗口的函数
+        function hideTooltip() {
+            const tooltip = document.getElementById('entity-tooltip');
+            if (tooltip) {
+                tooltip.classList.remove('visible');
+            }
+        }
+
+        // 悬浮窗口显示状态控制
+        let tooltipShouldShow = false;
+
         function zoomIn() {
             if (!svg || !zoom) return;
+            hideTooltip(); // 缩放时隐藏悬浮窗口
+            tooltipShouldShow = false; // 重置悬浮窗口状态
             svg.transition().duration(300).call(
                 zoom.scaleBy, 1.3
             );
@@ -4244,6 +4371,8 @@
 
         function zoomOut() {
             if (!svg || !zoom) return;
+            hideTooltip(); // 缩放时隐藏悬浮窗口
+            tooltipShouldShow = false; // 重置悬浮窗口状态
             svg.transition().duration(300).call(
                 zoom.scaleBy, 0.77
             );
@@ -4251,6 +4380,8 @@
 
         function fitView() {
             if (!svg || !zoom || graphData.nodes.length === 0) return;
+            hideTooltip(); // 适配显示时隐藏悬浮窗口
+            tooltipShouldShow = false; // 重置悬浮窗口状态
 
             const nodes = graphData.nodes;
             const minX = Math.min(...nodes.map(d => d.x));
@@ -4283,6 +4414,8 @@
 
         function resetLayout() {
             if (!simulation) return;
+            hideTooltip(); // 重置布局时隐藏悬浮窗口
+            tooltipShouldShow = false; // 重置悬浮窗口状态
 
             simulation.alpha(0.3).restart();
 
@@ -4563,9 +4696,8 @@
                 <div class="detail-section">
                     <h3>实体描述</h3>
                     <div class="detail-content resizable-description" id="entity-description">
-                        <div class="description-text" id="description-text" data-full-text="${entity.description || '无描述'}">${entity.description && entity.description.length > 100 ? entity.description.substring(0, 100) + '...' : (entity.description || '无描述')}</div>
+                        <div class="description-text" id="description-text">${(entity.description || '无描述').replace(/\n/g, '<br>')}</div>
                         <div class="description-controls" style="display: ${entity.description && entity.description !== '无描述' ? 'flex' : 'none'}">
-                            <button class="expand-btn" onclick="toggleDescription()" style="display: ${entity.description && entity.description.length > 100 ? 'inline-block' : 'none'}">展开</button>
                             <button class="copy-btn" onclick="copyDescription()">复制</button>
                         </div>
                     </div>
@@ -5185,6 +5317,145 @@
             console.log('实体编辑已取消');
         }
 
+        // 搜索建议功能
+        function handleSearchInput(e) {
+            const keyword = e.target.value.trim();
+            
+            if (searchTimer) {
+                clearTimeout(searchTimer);
+            }
+            
+            searchTimer = setTimeout(() => {
+                if (keyword.length > 0) {
+                    generateSearchSuggestions(keyword);
+                } else {
+                    hideSearchSuggestions();
+                }
+            }, 300);
+        }
+
+        function generateSearchSuggestions(keyword) {
+            const searchType = searchTypeSelect.value;
+            const suggestions = [];
+            
+            if (searchType === 'entityName') {
+                // 搜索实体名称
+                graphData.nodes.forEach(node => {
+                    const name = node.name ? node.name.toLowerCase() : '';
+                    if (name.includes(keyword.toLowerCase())) {
+                        suggestions.push({
+                            text: node.name,
+                            displayText: node.name,
+                            type: 'entity',
+                            data: node
+                        });
+                    }
+                });
+            } else if (searchType === 'entityId') {
+                // 搜索实体ID
+                graphData.nodes.forEach(node => {
+                    const id = node.id ? node.id.toLowerCase() : '';
+                    if (id.includes(keyword.toLowerCase())) {
+                        suggestions.push({
+                            text: node.id, // 选择后填入ID
+                            displayText: node.name || node.id, // 显示实体名称
+                            type: 'entity',
+                            data: node
+                        });
+                    }
+                });
+            } else if (searchType === 'entityDesc') {
+                // 搜索实体描述，但显示实体名称
+                graphData.nodes.forEach(node => {
+                    const desc = node.description ? node.description.toLowerCase() : '';
+                    if (desc.includes(keyword.toLowerCase())) {
+                        suggestions.push({
+                            text: node.name, // 选择后填入实体名称
+                            displayText: node.name,
+                            type: 'description',
+                            data: node
+                        });
+                    }
+                });
+            } else if (searchType === 'relation') {
+                // 搜索关系类型
+                const relationTypes = new Set();
+                graphData.links.forEach(link => {
+                    if (link.type && link.type.toLowerCase().includes(keyword.toLowerCase())) {
+                        relationTypes.add(link.type);
+                    }
+                });
+                
+                relationTypes.forEach(type => {
+                    suggestions.push({
+                        text: type,
+                        displayText: type,
+                        type: 'relation',
+                        data: { type: type }
+                    });
+                });
+            }
+            
+            displaySearchSuggestions(suggestions.slice(0, 10)); // 限制显示10个建议
+        }
+
+        function displaySearchSuggestions(suggestions) {
+            if (suggestions.length === 0) {
+                hideSearchSuggestions();
+                return;
+            }
+            
+            searchSuggestionsEl.innerHTML = suggestions.map(suggestion => {
+                const kw = searchInput.value;
+                const highlightedText = highlightText(String(suggestion.displayText || ''), kw);
+                let subtitle = '';
+                if (suggestion.type === 'entity') {
+                    const node = suggestion.data || {};
+                    const idInfo = node.id ? `ID: ${node.id}` : '';
+                    const domainInfo = node.domain ? `领域: ${node.domain}` : '';
+                    subtitle = [idInfo, domainInfo].filter(Boolean).join(' · ');
+                } else if (suggestion.type === 'description') {
+                    const node = suggestion.data || {};
+                    const desc = node.description ? (node.description.length > 50 ? node.description.substring(0, 50) + '...' : node.description) : '';
+                    subtitle = `描述: ${desc}`;
+                } else {
+                    subtitle = '关系类型';
+                }
+                return `<div class=\"search-suggestion-item\" data-text=\"${String(suggestion.text || '').replace(/\"/g, '&quot;')}\">\
+                    <div>${highlightedText}</div>\
+                    <small style=\"color: #666;\">${subtitle}</small>\
+                </div>`;
+            }).join('');
+            
+            // 绑定点击事件
+            searchSuggestionsEl.querySelectorAll('.search-suggestion-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const text = item.getAttribute('data-text');
+                    searchInput.value = text;
+                    hideSearchSuggestions();
+                    searchAndLocate();
+                });
+            });
+            
+            searchSuggestionsEl.style.display = 'block';
+        }
+
+        function highlightText(text, keyword) {
+            if (!keyword) return text;
+            const regex = new RegExp(`(${keyword})`, 'gi');
+            return text.replace(regex, '<span class="search-suggestion-highlight">$1</span>');
+        }
+
+        function showSearchSuggestions() {
+            if (searchInput.value.trim().length > 0) {
+                generateSearchSuggestions(searchInput.value.trim());
+            }
+        }
+
+        function hideSearchSuggestions() {
+            searchSuggestionsEl.style.display = 'none';
+        }
+
         // 重置搜索状态
         function resetSearchState() {
             searchResults = [];
@@ -5329,8 +5600,52 @@
 
             searchBtn.addEventListener('click', searchAndLocate);
             searchInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') searchAndLocate();
+                if (e.key === 'Enter') {
+                    hideSearchSuggestions();
+                    searchAndLocate();
+                }
             });
+            
+            // 搜索建议功能
+            searchInput.addEventListener('input', handleSearchInput);
+            searchInput.addEventListener('focus', showSearchSuggestions);
+            searchInput.addEventListener('blur', (e) => {
+                // 延迟隐藏，让点击事件先触发
+                setTimeout(() => hideSearchSuggestions(), 200);
+            });
+            // 切换搜索类型时，依据当前输入即时刷新下拉
+            searchTypeSelect.addEventListener('change', () => {
+                const kw = searchInput.value.trim();
+                if (kw) {
+                    generateSearchSuggestions(kw);
+                } else {
+                    hideSearchSuggestions();
+                }
+            });
+            
+            // 点击外部关闭搜索建议
+            document.addEventListener('click', (e) => {
+                if (!searchInput.contains(e.target) && !searchSuggestionsEl.contains(e.target)) {
+                    hideSearchSuggestions();
+                }
+            });
+            
+            // 悬浮窗口鼠标事件
+            const tooltip = document.getElementById('entity-tooltip');
+            
+            if (tooltip) {
+                tooltip.addEventListener('mouseenter', function() {
+                    // 鼠标进入tooltip时保持显示
+                    if (tooltipShouldShow) {
+                        this.classList.add('visible');
+                    }
+                });
+                
+                tooltip.addEventListener('mouseleave', function() {
+                    // 鼠标离开tooltip时隐藏
+                    this.classList.remove('visible');
+                });
+            }
 
             zoomInBtn.addEventListener('click', zoomIn);
             zoomOutBtn.addEventListener('click', zoomOut);
@@ -7054,6 +7369,74 @@
             console.log('数据模式准备完成');
         }
 
+        // 重新排序实体ID
+        function reorderEntityIds() {
+            try {
+                const jsonEditor = document.getElementById('json-editor');
+                if (!jsonEditor) {
+                    alert('找不到JSON编辑器');
+                    return;
+                }
+                
+                const jsonText = jsonEditor.value.trim();
+                if (!jsonText) {
+                    alert('请先加载数据');
+                    return;
+                }
+                
+                // 解析JSON数据
+                let parsedData;
+                try {
+                    parsedData = JSON.parse(jsonText);
+                } catch (e) {
+                    alert('JSON格式错误，请检查语法');
+                    return;
+                }
+                
+                if (!parsedData.nodes || !Array.isArray(parsedData.nodes)) {
+                    alert('数据格式错误：缺少nodes数组');
+                    return;
+                }
+                
+                // 创建ID映射表
+                const idMapping = {};
+                const nodes = parsedData.nodes;
+                
+                // 按原始顺序重新分配ID（从1开始）
+                nodes.forEach((node, index) => {
+                    const oldId = node.id;
+                    const newId = (index + 1).toString();
+                    idMapping[oldId] = newId;
+                    node.id = newId;
+                });
+                
+                // 更新关系中的源和目标ID
+                if (parsedData.links && Array.isArray(parsedData.links)) {
+                    parsedData.links.forEach(link => {
+                        if (link.source && idMapping[link.source]) {
+                            link.source = idMapping[link.source];
+                        }
+                        if (link.target && idMapping[link.target]) {
+                            link.target = idMapping[link.target];
+                        }
+                    });
+                }
+                
+                // 更新JSON编辑器内容
+                const newJsonText = JSON.stringify(parsedData, null, 2);
+                jsonEditor.value = newJsonText;
+                
+                // 更新内存中的数据
+                graphData = parsedData;
+                
+                alert(`重新排序完成！实体ID已从1开始递增，共处理 ${nodes.length} 个实体`);
+                
+            } catch (error) {
+                console.error('重新排序失败:', error);
+                alert('重新排序失败: ' + error.message);
+            }
+        }
+
         // 保存JSON数据到数据库
         async function saveJsonData() {
             try {
@@ -7185,12 +7568,20 @@
                     return;
                 }
                 
+                // 恢复原始数据
                 if (originalJsonData) {
                     jsonEditor.value = originalJsonData;
-                    alert('已恢复到原始数据');
+                    console.log('已恢复到原始数据');
                 } else {
-                    alert('没有原始数据可恢复');
+                    console.log('没有原始数据可恢复');
                 }
+                
+                // 切换到预览模式
+                switchToPreviewMode();
+                
+                // 显示成功消息
+                alert('已取消编辑并切换到预览模式');
+                
             } catch (error) {
                 console.error('取消编辑失败:', error);
                 alert('取消编辑失败: ' + error.message);

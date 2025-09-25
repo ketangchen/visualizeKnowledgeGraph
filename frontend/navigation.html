@@ -224,7 +224,7 @@
                 <p class="module-description">基于语义的智能搜索，快速定位相关实体和关系</p>
             </a>
 
-            <a href="/frontend/admin.html" target="_blank" class="module-card">
+            <a href="#" onclick="openModule('system-management')" class="module-card">
                 <div class="module-icon">⚙️</div>
                 <h3 class="module-title">系统管理</h3>
                 <p class="module-description">用户管理、权限控制、系统配置和数据备份</p>
@@ -259,8 +259,8 @@
                     <div class="stat-label">领域数量</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number" id="userCount">1</div>
-                    <div class="stat-label">在线用户</div>
+                    <div class="stat-number" id="userCount">0</div>
+                    <div class="stat-label">用户总数</div>
                 </div>
             </div>
         </section>
@@ -304,6 +304,15 @@
             
             const url = moduleUrls[moduleType];
             if (url) {
+                // 管理员权限校验
+                if (moduleType === 'system-management') {
+                    const username = localStorage.getItem('username');
+                    if (username !== 'admin') {
+                        alert('只有管理员可以访问系统管理模块');
+                        return;
+                    }
+                }
+
                 window.open(url, '_blank');
             } else {
                 alert('该功能正在开发中...');
@@ -327,6 +336,19 @@
                             document.getElementById('domainCount').textContent = domains.size;
                         }
                     }
+                }
+
+                // 获取用户数量
+                try {
+                    const usersResp = await fetch('/api/kg/users/');
+                    if (usersResp.ok) {
+                        const usersResult = await usersResp.json();
+                        if (usersResult.ret === 0 && Array.isArray(usersResult.data)) {
+                            document.getElementById('userCount').textContent = usersResult.data.length;
+                        }
+                    }
+                } catch (e) {
+                    // 忽略用户统计错误
                 }
             } catch (error) {
                 console.log('无法获取统计数据');

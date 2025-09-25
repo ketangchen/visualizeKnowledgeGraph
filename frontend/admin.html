@@ -261,7 +261,7 @@
         }
 
         // 用户管理功能
-        function showAddUserForm() { alert('添加用户功能开发中...'); }
+        function showAddUserForm() { window.open('/frontend/user_management.html', '_blank'); }
         function editUser(username) { alert(`编辑用户 ${username} 功能开发中...`); }
         function deleteUser(username) { 
             if (username === 'admin') { alert('不能删除超级管理员账号'); return; }

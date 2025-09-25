@@ -28,14 +28,15 @@ if __name__ == '__main__':
     main()
 
 """
-
-env:my_env_py_310
 python manage.py runserver 8000
 http://127.0.0.1:8000/api/
 
 http://127.0.0.1:8000
 
+ps -ef|grep "python manage.py runserver"
+kill -9 <pid>
 
+conda activate my_env1 && ./build_smart_version.sh
 
 
 visualizeKnowledgeGraph/
@@ -69,7 +70,7 @@ pip index versions paddlepaddle
 pip index versions paddleocr
 
 conda创建虚拟环境
-conda create -n my_env1 python=3.9
+conda create -n my_env_py37 python=3.7
 conda activate my_env1
 conda deactivate
 conda env list
