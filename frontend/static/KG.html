@@ -7577,8 +7577,8 @@
                 // 切换到预览模式
                 switchToPreviewMode();
                 
-                // 显示成功消息
-                alert('已取消编辑并切换到预览模式');
+                // 移除弹窗提示，直接回到预览模式
+                console.log('已取消编辑并切换到预览模式');
                 
             } catch (error) {
                 console.error('取消编辑失败:', error);
