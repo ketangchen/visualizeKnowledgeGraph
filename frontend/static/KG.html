@@ -7915,14 +7915,42 @@
                     return;
                 }
                 
+                // 获取当前编辑的领域
+                const currentDomain = parsedData.currentDomain || 'all';
+                console.log('当前编辑领域:', currentDomain);
+                
+                // 获取所有领域的已使用ID（用于避免冲突）
+                const allUsedIds = new Set();
+                if (currentDomain !== 'all' && allGraphData && allGraphData.nodes) {
+                    // 如果当前不是编辑所有领域，需要获取所有领域的ID以避免冲突
+                    allGraphData.nodes.forEach(node => {
+                        allUsedIds.add(node.id);
+                    });
+                    console.log('所有领域已使用的ID:', Array.from(allUsedIds));
+                }
+                
                 // 创建ID映射表
                 const idMapping = {};
                 const nodes = parsedData.nodes;
+                let nextId = 1;
                 
-                // 按原始顺序重新分配ID（从1开始）
+                // 为每个节点分配新的ID，避免与所有领域的ID冲突
                 nodes.forEach((node, index) => {
                     const oldId = node.id;
-                    const newId = (index + 1).toString();
+                    let newId;
+                    
+                    if (currentDomain === 'all') {
+                        // 如果是编辑所有领域，按顺序从1开始分配
+                        newId = (index + 1).toString();
+                    } else {
+                        // 如果是编辑特定领域，需要避免与所有领域的ID冲突
+                        while (allUsedIds.has(nextId.toString())) {
+                            nextId++;
+                        }
+                        newId = nextId.toString();
+                        nextId++;
+                    }
+                    
                     idMapping[oldId] = newId;
                     node.id = newId;
                 });
@@ -7946,7 +7974,12 @@
                 // 更新内存中的数据
                 graphData = parsedData;
                 
-                alert(`重新排序完成！实体ID已从1开始递增，共处理 ${nodes.length} 个实体`);
+                // 显示结果信息
+                if (currentDomain === 'all') {
+                    alert(`重新排序完成！\n\n领域：所有领域\n实体ID已从1开始递增，共处理 ${nodes.length} 个实体`);
+                } else {
+                    alert(`重新排序完成！\n\n领域：${currentDomain}\n实体ID已重新分配，避免与所有领域ID冲突\n共处理 ${nodes.length} 个实体`);
+                }
                 
             } catch (error) {
                 console.error('重新排序失败:', error);
