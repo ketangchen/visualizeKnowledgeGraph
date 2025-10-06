@@ -5438,7 +5438,7 @@
 
             try {
                 // 从本地数据中获取关系ID
-                const relationshipId = originalLink.id;
+                let relationshipId = originalLink.id;
                 console.log('本地关系ID:', relationshipId);
                 
                 if (!relationshipId) {
@@ -6627,6 +6627,12 @@
                             // 确保数据格式正确
                             console.log('刷新数据，当前数据:', graphData);
                             initializeGraph();
+                            
+                            // 延迟执行适配显示，确保图形已完全渲染
+                            setTimeout(() => {
+                                fitView();
+                                console.log('刷新数据：已执行适配显示');
+                            }, 500);
                         } else {
                             console.log('没有数据，重新加载...');
                             // 如果没有数据，重新加载
@@ -7640,6 +7646,12 @@
                 // 确保数据格式正确
                 console.log('切换到预览模式，当前数据:', graphData);
                 initializeGraph();
+                
+                // 延迟执行适配显示，确保图形已完全渲染
+                setTimeout(() => {
+                    fitView();
+                    console.log('预览模式：已执行适配显示');
+                }, 500);
             } else {
                 console.log('没有数据，重新加载...');
                 // 如果没有数据，重新加载
