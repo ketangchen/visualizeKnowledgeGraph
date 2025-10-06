@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>刷新功能测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #2196f3 0%, #42a5f5 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 10px 0;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #1976d2 0%, #2196f3 100%);
+        }
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h2>刷新功能测试</h2>
+        <p>点击下面的按钮测试刷新功能：</p>
+        
+        <button id="refresh-data" class="btn-primary" style="width: 100%;">🔄 刷新数据</button>
+        
+        <div class="log" id="log-container">
+            <div>等待测试...</div>
+        </div>
+        
+        <button onclick="clearLog()" class="btn-primary">清空日志</button>
+    </div>
+
+    <script>
+        function log(message) {
+            const logContainer = document.getElementById('log-container');
+            const timestamp = new Date().toLocaleTimeString();
+            logContainer.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+        
+        function clearLog() {
+            document.getElementById('log-container').innerHTML = '<div>日志已清空...</div>';
+        }
+        
+        // 刷新数据从数据库
+        async function refreshDataFromDatabase() {
+            log('refreshDataFromDatabase函数被调用');
+            try {
+                // 显示加载状态
+                const refreshButton = document.getElementById('refresh-data');
+                if (refreshButton) {
+                    const originalText = refreshButton.textContent;
+                    refreshButton.textContent = '刷新中...';
+                    refreshButton.disabled = true;
+                    log('刷新按钮状态已更新');
+                } else {
+                    log('错误：刷新按钮未找到');
+                }
+                
+                log('开始从数据库刷新数据...');
+                
+                // 调用API重新加载数据
+                const response = await fetch('/api/kg/data');
+                if (!response.ok) {
+                    throw new Error(`HTTP错误${response.status}`);
+                }
+                
+                const result = await response.json();
+                if (result.ret === 0) {
+                    log('数据刷新成功');
+                    log(`实体数量: ${result.data.nodes.length}`);
+                    log(`关系数量: ${result.data.links.length}`);
+                    
+                    // 显示成功消息
+                    alert(`数据刷新成功！\n\n实体数量: ${result.data.nodes.length}\n关系数量: ${result.data.links.length}`);
+                    
+                } else {
+                    throw new Error(result.msg || '数据加载失败');
+                }
+                
+            } catch (error) {
+                log(`刷新数据失败: ${error.message}`);
+                alert(`刷新数据失败：${error.message}`);
+            } finally {
+                // 恢复按钮状态
+                const refreshButton = document.getElementById('refresh-data');
+                if (refreshButton) {
+                    refreshButton.textContent = '🔄 刷新数据';
+                    refreshButton.disabled = false;
+                }
+            }
+        }
+        
+        // 绑定事件监听器
+        document.addEventListener('DOMContentLoaded', function() {
+            log('页面加载完成');
+            
+            const refreshDataBtn = document.getElementById('refresh-data');
+            if (refreshDataBtn) {
+                refreshDataBtn.addEventListener('click', refreshDataFromDatabase);
+                log('刷新按钮事件监听器已绑定');
+            } else {
+                log('错误：刷新按钮未找到');
+            }
+        });
+    </script>
+</body>
+</html>

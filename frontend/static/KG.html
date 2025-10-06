@@ -98,6 +98,21 @@
             background: linear-gradient(135deg, #f57c00 0%, #ff9800 100%);
         }
 
+        .mode-btn.refresh {
+            background: linear-gradient(135deg, #2196f3 0%, #42a5f5 100%);
+            color: white;
+        }
+
+        .mode-btn.refresh:hover {
+            background: linear-gradient(135deg, #1976d2 0%, #2196f3 100%);
+        }
+
+        .mode-btn.refresh:disabled {
+            background: linear-gradient(135deg, #ccc 0%, #ddd 100%);
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
         .mode-btn.active {
             transform: scale(1.05);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -1762,6 +1777,7 @@
             <div class="mode-switcher">
                 <button class="mode-btn preview active" onclick="switchToPreviewMode()">预览模式</button>
                 <button class="mode-btn data" onclick="switchToDataMode()">数据模式</button>
+                <button id="refresh-data" class="mode-btn refresh" onclick="refreshDataFromDatabase()">🔄 刷新数据</button>
             </div>
             
             <!-- 预览模式内容 -->
@@ -5596,7 +5612,10 @@
             clearRelationFormBtn.addEventListener('click', clearRelationForm);
 
             // 清空所有数据按钮事件
-            document.getElementById('clear-all-data').addEventListener('click', clearAllData);
+            const clearAllDataBtn = document.getElementById('clear-all-data');
+            if (clearAllDataBtn) {
+                clearAllDataBtn.addEventListener('click', clearAllData);
+            }
 
             searchBtn.addEventListener('click', searchAndLocate);
             searchInput.addEventListener('keypress', (e) => {
@@ -6160,6 +6179,71 @@
                 if (clearButton) {
                     clearButton.textContent = '一键清空数据';
                     clearButton.disabled = false;
+                }
+            }
+        }
+
+        // 刷新数据从数据库
+        async function refreshDataFromDatabase() {
+            console.log('refreshDataFromDatabase函数被调用');
+            try {
+                // 显示加载状态
+                const refreshButton = document.getElementById('refresh-data');
+                if (refreshButton) {
+                    const originalText = refreshButton.textContent;
+                    refreshButton.textContent = '刷新中...';
+                    refreshButton.disabled = true;
+                    refreshButton.style.cursor = 'not-allowed';
+                    console.log('刷新按钮状态已更新');
+                } else {
+                    console.error('刷新按钮未找到');
+                }
+                
+                console.log('开始从数据库刷新数据...');
+                
+                // 调用API重新加载数据
+                const response = await fetch('/api/kg/data');
+                if (!response.ok) {
+                    throw new Error(`HTTP错误${response.status}`);
+                }
+                
+                const result = await response.json();
+                if (result.ret === 0) {
+                    // 更新全局数据
+                    graphData = result.data;
+                    
+                    // 重新渲染图形
+                    if (currentMode === 'preview') {
+                        initializeGraph();
+                    }
+                    
+                    // 更新实体列表
+                    renderEntityList();
+                    
+                    // 更新关系类型下拉框
+                    updateRelationTypeDropdown();
+                    
+                    // 更新实体选择下拉框
+                    updateEntityDropdowns();
+                    
+                    console.log('数据刷新成功:', {
+                        实体数量: graphData.nodes.length,
+                        关系数量: graphData.links.length
+                    });
+                    
+                } else {
+                    throw new Error(result.msg || '数据加载失败');
+                }
+                
+            } catch (error) {
+                console.error('刷新数据失败:', error);
+            } finally {
+                // 恢复按钮状态
+                const refreshButton = document.getElementById('refresh-data');
+                if (refreshButton) {
+                    refreshButton.textContent = '🔄 刷新数据';
+                    refreshButton.disabled = false;
+                    refreshButton.style.cursor = 'pointer';
                 }
             }
         }
