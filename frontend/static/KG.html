@@ -2247,7 +2247,22 @@
             updateEntityDropdowns();
             updateRelationTypeDropdown();
             renderEntityList();
-            initializeGraph();
+            
+            // 使用与switchToPreviewMode相同的逻辑初始化图形
+            // 重新启用右侧面板功能（这会调用resetDomainSelector和filterDataByDomain）
+            enableRightPanel();
+            
+            // 重新初始化图形
+            if (graphData && graphData.nodes && graphData.nodes.length > 0) {
+                // 确保数据格式正确
+                console.log('页面初始化，当前数据:', graphData);
+                initializeGraph();
+            } else {
+                console.log('没有数据，重新加载...');
+                // 如果没有数据，重新加载
+                loadGraphData();
+            }
+            
             setupEventListeners();
             // 初始化实体表单默认值
             populateDefaultEntityValues();
@@ -6212,9 +6227,21 @@
                     // 更新全局数据
                     graphData = result.data;
                     
-                    // 重新渲染图形
+                    // 完全模拟switchToPreviewMode的逻辑
                     if (currentMode === 'preview') {
-                        initializeGraph();
+                        // 重新启用右侧面板功能（这会调用resetDomainSelector和filterDataByDomain）
+                        enableRightPanel();
+                        
+                        // 重新初始化图形
+                        if (graphData && graphData.nodes && graphData.nodes.length > 0) {
+                            // 确保数据格式正确
+                            console.log('刷新数据，当前数据:', graphData);
+                            initializeGraph();
+                        } else {
+                            console.log('没有数据，重新加载...');
+                            // 如果没有数据，重新加载
+                            loadGraphData();
+                        }
                     }
                     
                     // 更新实体列表
@@ -7202,6 +7229,15 @@
             document.querySelector('.mode-btn.preview').classList.add('active');
             document.querySelector('.mode-btn.data').classList.remove('active');
             
+            // 启用刷新按钮
+            const refreshBtn = document.getElementById('refresh-data');
+            if (refreshBtn) {
+                refreshBtn.disabled = false;
+                refreshBtn.style.opacity = '1';
+                refreshBtn.style.cursor = 'pointer';
+                console.log('刷新按钮已启用');
+            }
+            
             // 显示预览模式，隐藏数据模式
             document.getElementById('preview-mode').style.display = 'block';
             document.getElementById('data-mode').classList.remove('active');
@@ -7236,9 +7272,18 @@
             // 更新按钮状态
             const previewBtn = document.querySelector('.mode-btn.preview');
             const dataBtn = document.querySelector('.mode-btn.data');
+            const refreshBtn = document.getElementById('refresh-data');
             
             if (previewBtn) previewBtn.classList.remove('active');
             if (dataBtn) dataBtn.classList.add('active');
+            
+            // 禁用刷新按钮
+            if (refreshBtn) {
+                refreshBtn.disabled = true;
+                refreshBtn.style.opacity = '0.5';
+                refreshBtn.style.cursor = 'not-allowed';
+                console.log('刷新按钮已禁用');
+            }
             
             // 隐藏预览模式，显示数据模式
             const previewMode = document.getElementById('preview-mode');
