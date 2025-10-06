@@ -684,6 +684,58 @@
             opacity: 1;
         }
 
+        /* 右键操作菜单样式 */
+        .context-menu {
+            position: fixed;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 8px 0;
+            z-index: 10000;
+            display: none;
+            min-width: 160px;
+        }
+
+        .context-menu.visible {
+            display: block;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-size: 14px;
+        }
+
+        .menu-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        .menu-item.danger:hover {
+            background-color: #ffebee;
+            color: #d32f2f;
+        }
+
+        .menu-icon {
+            margin-right: 10px;
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .menu-text {
+            flex: 1;
+        }
+
+        /* 节点选中状态样式 */
+        .node.selected {
+            stroke: #ff6b6b;
+            stroke-width: 3px;
+        }
+
         /* 关系边样式 - 带箭头 */
         .links line {
             stroke: #90a4ae;
@@ -1789,6 +1841,22 @@
                 <p><strong>ID：</strong><span id="tooltip-id"></span></p>
                 <p><strong>领域：</strong><span id="tooltip-domain"></span></p>
                 <p><strong>描述：</strong><span id="tooltip-desc"></span></p>
+            </div>
+            
+            <!-- 右键操作菜单 -->
+            <div id="context-menu" class="context-menu">
+                <div class="menu-item" id="add-entity-menu">
+                    <span class="menu-icon">➕</span>
+                    <span class="menu-text">新增实体</span>
+                </div>
+                <div class="menu-item" id="delete-entity-menu">
+                    <span class="menu-icon">🗑️</span>
+                    <span class="menu-text">删除实体</span>
+                </div>
+                <div class="menu-item" id="copy-entity-menu">
+                    <span class="menu-icon">📋</span>
+                    <span class="menu-text">复制实体</span>
+                </div>
             </div>
             <!-- 原有控制按钮 -->
             <div class="controls">
@@ -4000,6 +4068,12 @@
                 selectedNode = d;
                 selectedLink = null;
                 clearAllHighlights();
+                
+                // 清除所有节点的选中状态
+                nodeGroups.classed('selected', false);
+                // 设置当前节点为选中状态
+                d3.select(event.currentTarget).classed('selected', true);
+                
                 d3.select(event.currentTarget).classed('highlighted', true);
                 showEntityDetail(d);
                 centerNodeInView(d.id);
@@ -4110,6 +4184,18 @@
                         }
                     }, 30);
                 })
+                .on('contextmenu', function(event, d) {
+                    event.preventDefault(); // 阻止默认右键菜单
+                    
+                    // 确保节点被选中
+                    selectedNode = d;
+                    clearAllHighlights();
+                    nodeGroups.classed('selected', false);
+                    d3.select(event.currentTarget).classed('selected', true);
+                    
+                    // 显示右键菜单
+                    showContextMenu(event, d);
+                });
 
             // 存储箭头元素引用，添加数据属性标识对应的关系索引
             arrowElements = svg.selectAll('.arrowhead');
@@ -4385,6 +4471,297 @@
             const tooltip = document.getElementById('entity-tooltip');
             if (tooltip) {
                 tooltip.classList.remove('visible');
+            }
+        }
+
+        // 显示右键菜单
+        function showContextMenu(event, nodeData) {
+            const contextMenu = document.getElementById('context-menu');
+            if (!contextMenu) return;
+
+            // 设置菜单位置
+            const x = event.clientX;
+            const y = event.clientY;
+            
+            // 确保菜单不超出屏幕边界
+            const menuWidth = 160;
+            const menuHeight = 120;
+            const finalX = x + menuWidth > window.innerWidth ? x - menuWidth : x;
+            const finalY = y + menuHeight > window.innerHeight ? y - menuHeight : y;
+
+            contextMenu.style.left = `${finalX}px`;
+            contextMenu.style.top = `${finalY}px`;
+            contextMenu.classList.add('visible');
+
+            // 设置删除按钮为危险样式
+            const deleteItem = document.getElementById('delete-entity-menu');
+            if (deleteItem) {
+                deleteItem.classList.add('danger');
+            }
+        }
+
+        // 隐藏右键菜单
+        function hideContextMenu() {
+            const contextMenu = document.getElementById('context-menu');
+            if (contextMenu) {
+                contextMenu.classList.remove('visible');
+            }
+        }
+
+        // 从右键菜单新增实体
+        async function addNewEntityFromContext() {
+            if (!selectedNode) return;
+            
+            try {
+                // 生成新实体的合理属性
+                const baseId = selectedNode.id;
+                const baseName = selectedNode.name;
+                const baseDomain = selectedNode.domain || 'default';
+                
+                // 生成新的ID（避免重复）
+                let newId = `${baseId}_new`;
+                let counter = 1;
+                while (graphData.nodes.some(node => node.id === newId)) {
+                    newId = `${baseId}_new_${counter}`;
+                    counter++;
+                }
+                
+                // 生成新的名称
+                const newName = `${baseName}相关实体`;
+                
+                // 创建新实体
+                const newEntity = {
+                    id: newId,
+                    name: newName,
+                    type: selectedNode.type || '',
+                    description: `基于${baseName}创建的新实体`,
+                    domain: baseDomain
+                };
+                
+                // 1. 先保存实体到数据库
+                const entityResponse = await fetch('/api/kg/entities', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newEntity)
+                });
+                
+                if (!entityResponse.ok) {
+                    throw new Error(`保存实体失败: ${entityResponse.status}`);
+                }
+                
+                const entityResult = await entityResponse.json();
+                if (entityResult.ret !== 0) {
+                    throw new Error(`保存实体失败: ${entityResult.msg}`);
+                }
+                
+                // 2. 创建与原实体的关系
+                const newRelation = {
+                    source: selectedNode.id,
+                    target: newId,
+                    type: '相关',
+                    description: '基于右键菜单创建的关系',
+                    domain: baseDomain
+                };
+                
+                // 保存关系到数据库
+                const relationResponse = await fetch('/api/kg/relationships', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newRelation)
+                });
+                
+                if (!relationResponse.ok) {
+                    throw new Error(`保存关系失败: ${relationResponse.status}`);
+                }
+                
+                const relationResult = await relationResponse.json();
+                if (relationResult.ret !== 0) {
+                    throw new Error(`保存关系失败: ${relationResult.msg}`);
+                }
+                
+                // 3. 更新本地数据
+                graphData.nodes.push(newEntity);
+                graphData.links.push(newRelation);
+                
+                // 4. 更新界面
+                renderEntityList();
+                updateEntityDropdowns();
+                updateRelationTypeDropdown();
+                initializeGraph();
+                
+                console.log('新增实体成功:', newEntity);
+                console.log('新增关系成功:', newRelation);
+                
+                // 5. 显示成功消息
+                alert(`新增实体"${newName}"成功！\n\n已同步到数据库。`);
+                
+            } catch (error) {
+                console.error('新增实体失败:', error);
+                alert(`新增实体失败: ${error.message}`);
+            }
+        }
+
+        // 从右键菜单删除实体
+        async function deleteEntityFromContext() {
+            if (!selectedNode) return;
+            
+            const entityId = selectedNode.id;
+            const entityName = selectedNode.name;
+            
+            // 确认删除
+            if (!confirm(`确定要删除实体"${entityName}"吗？\n\n这将同时删除所有与该实体相关的关系。`)) {
+                return;
+            }
+            
+            try {
+                // 1. 先获取所有相关关系
+                const relationsToDelete = graphData.links.filter(link => 
+                    link.source === entityId || link.target === entityId
+                );
+                
+                // 2. 从数据库删除所有相关关系
+                for (const relation of relationsToDelete) {
+                    if (relation.id) {
+                        const relationResponse = await fetch(`/api/kg/relationships/${relation.id}`, {
+                            method: 'DELETE'
+                        });
+                        
+                        if (!relationResponse.ok) {
+                            console.warn(`删除关系失败: ${relation.id}`);
+                        }
+                    }
+                }
+                
+                // 3. 从数据库删除实体
+                const entityResponse = await fetch(`/api/kg/entities/${entityId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (!entityResponse.ok) {
+                    throw new Error(`删除实体失败: ${entityResponse.status}`);
+                }
+                
+                const entityResult = await entityResponse.json();
+                if (entityResult.ret !== 0) {
+                    throw new Error(`删除实体失败: ${entityResult.msg}`);
+                }
+                
+                // 4. 更新本地数据
+                graphData.nodes = graphData.nodes.filter(node => node.id !== entityId);
+                graphData.links = graphData.links.filter(link => 
+                    link.source !== entityId && link.target !== entityId
+                );
+                
+                // 5. 清除选中状态
+                selectedNode = null;
+                
+                // 6. 更新界面
+                renderEntityList();
+                updateEntityDropdowns();
+                updateRelationTypeDropdown();
+                initializeGraph();
+                
+                console.log(`删除实体"${entityName}"成功，同时删除了${relationsToDelete.length}个关系`);
+                
+                // 7. 显示成功消息
+                alert(`删除实体"${entityName}"成功！\n\n已从数据库同步删除。`);
+                
+            } catch (error) {
+                console.error('删除实体失败:', error);
+                alert(`删除实体失败: ${error.message}`);
+            }
+        }
+
+        // 从右键菜单复制实体
+        async function copyEntityFromContext() {
+            if (!selectedNode) return;
+            
+            try {
+                const originalEntity = selectedNode;
+                const baseId = originalEntity.id;
+                const baseName = originalEntity.name;
+                const baseDomain = originalEntity.domain || 'default';
+                
+                // 生成新的ID（避免重复）
+                let newId = `${baseId}_copy`;
+                let counter = 1;
+                while (graphData.nodes.some(node => node.id === newId)) {
+                    newId = `${baseId}_copy_${counter}`;
+                    counter++;
+                }
+                
+                // 生成新的名称
+                const newName = `${baseName}副本`;
+                
+                // 创建复制的实体
+                const copiedEntity = {
+                    id: newId,
+                    name: newName,
+                    type: originalEntity.type || '',
+                    description: `基于${baseName}复制的实体`,
+                    domain: baseDomain
+                };
+                
+                // 1. 先保存复制的实体到数据库
+                const entityResponse = await fetch('/api/kg/entities', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(copiedEntity)
+                });
+                
+                if (!entityResponse.ok) {
+                    throw new Error(`保存复制实体失败: ${entityResponse.status}`);
+                }
+                
+                const entityResult = await entityResponse.json();
+                if (entityResult.ret !== 0) {
+                    throw new Error(`保存复制实体失败: ${entityResult.msg}`);
+                }
+                
+                // 2. 创建与原实体的关系
+                const copyRelation = {
+                    source: originalEntity.id,
+                    target: newId,
+                    type: '复制',
+                    description: '基于右键菜单复制的实体',
+                    domain: baseDomain
+                };
+                
+                // 保存复制关系到数据库
+                const relationResponse = await fetch('/api/kg/relationships', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(copyRelation)
+                });
+                
+                if (!relationResponse.ok) {
+                    throw new Error(`保存复制关系失败: ${relationResponse.status}`);
+                }
+                
+                const relationResult = await relationResponse.json();
+                if (relationResult.ret !== 0) {
+                    throw new Error(`保存复制关系失败: ${relationResult.msg}`);
+                }
+                
+                // 3. 更新本地数据
+                graphData.nodes.push(copiedEntity);
+                graphData.links.push(copyRelation);
+                
+                // 4. 更新界面
+                renderEntityList();
+                updateEntityDropdowns();
+                updateRelationTypeDropdown();
+                initializeGraph();
+                
+                console.log('复制实体成功:', copiedEntity);
+                console.log('创建复制关系成功:', copyRelation);
+                
+                // 5. 显示成功消息
+                alert(`复制实体"${newName}"成功！\n\n已同步到数据库。`);
+                
+            } catch (error) {
+                console.error('复制实体失败:', error);
+                alert(`复制实体失败: ${error.message}`);
             }
         }
 
@@ -5678,6 +6055,40 @@
                     this.classList.remove('visible');
                 });
             }
+
+            // 右键菜单事件监听器
+            const addEntityMenu = document.getElementById('add-entity-menu');
+            const deleteEntityMenu = document.getElementById('delete-entity-menu');
+            const copyEntityMenu = document.getElementById('copy-entity-menu');
+
+            if (addEntityMenu) {
+                addEntityMenu.addEventListener('click', () => {
+                    hideContextMenu();
+                    addNewEntityFromContext();
+                });
+            }
+
+            if (deleteEntityMenu) {
+                deleteEntityMenu.addEventListener('click', () => {
+                    hideContextMenu();
+                    deleteEntityFromContext();
+                });
+            }
+
+            if (copyEntityMenu) {
+                copyEntityMenu.addEventListener('click', () => {
+                    hideContextMenu();
+                    copyEntityFromContext();
+                });
+            }
+
+            // 点击其他地方隐藏右键菜单
+            document.addEventListener('click', (event) => {
+                const contextMenu = document.getElementById('context-menu');
+                if (contextMenu && !contextMenu.contains(event.target)) {
+                    hideContextMenu();
+                }
+            });
 
             zoomInBtn.addEventListener('click', zoomIn);
             zoomOutBtn.addEventListener('click', zoomOut);
