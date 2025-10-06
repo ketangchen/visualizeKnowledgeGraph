@@ -169,8 +169,20 @@ def entity_detail(request, entity_id: str):
         return JsonResponse({"ret": 0, "msg": "updated"})
 
     # DELETE
+    # 获取要删除的关系数量（用于日志记录）
+    related_relationships = Relationship.objects.filter(
+        models.Q(source=entity) | models.Q(target=entity)
+    )
+    relationship_count = related_relationships.count()
+    
+    # 删除实体（会自动级联删除相关关系）
     entity.delete()
-    return JsonResponse({"ret": 0, "msg": "deleted"})
+    
+    return JsonResponse({
+        "ret": 0, 
+        "msg": "deleted",
+        "deleted_relationships": relationship_count
+    })
 
 
 # -----------------------------

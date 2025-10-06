@@ -1845,17 +1845,13 @@
             
             <!-- 右键操作菜单 -->
             <div id="context-menu" class="context-menu">
-                <div class="menu-item" id="add-entity-menu">
-                    <span class="menu-icon">➕</span>
-                    <span class="menu-text">新增实体</span>
+                <div class="menu-item" id="copy-entity-menu">
+                    <span class="menu-icon">📋</span>
+                    <span class="menu-text">复制实体</span>
                 </div>
                 <div class="menu-item" id="delete-entity-menu">
                     <span class="menu-icon">🗑️</span>
                     <span class="menu-text">删除实体</span>
-                </div>
-                <div class="menu-item" id="copy-entity-menu">
-                    <span class="menu-icon">📋</span>
-                    <span class="menu-text">复制实体</span>
                 </div>
             </div>
             <!-- 原有控制按钮 -->
@@ -4614,25 +4610,14 @@
             }
             
             try {
-                // 1. 先获取所有相关关系
-                const relationsToDelete = graphData.links.filter(link => 
-                    link.source === entityId || link.target === entityId
-                );
+                // 1. 获取要删除的关系数量（用于显示）
+                const relationsToDelete = graphData.links.filter(link => {
+                    const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
+                    const targetId = typeof link.target === 'object' ? link.target.id : link.target;
+                    return sourceId === entityId || targetId === entityId;
+                });
                 
-                // 2. 从数据库删除所有相关关系
-                for (const relation of relationsToDelete) {
-                    if (relation.id) {
-                        const relationResponse = await fetch(`/api/kg/relationships/${relation.id}`, {
-                            method: 'DELETE'
-                        });
-                        
-                        if (!relationResponse.ok) {
-                            console.warn(`删除关系失败: ${relation.id}`);
-                        }
-                    }
-                }
-                
-                // 3. 从数据库删除实体
+                // 2. 从数据库删除实体（会自动级联删除相关关系）
                 const entityResponse = await fetch(`/api/kg/entities/${entityId}`, {
                     method: 'DELETE'
                 });
@@ -4646,16 +4631,18 @@
                     throw new Error(`删除实体失败: ${entityResult.msg}`);
                 }
                 
-                // 4. 更新本地数据
+                // 3. 更新本地数据
                 graphData.nodes = graphData.nodes.filter(node => node.id !== entityId);
-                graphData.links = graphData.links.filter(link => 
-                    link.source !== entityId && link.target !== entityId
-                );
+                graphData.links = graphData.links.filter(link => {
+                    const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
+                    const targetId = typeof link.target === 'object' ? link.target.id : link.target;
+                    return sourceId !== entityId && targetId !== entityId;
+                });
                 
-                // 5. 清除选中状态
+                // 4. 清除选中状态
                 selectedNode = null;
                 
-                // 6. 更新界面
+                // 5. 更新界面
                 renderEntityList();
                 updateEntityDropdowns();
                 updateRelationTypeDropdown();
@@ -4663,7 +4650,7 @@
                 
                 console.log(`删除实体"${entityName}"成功，同时删除了${relationsToDelete.length}个关系`);
                 
-                // 7. 显示成功消息
+                // 6. 显示成功消息
                 alert(`删除实体"${entityName}"成功！\n\n已从数据库同步删除。`);
                 
             } catch (error) {
@@ -6057,16 +6044,8 @@
             }
 
             // 右键菜单事件监听器
-            const addEntityMenu = document.getElementById('add-entity-menu');
             const deleteEntityMenu = document.getElementById('delete-entity-menu');
             const copyEntityMenu = document.getElementById('copy-entity-menu');
-
-            if (addEntityMenu) {
-                addEntityMenu.addEventListener('click', () => {
-                    hideContextMenu();
-                    addNewEntityFromContext();
-                });
-            }
 
             if (deleteEntityMenu) {
                 deleteEntityMenu.addEventListener('click', () => {
