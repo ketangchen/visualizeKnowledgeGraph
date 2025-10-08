@@ -3205,6 +3205,9 @@
             updateUsedRelationTypes();
             updateRelationTypeDropdown();
             updateDomainInfo();
+            
+            // 清除搜索缓存，确保搜索功能与最新数据同步
+            resetSearchState();
             updateDomainDropdown(null, '');
             
             // 重新渲染图表（保持当前视图）
@@ -3260,6 +3263,12 @@
                 }, 100);
                 
                 alert('实体添加成功');
+                
+                // 将新增的实体名称填充到搜索框
+                const searchInput = document.getElementById('search-input');
+                if (searchInput) {
+                    searchInput.value = name;
+                }
             } else {
                 alert('实体添加失败，请检查网络连接');
             }
@@ -3381,6 +3390,12 @@
                 waitForSimulation();
 
                 alert(`实体复制成功！新实体ID：${newId}`);
+                
+                // 将复制的实体名称填充到搜索框
+                const searchInput = document.getElementById('search-input');
+                if (searchInput) {
+                    searchInput.value = newName;
+                }
             } else {
                 alert('实体复制失败，请检查网络连接');
             }
@@ -3500,6 +3515,12 @@
                     ? `实体复制成功！新实体ID：${newId}，已建立与原实体的关系`
                     : `实体复制成功！新实体ID：${newId}`;
                 alert(successMsg);
+                
+                // 将复制的实体名称填充到搜索框
+                const searchInput = document.getElementById('search-input');
+                if (searchInput) {
+                    searchInput.value = newName;
+                }
 
             } catch (error) {
                 console.error('复制实体时发生错误:', error);
@@ -3508,14 +3529,20 @@
         }
 
         async function deleteEntity(id) {
-            if (!confirm('确定要删除此实体吗？关联的关系也将被删除')) return;
-
             // 获取要删除的实体及其关系信息
             const entityToDelete = graphData.nodes.find(node => node.id === id);
             if (!entityToDelete) {
                 alert('实体不存在');
                 return;
             }
+            
+            // 在删除前将实体名称填充到搜索框
+            const searchInput = document.getElementById('search-input');
+            if (searchInput) {
+                searchInput.value = entityToDelete.name;
+            }
+            
+            if (!confirm('确定要删除此实体吗？关联的关系也将被删除')) return;
 
             // 查找与被删除实体相关的所有关系
             const relatedLinks = graphData.links.filter(link => {
@@ -3566,6 +3593,12 @@
                     detailView.innerHTML = '<div class="no-data">选择一个实体或关系查看详情</div>';
                 }
 
+                // 将删除的实体名称填充到搜索框
+                const searchInput = document.getElementById('search-input');
+                if (searchInput) {
+                    searchInput.value = entityToDelete.name;
+                }
+                
                 resetSearchState();
 
                 // 根据关系数量决定删除后的显示逻辑
@@ -4591,6 +4624,12 @@
                 // 5. 显示成功消息
                 alert(`新增实体"${newName}"成功！\n\n已同步到数据库。`);
                 
+                // 将新增的实体名称填充到搜索框
+                const searchInput = document.getElementById('search-input');
+                if (searchInput) {
+                    searchInput.value = newName;
+                }
+                
             } catch (error) {
                 console.error('新增实体失败:', error);
                 alert(`新增实体失败: ${error.message}`);
@@ -4603,6 +4642,12 @@
             
             const entityId = selectedNode.id;
             const entityName = selectedNode.name;
+            
+            // 在删除前将实体名称填充到搜索框
+            const searchInput = document.getElementById('search-input');
+            if (searchInput) {
+                searchInput.value = entityName;
+            }
             
             // 确认删除
             if (!confirm(`确定要删除实体"${entityName}"吗？\n\n这将同时删除所有与该实体相关的关系。`)) {
@@ -4647,6 +4692,15 @@
                 updateEntityDropdowns();
                 updateRelationTypeDropdown();
                 initializeGraph();
+                
+                // 将删除的实体名称填充到搜索框
+                const searchInput = document.getElementById('search-input');
+                if (searchInput) {
+                    searchInput.value = entityName;
+                }
+                
+                // 清除搜索缓存
+                resetSearchState();
                 
                 console.log(`删除实体"${entityName}"成功，同时删除了${relationsToDelete.length}个关系`);
                 
@@ -4745,6 +4799,12 @@
                 
                 // 5. 显示成功消息
                 alert(`复制实体"${newName}"成功！\n\n已同步到数据库。`);
+                
+                // 将复制的实体名称填充到搜索框
+                const searchInput = document.getElementById('search-input');
+                if (searchInput) {
+                    searchInput.value = newName;
+                }
                 
             } catch (error) {
                 console.error('复制实体失败:', error);
