@@ -1843,8 +1843,12 @@
                 <p><strong>描述：</strong><span id="tooltip-desc"></span></p>
             </div>
             
-            <!-- 右键操作菜单 -->
+            <!-- 实体右键操作菜单 -->
             <div id="context-menu" class="context-menu">
+                <div class="menu-item" id="edit-entity-menu">
+                    <span class="menu-icon">✏️</span>
+                    <span class="menu-text">编辑实体</span>
+                </div>
                 <div class="menu-item" id="copy-entity-menu">
                     <span class="menu-icon">📋</span>
                     <span class="menu-text">复制实体</span>
@@ -1852,6 +1856,18 @@
                 <div class="menu-item" id="delete-entity-menu">
                     <span class="menu-icon">🗑️</span>
                     <span class="menu-text">删除实体</span>
+                </div>
+            </div>
+            
+            <!-- 关系右键操作菜单 -->
+            <div id="relation-context-menu" class="context-menu">
+                <div class="menu-item" id="edit-relation-menu">
+                    <span class="menu-icon">✏️</span>
+                    <span class="menu-text">编辑关系</span>
+                </div>
+                <div class="menu-item" id="delete-relation-menu">
+                    <span class="menu-icon">🗑️</span>
+                    <span class="menu-text">删除关系</span>
                 </div>
             </div>
             <!-- 原有控制按钮 -->
@@ -4035,6 +4051,19 @@
                     showRelationDetail(d);
                     centerRelationInView(d);
                     resetSearchState();
+                })
+                .on('contextmenu', function(event, d) {
+                    event.preventDefault(); // 阻止默认右键菜单
+                    
+                    // 确保关系被选中
+                    selectedLink = d;
+                    clearAllHighlights();
+                    
+                    // 高亮当前关系及相关实体和箭头
+                    highlightRelationAndEntities(d);
+                    
+                    // 显示关系右键菜单
+                    showRelationContextMenu(event, d);
                 });
 
             // 绘制连线标签
@@ -4529,11 +4558,45 @@
             }
         }
 
+        // 显示关系右键菜单
+        function showRelationContextMenu(event, linkData) {
+            const relationContextMenu = document.getElementById('relation-context-menu');
+            if (!relationContextMenu) return;
+
+            // 设置菜单位置
+            const x = event.clientX;
+            const y = event.clientY;
+            
+            // 确保菜单不超出屏幕边界
+            const menuWidth = 160;
+            const menuHeight = 80;
+            const finalX = x + menuWidth > window.innerWidth ? x - menuWidth : x;
+            const finalY = y + menuHeight > window.innerHeight ? y - menuHeight : y;
+
+            relationContextMenu.style.left = `${finalX}px`;
+            relationContextMenu.style.top = `${finalY}px`;
+            relationContextMenu.classList.add('visible');
+
+            // 设置删除按钮为危险样式
+            const deleteItem = document.getElementById('delete-relation-menu');
+            if (deleteItem) {
+                deleteItem.classList.add('danger');
+            }
+        }
+
         // 隐藏右键菜单
         function hideContextMenu() {
             const contextMenu = document.getElementById('context-menu');
             if (contextMenu) {
                 contextMenu.classList.remove('visible');
+            }
+        }
+
+        // 隐藏关系右键菜单
+        function hideRelationContextMenu() {
+            const relationContextMenu = document.getElementById('relation-context-menu');
+            if (relationContextMenu) {
+                relationContextMenu.classList.remove('visible');
             }
         }
 
@@ -4713,6 +4776,19 @@
             }
         }
 
+        // 从右键菜单编辑实体
+        function editEntityFromContext() {
+            if (!selectedNode) return;
+            
+            // 切换到编辑模式
+            if (currentMode !== 'preview') {
+                switchToPreviewMode();
+            }
+            
+            // 开始编辑选中的实体
+            startEditEntity(selectedNode.id);
+        }
+
         // 从右键菜单复制实体
         async function copyEntityFromContext() {
             if (!selectedNode) return;
@@ -4809,6 +4885,69 @@
             } catch (error) {
                 console.error('复制实体失败:', error);
                 alert(`复制实体失败: ${error.message}`);
+            }
+        }
+
+        // 从右键菜单编辑关系
+        function editRelationFromContext() {
+            if (!selectedLink) return;
+            
+            // 切换到编辑模式
+            if (currentMode !== 'preview') {
+                switchToPreviewMode();
+            }
+            
+            // 找到关系的索引
+            const linkIndex = graphData.links.findIndex(link => 
+                link.id === selectedLink.id || 
+                (link.source === selectedLink.source && link.target === selectedLink.target && link.type === selectedLink.type)
+            );
+            
+            if (linkIndex >= 0) {
+                // 开始编辑选中的关系
+                startEditRelation(linkIndex);
+            } else {
+                alert('无法找到要编辑的关系');
+            }
+        }
+
+        // 从右键菜单删除关系
+        async function deleteRelationFromContext() {
+            if (!selectedLink) return;
+            
+            const relationId = selectedLink.id;
+            const relationType = selectedLink.type;
+            const sourceName = typeof selectedLink.source === 'object' ? selectedLink.source.name : 
+                              graphData.nodes.find(n => n.id === selectedLink.source)?.name || selectedLink.source;
+            const targetName = typeof selectedLink.target === 'object' ? selectedLink.target.name : 
+                              graphData.nodes.find(n => n.id === selectedLink.target)?.name || selectedLink.target;
+            
+            // 确认删除
+            if (!confirm(`确定要删除关系"${relationType}"吗？\n\n从"${sourceName}"到"${targetName}"`)) {
+                return;
+            }
+            
+            try {
+                // 调用后端API删除关系
+                const success = await deleteRelationshipAPI(relationId);
+                if (success) {
+                    // 从本地数据中删除关系
+                    graphData.links = graphData.links.filter(link => link.id !== relationId);
+                    
+                    // 更新图形显示
+                    updateGraphDataLocally();
+                    
+                    // 清除选中状态
+                    selectedLink = null;
+                    clearAllHighlights();
+                    
+                    console.log('关系删除成功');
+                } else {
+                    alert('关系删除失败，请检查网络连接');
+                }
+            } catch (error) {
+                console.error('删除关系失败:', error);
+                alert(`删除关系失败: ${error.message}`);
             }
         }
 
@@ -5752,6 +5891,12 @@
                 }
 
                 alert('实体更新成功');
+                
+                // 将更新后的实体名填充到搜索框
+                const searchInput = document.getElementById('search-input');
+                if (searchInput) {
+                    searchInput.value = name;
+                }
             } else {
                 alert('实体更新失败，请检查网络连接');
             }
@@ -6103,9 +6248,17 @@
                 });
             }
 
-            // 右键菜单事件监听器
+            // 实体右键菜单事件监听器
+            const editEntityMenu = document.getElementById('edit-entity-menu');
             const deleteEntityMenu = document.getElementById('delete-entity-menu');
             const copyEntityMenu = document.getElementById('copy-entity-menu');
+
+            if (editEntityMenu) {
+                editEntityMenu.addEventListener('click', () => {
+                    hideContextMenu();
+                    editEntityFromContext();
+                });
+            }
 
             if (deleteEntityMenu) {
                 deleteEntityMenu.addEventListener('click', () => {
@@ -6121,11 +6274,35 @@
                 });
             }
 
+            // 关系右键菜单事件监听器
+            const editRelationMenu = document.getElementById('edit-relation-menu');
+            const deleteRelationMenu = document.getElementById('delete-relation-menu');
+
+            if (editRelationMenu) {
+                editRelationMenu.addEventListener('click', () => {
+                    hideRelationContextMenu();
+                    editRelationFromContext();
+                });
+            }
+
+            if (deleteRelationMenu) {
+                deleteRelationMenu.addEventListener('click', () => {
+                    hideRelationContextMenu();
+                    deleteRelationFromContext();
+                });
+            }
+
             // 点击其他地方隐藏右键菜单
             document.addEventListener('click', (event) => {
                 const contextMenu = document.getElementById('context-menu');
+                const relationContextMenu = document.getElementById('relation-context-menu');
+                
                 if (contextMenu && !contextMenu.contains(event.target)) {
                     hideContextMenu();
+                }
+                
+                if (relationContextMenu && !relationContextMenu.contains(event.target)) {
+                    hideRelationContextMenu();
                 }
             });
 
