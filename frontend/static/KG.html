@@ -650,16 +650,18 @@
             border: 2px solid #4dd0e1;
             border-radius: 8px;
             padding: 10px;
-            background: transparent; /* 透明背景 */
+            background: rgba(255, 255, 255, 0.95); /* 半透明白色背景，便于阅读 */
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             font-size: 14px;
             z-index: 1000;
-            pointer-events: auto; /* 允许鼠标交互 */
+            pointer-events: auto; /* 允许鼠标交互，用于滚动 */
             opacity: 0;
             transition: opacity 0.3s ease;
             left: 0;
             top: 0;
             overflow-y: auto; /* 垂直滚动条 */
+            display: none; /* 默认隐藏 */
+            backdrop-filter: blur(10px); /* 背景模糊效果 */
         }
 
 
@@ -678,9 +680,29 @@
             white-space: pre-wrap; /* 保留换行符和空格 */
             word-wrap: break-word; /* 长单词自动换行 */
         }
+        
+        /* 悬浮窗口滚动条样式 */
+        .entity-tooltip::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .entity-tooltip::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 3px;
+        }
+        
+        .entity-tooltip::-webkit-scrollbar-thumb {
+            background: rgba(77, 208, 225, 0.6);
+            border-radius: 3px;
+        }
+        
+        .entity-tooltip::-webkit-scrollbar-thumb:hover {
+            background: rgba(77, 208, 225, 0.8);
+        }
 
         /* 显示悬浮框时的样式 */
         .entity-tooltip.visible {
+            display: block;
             opacity: 1;
         }
 
@@ -745,8 +767,6 @@
 
         /* 箭头标记定义 */
         .arrowhead {
-            fill: none;
-            stroke: #90a4ae;
             stroke-width: 1.5px;
             stroke-opacity: 0.8;
             transition: all 0.3s ease;
@@ -1813,12 +1833,12 @@
                 <div class="form-group">
                     <label for="edge-type">边类型</label>
                     <select id="edge-type" class="form-control">
-                        <option value="solid-arrow">实线 + 箭头</option>
+                        <option value="solid-arrow">实线 + 实心黑色三角箭头</option>
+                        <option value="dashed-arrow">虚线 + 实心黑色三角箭头</option>
                         <option value="solid-triangle">实线 + 空心三角箭头</option>
                         <option value="dashed-triangle">虚线 + 空心三角箭头</option>
-                        <option value="hollow-diamond">空心菱形 + 实线</option>
-                        <option value="solid-diamond">实心菱形 + 实线</option>
-                        <option value="dashed-arrow">虚线 + 箭头</option>
+                        <option value="hollow-diamond">实线 + 空心菱形</option>
+                        <option value="solid-diamond">实线 + 实心黑色菱形</option> 
                     </select>
                 </div>
                 <div class="btn-group">
@@ -3511,12 +3531,13 @@
 
         // 生成不重复的实体ID
         function generateUniqueEntityId(originalId) {
-            // 尝试在原ID后添加数字后缀（如原ID为"1"，尝试"1_1"、"1_2"...）
-            let suffix = 1;
-            let newId = `${originalId}_${suffix}`;
+            // 生成时间戳作为ID，确保唯一性
+            const timestamp = Date.now();
+            let newId = `${timestamp}`;
+            
+            // 如果时间戳已存在，添加随机数
             while (allGraphData.nodes.some(node => node.id === newId)) {
-                suffix++;
-                newId = `${originalId}_${suffix}`;
+                newId = `${timestamp}_${Math.floor(Math.random() * 1000)}`;
             }
             return newId;
         }
@@ -4098,8 +4119,9 @@
                         marker.append('path')
                             .attr('d', 'M0,-5L10,0L0,5Z')
                             .attr('class', 'arrowhead')
-                            .attr('fill', '#666')
-                            .attr('stroke', 'none');
+                            .attr('fill', '#000000')
+                            .attr('stroke', '#000000')
+                            .attr('stroke-width', 1);
                         break;
                     case 'solid-triangle':
                         marker.append('path')
@@ -4351,7 +4373,22 @@
                     
                     tooltip.style.left = `${tooltipX}px`;
                     tooltip.style.top = `${tooltipY}px`;
+                    tooltip.style.display = 'block';
                     tooltip.classList.add('visible');
+                    
+                    // 悬浮窗口的鼠标事件处理（避免重复添加）
+                    if (!tooltip.hasAttribute('data-events-added')) {
+                        tooltip.addEventListener('mouseenter', function() {
+                            tooltipShouldShow = true;
+                        });
+                        
+                        tooltip.addEventListener('mouseleave', function() {
+                            tooltipShouldShow = false;
+                            hideTooltip();
+                        });
+                        
+                        tooltip.setAttribute('data-events-added', 'true');
+                    }
                     
                     // 不显示背景遮罩，只在节点上显示悬浮窗口
                 })
@@ -4393,13 +4430,11 @@
                     // 设置悬浮窗口不应该显示
                     tooltipShouldShow = false;
                     
-                    // 延迟隐藏tooltip，给用户时间移动到tooltip上
-                    setTimeout(() => {
-                        const tooltip = document.getElementById('entity-tooltip');
-                        if (!tooltip.matches(':hover') && !tooltipShouldShow) {
-                            tooltip.classList.remove('visible');
-                        }
-                    }, 30);
+                    // 立即隐藏tooltip
+                    const tooltip = document.getElementById('entity-tooltip');
+                    if (tooltip) {
+                        tooltip.classList.remove('visible');
+                    }
                 })
                 .on('contextmenu', function(event, d) {
                     event.preventDefault(); // 阻止默认右键菜单
@@ -4544,6 +4579,10 @@
                 selectedLink = null;
                 detailView.innerHTML = '<div class="no-data">选择一个实体或关系查看详情</div>';
                 resetSearchState();
+                
+                // 点击空白处时隐藏悬浮窗口并重置状态
+                hideTooltip();
+                tooltipShouldShow = false;
             }
         }
 
@@ -4688,6 +4727,7 @@
             const tooltip = document.getElementById('entity-tooltip');
             if (tooltip) {
                 tooltip.classList.remove('visible');
+                tooltip.style.display = 'none';
             }
         }
 
@@ -5722,12 +5762,12 @@
                     <div class="form-group">
                         <label for="edit-edge-type">边类型</label>
                         <select id="edit-edge-type" class="form-control">
-                            <option value="solid-arrow" ${link.edgeType === 'solid-arrow' ? 'selected' : ''}>实线 + 箭头</option>
+                            <option value="solid-arrow" ${link.edgeType === 'solid-arrow' ? 'selected' : ''}>实线 + 实心黑色三角箭头</option>
+                            <option value="dashed-arrow" ${link.edgeType === 'dashed-arrow' ? 'selected' : ''}>虚线 + 实心黑色三角箭头</option>
                             <option value="solid-triangle" ${link.edgeType === 'solid-triangle' ? 'selected' : ''}>实线 + 空心三角箭头</option>
                             <option value="dashed-triangle" ${link.edgeType === 'dashed-triangle' ? 'selected' : ''}>虚线 + 空心三角箭头</option>
-                            <option value="hollow-diamond" ${link.edgeType === 'hollow-diamond' ? 'selected' : ''}>空心菱形 + 实线</option>
-                            <option value="solid-diamond" ${link.edgeType === 'solid-diamond' ? 'selected' : ''}>实心菱形 + 实线</option>
-                            <option value="dashed-arrow" ${link.edgeType === 'dashed-arrow' ? 'selected' : ''}>虚线 + 箭头</option>
+                            <option value="hollow-diamond" ${link.edgeType === 'hollow-diamond' ? 'selected' : ''}>实线 + 空心菱形</option>
+                            <option value="solid-diamond" ${link.edgeType === 'solid-diamond' ? 'selected' : ''}>实线 + 实心黑色菱形</option>
                         </select>
                     </div>
                     <div class="btn-group">
@@ -6761,6 +6801,15 @@
                 if (graphData.nodes.length > 0) {
                     reloadGraph();
                     fitView();
+                }
+            });
+            
+            // 全局点击事件：点击任何地方都隐藏悬浮窗口
+            document.addEventListener('click', function(event) {
+                // 如果点击的不是实体节点和悬浮窗口本身，隐藏悬浮窗口
+                if (!event.target.closest('.nodes circle') && !event.target.closest('.entity-tooltip')) {
+                    hideTooltip();
+                    tooltipShouldShow = false;
                 }
             });
         }
