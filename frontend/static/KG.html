@@ -1853,6 +1853,10 @@
                     <span class="menu-icon">📋</span>
                     <span class="menu-text">复制实体</span>
                 </div>
+                <div class="menu-item" id="copy-5-entities-menu">
+                    <span class="menu-icon">📋</span>
+                    <span class="menu-text">复制5个实体</span>
+                </div>
                 <div class="menu-item" id="delete-entity-menu">
                     <span class="menu-icon">🗑️</span>
                     <span class="menu-text">删除实体</span>
@@ -4839,7 +4843,7 @@
                 const copyRelation = {
                     source: originalEntity.id,
                     target: newId,
-                    type: '复制',
+                    type: '关联',
                     description: '基于右键菜单复制的实体',
                     domain: baseDomain
                 };
@@ -4885,6 +4889,115 @@
             } catch (error) {
                 console.error('复制实体失败:', error);
                 alert(`复制实体失败: ${error.message}`);
+            }
+        }
+
+        // 从右键菜单复制5个实体
+        async function copy5EntitiesFromContext() {
+            if (!selectedNode) return;
+            
+            try {
+                const originalEntity = selectedNode;
+                const baseId = originalEntity.id;
+                const baseName = originalEntity.name;
+                const baseDomain = originalEntity.domain || 'default';
+                
+                const copiedEntities = [];
+                const copiedRelations = [];
+                
+                // 复制5个实体
+                for (let i = 1; i <= 5; i++) {
+                    // 生成新的ID（避免重复）
+                    let newId = `${baseId}_copy_${i}`;
+                    let counter = 1;
+                    while (graphData.nodes.some(node => node.id === newId)) {
+                        newId = `${baseId}_copy_${i}_${counter}`;
+                        counter++;
+                    }
+                    
+                    // 生成新的名称
+                    const newName = `${baseName}副本${i}`;
+                    
+                    // 创建复制的实体
+                    const copiedEntity = {
+                        id: newId,
+                        name: newName,
+                        type: originalEntity.type || '',
+                        description: `基于${baseName}复制的实体${i}`,
+                        domain: baseDomain
+                    };
+                    
+                    // 1. 先保存复制的实体到数据库
+                    const entityResponse = await fetch('/api/kg/entities', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(copiedEntity)
+                    });
+                    
+                    if (!entityResponse.ok) {
+                        throw new Error(`保存复制实体${i}失败: ${entityResponse.status}`);
+                    }
+                    
+                    const entityResult = await entityResponse.json();
+                    if (entityResult.ret !== 0) {
+                        throw new Error(`保存复制实体${i}失败: ${entityResult.msg}`);
+                    }
+                    
+                    // 2. 创建与原实体的关系
+                    const copyRelation = {
+                        source: originalEntity.id,
+                        target: newId,
+                        type: '关联',
+                        description: `基于右键菜单复制的实体${i}`,
+                        domain: baseDomain
+                    };
+                    
+                    // 保存复制关系到数据库
+                    const relationResponse = await fetch('/api/kg/relationships', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(copyRelation)
+                    });
+                    
+                    if (!relationResponse.ok) {
+                        throw new Error(`保存复制关系${i}失败: ${relationResponse.status}`);
+                    }
+                    
+                    const relationResult = await relationResponse.json();
+                    if (relationResult.ret !== 0) {
+                        throw new Error(`保存复制关系${i}失败: ${relationResult.msg}`);
+                    }
+                    
+                    // 收集复制的实体和关系
+                    copiedEntities.push(copiedEntity);
+                    copiedRelations.push(copyRelation);
+                }
+                
+                // 3. 更新本地数据
+                graphData.nodes.push(...copiedEntities);
+                graphData.links.push(...copiedRelations);
+                
+                // 4. 更新界面
+                renderEntityList();
+                updateEntityDropdowns();
+                updateRelationTypeDropdown();
+                initializeGraph();
+                
+                console.log('复制5个实体成功:', copiedEntities);
+                console.log('创建复制关系成功:', copiedRelations);
+                
+                // 5. 显示成功消息
+                alert(`成功复制5个实体！\n\n已同步到数据库。\n复制的实体：\n${copiedEntities.map(e => `- ${e.name}`).join('\n')}`);
+                
+                // 将最后一个复制的实体名称填充到搜索框
+                const searchInput = document.getElementById('search-input');
+                if (searchInput) {
+                    searchInput.value = copiedEntities[copiedEntities.length - 1].name;
+                }
+                
+            } catch (error) {
+                console.error('复制5个实体失败:', error);
+                alert(`复制5个实体失败: ${error.message}`);
             }
         }
 
@@ -6271,6 +6384,15 @@
                 copyEntityMenu.addEventListener('click', () => {
                     hideContextMenu();
                     copyEntityFromContext();
+                });
+            }
+
+            // 复制5个实体菜单事件监听器
+            const copy5EntitiesMenu = document.getElementById('copy-5-entities-menu');
+            if (copy5EntitiesMenu) {
+                copy5EntitiesMenu.addEventListener('click', () => {
+                    hideContextMenu();
+                    copy5EntitiesFromContext();
                 });
             }
 
