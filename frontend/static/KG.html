@@ -2440,6 +2440,12 @@
                 // 确保数据格式正确
                 console.log('页面初始化，当前数据:', graphData);
                 initializeGraph();
+                
+                // 延迟执行适配显示，确保图形已完全渲染
+                setTimeout(() => {
+                    fitView();
+                    console.log('页面初始化：已执行适配显示');
+                }, 500);
             } else {
                 console.log('没有数据，重新加载...');
                 // 如果没有数据，重新加载
@@ -2478,6 +2484,14 @@
                     domains: [...new Set(allGraphData.nodes.map(n => n.domain))]
                 }
             });
+            
+            // 页面刷新后的额外适配显示，确保图形正确显示
+            setTimeout(() => {
+                if (graphData && graphData.nodes && graphData.nodes.length > 0) {
+                    fitView();
+                    console.log('页面刷新后：已执行最终适配显示');
+                }
+            }, 1000);
         }
 
         // 初始化领域选择器
