@@ -1868,6 +1868,10 @@
                     <span class="menu-icon">📋</span>
                     <span class="menu-text">复制5个实体</span>
                 </div>
+                <div class="menu-item" id="add-relation-menu">
+                    <span class="menu-icon">🔗</span>
+                    <span class="menu-text">新增关系</span>
+                </div>
                 <div class="menu-item" id="delete-entity-menu">
                     <span class="menu-icon">🗑️</span>
                     <span class="menu-text">删除实体</span>
@@ -4939,6 +4943,29 @@
             startEditEntity(selectedNode.id);
         }
 
+        // 从右键菜单新增关系
+        function addRelationFromContext() {
+            if (!selectedNode) return;
+            
+            // 自动设置源实体为当前选中的实体
+            const sourceEntityInput = document.getElementById('source-entity');
+            if (sourceEntityInput) {
+                sourceEntityInput.value = selectedNode.id;
+            }
+            
+            // 更新源实体显示
+            const sourceEntityDisplay = document.getElementById('source-entity-display');
+            if (sourceEntityDisplay) {
+                sourceEntityDisplay.value = selectedNode.name;
+            }
+            
+            // 滚动到关系表单区域
+            const relationForm = document.querySelector('.form-section');
+            if (relationForm) {
+                relationForm.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
         // 从右键菜单复制实体
         async function copyEntityFromContext() {
             if (!selectedNode) return;
@@ -6556,6 +6583,15 @@
                 copy5EntitiesMenu.addEventListener('click', () => {
                     hideContextMenu();
                     copy5EntitiesFromContext();
+                });
+            }
+
+            // 新增关系菜单事件监听器
+            const addRelationMenu = document.getElementById('add-relation-menu');
+            if (addRelationMenu) {
+                addRelationMenu.addEventListener('click', () => {
+                    hideContextMenu();
+                    addRelationFromContext();
                 });
             }
 
