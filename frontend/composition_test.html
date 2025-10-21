@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>组合关系测试</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; text-align: center; }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button { 
+            padding: 10px 20px; 
+            margin: 5px; 
+            background: #007bff; 
+            color: white; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+        }
+        button:hover { background: #0056b3; }
+        .log { 
+            background: #f8f9fa; 
+            border: 1px solid #dee2e6; 
+            padding: 15px; 
+            margin: 10px 0; 
+            font-family: monospace; 
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        #graph-container {
+            width: 100%;
+            height: 500px;
+            border: 1px solid #ddd;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>组合关系显示测试</h1>
+        
+        <div class="test-section">
+            <h3>测试数据</h3>
+            <button id="load-test-data">加载测试数据</button>
+            <button id="render-graph">渲染图谱</button>
+            <div class="log" id="log"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>图谱显示</h3>
+            <div id="graph-container"></div>
+        </div>
+    </div>
+
+    <script src="libs/d3.v7.min.js"></script>
+    <script>
+        function log(msg) {
+            const logElement = document.getElementById('log');
+            logElement.innerHTML += new Date().toLocaleTimeString() + ': ' + msg + '<br>';
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        // 根据关系类型自动设置边类型
+        function getEdgeTypeForRelation(relationType) {
+            const mapping = {
+                '继承': 'solid-triangle',
+                '泛化': 'solid-triangle',
+                '实现': 'dashed-triangle',
+                '关联': 'solid-arrow',
+                '聚合': 'hollow-diamond',
+                '组合': 'solid-diamond',
+                '依赖': 'dashed-arrow',
+                '多态': 'solid-arrow',
+                '嵌套类': 'solid-arrow',
+                '友元': 'solid-arrow',
+                '泛型': 'solid-arrow',
+                '关联类': 'solid-arrow',
+                '角色限定关联': 'solid-arrow'
+            };
+            return mapping[relationType] || 'solid-arrow';
+        }
+
+        let testData = {
+            nodes: [
+                { id: "318", name: "心脏", domain: "animal" },
+                { id: "308", name: "猫", domain: "animal" },
+                { id: "315", name: "主人", domain: "animal" }
+            ],
+            links: [
+                {
+                    source: "318",
+                    target: "308",
+                    type: "组合",
+                    description: "",
+                    id: 24756,
+                    domain: "medical"
+                },
+                {
+                    source: "308",
+                    target: "315",
+                    type: "依赖",
+                    description: "",
+                    id: 24757,
+                    domain: "medical"
+                }
+            ]
+        };
+
+        function loadTestData() {
+            log('加载测试数据...');
+            log('节点数量: ' + testData.nodes.length);
+            log('关系数量: ' + testData.links.length);
+            
+            // 应用边类型映射
+            testData.links = testData.links.map(link => ({
+                ...link,
+                edgeType: getEdgeTypeForRelation(link.type)
+            }));
+            
+            log('组合关系边类型: ' + testData.links[0].edgeType);
+            log('测试数据加载完成');
+        }
+
+        function renderGraph() {
+            log('开始渲染图谱...');
+            
+            const container = document.getElementById('graph-container');
+            container.innerHTML = '';
+            
+            const svg = d3.select(container)
+                .append('svg')
+                .attr('width', '100%')
+                .attr('height', '100%');
+            
+            // 定义箭头标记
+            const defs = svg.append('defs');
+            testData.links.forEach((link, index) => {
+                const edgeType = link.edgeType || 'solid-arrow';
+                log(`创建箭头标记 ${index}: ${edgeType}`);
+                
+                const marker = defs.append('marker')
+                    .attr('id', `arrow-${index}`)
+                    .attr('viewBox', '0 -5 10 10')
+                    .attr('refX', 45)
+                    .attr('refY', 0)
+                    .attr('markerWidth', 6)
+                    .attr('markerHeight', 6)
+                    .attr('orient', 'auto');
+
+                // 根据边类型创建不同的标记
+                switch (edgeType) {
+                    case 'solid-diamond':
+                        marker.append('path')
+                            .attr('d', 'M0,0L5,-5L10,0L5,5Z')
+                            .attr('class', 'arrowhead')
+                            .attr('fill', '#000000')
+                            .attr('stroke', '#000000')
+                            .attr('stroke-width', 1);
+                        log('创建实心菱形箭头');
+                        break;
+                    case 'dashed-arrow':
+                        marker.append('path')
+                            .attr('d', 'M0,-5L10,0L0,5Z')
+                            .attr('class', 'arrowhead')
+                            .attr('fill', '#000000')
+                            .attr('stroke', '#000000')
+                            .attr('stroke-width', 1);
+                        log('创建虚线三角形实心黑色箭头');
+                        break;
+                    default:
+                        marker.append('path')
+                            .attr('d', 'M0,-5L10,0L0,5Z')
+                            .attr('class', 'arrowhead')
+                            .attr('fill', '#666')
+                            .attr('stroke', 'none');
+                        break;
+                }
+            });
+            
+            // 创建力导向图
+            const simulation = d3.forceSimulation(testData.nodes)
+                .force('link', d3.forceLink(testData.links).id(d => d.id))
+                .force('charge', d3.forceManyBody().strength(-300))
+                .force('center', d3.forceCenter(400, 250));
+            
+            // 绘制连线
+            const links = svg.append('g')
+                .selectAll('line')
+                .data(testData.links)
+                .enter().append('line')
+                .attr('stroke', '#999')
+                .attr('stroke-width', 2)
+                .attr('marker-end', (d, i) => `url(#arrow-${i})`)
+                .attr('stroke-dasharray', function(d) {
+                    const edgeType = d.edgeType || 'solid-arrow';
+                    const isDashed = (edgeType === 'dashed-triangle' || edgeType === 'dashed-arrow');
+                    log(`连线 ${d.type}: 边类型=${edgeType}, 虚线=${isDashed}`);
+                    return isDashed ? '5,5' : null;
+                });
+            
+            // 绘制节点
+            const nodes = svg.append('g')
+                .selectAll('circle')
+                .data(testData.nodes)
+                .enter().append('circle')
+                .attr('r', 25)
+                .attr('fill', '#66bb6a')
+                .attr('stroke', '#ffffff')
+                .attr('stroke-width', 2);
+            
+            // 添加节点标签
+            const labels = svg.append('g')
+                .selectAll('text')
+                .data(testData.nodes)
+                .enter().append('text')
+                .text(d => d.name)
+                .attr('text-anchor', 'middle')
+                .attr('dy', '.35em')
+                .attr('fill', '#333')
+                .attr('font-size', '12px');
+            
+            // 更新位置
+            simulation.on('tick', () => {
+                links
+                    .attr('x1', d => d.source.x)
+                    .attr('y1', d => d.source.y)
+                    .attr('x2', d => d.target.x)
+                    .attr('y2', d => d.target.y);
+                
+                nodes
+                    .attr('cx', d => d.x)
+                    .attr('cy', d => d.y);
+                
+                labels
+                    .attr('x', d => d.x)
+                    .attr('y', d => d.y);
+            });
+            
+            log('图谱渲染完成');
+        }
+
+        // 事件监听器
+        document.getElementById('load-test-data').addEventListener('click', loadTestData);
+        document.getElementById('render-graph').addEventListener('click', renderGraph);
+        
+        log('页面加载完成，点击"加载测试数据"开始测试');
+    </script>
+</body>
+</html>

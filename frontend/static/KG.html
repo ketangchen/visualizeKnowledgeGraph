@@ -1810,6 +1810,17 @@
                         <div class="relation-type-dropdown" id="relation-type-dropdown"></div>
                     </div>
                 </div>
+                <div class="form-group">
+                    <label for="edge-type">边类型</label>
+                    <select id="edge-type" class="form-control">
+                        <option value="solid-arrow">实线 + 箭头</option>
+                        <option value="solid-triangle">实线 + 空心三角箭头</option>
+                        <option value="dashed-triangle">虚线 + 空心三角箭头</option>
+                        <option value="hollow-diamond">空心菱形 + 实线</option>
+                        <option value="solid-diamond">实心菱形 + 实线</option>
+                        <option value="dashed-arrow">虚线 + 箭头</option>
+                    </select>
+                </div>
                 <div class="btn-group">
                     <button id="add-relation" class="btn-primary">添加关系</button>
                     <button id="clear-relation-form" class="btn-secondary">清空</button>
@@ -2054,6 +2065,61 @@
             }
         }
         
+        // 根据关系类型自动设置边类型
+        function getEdgeTypeForRelation(relationType) {
+            const mapping = {
+                '继承': 'solid-triangle',        // 空心三角箭头
+                '泛化': 'solid-triangle',        // 空心三角箭头
+                '实现': 'dashed-triangle',       // 虚线空心三角箭头
+                '关联': 'solid-arrow',           // 实线箭头
+                '聚合': 'hollow-diamond',        // 空心菱形
+                '组合': 'solid-diamond',        // 实心菱形
+                '依赖': 'dashed-arrow',          // 虚线箭头
+                '多态': 'solid-arrow',           // 实线箭头
+                '嵌套类': 'solid-arrow',         // 实线箭头
+                '友元': 'solid-arrow',           // 实线箭头
+                '泛型': 'solid-arrow',           // 实线箭头
+                '关联类': 'solid-arrow',         // 实线箭头
+                '角色限定关联': 'solid-arrow'    // 实线箭头
+            };
+            return mapping[relationType] || 'solid-arrow';
+        }
+
+        // 检测和处理重复关系
+        function processDuplicateRelations(links) {
+            const processedLinks = [];
+            const relationMap = new Map();
+            
+            links.forEach(link => {
+                const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
+                const targetId = typeof link.target === 'object' ? link.target.id : link.target;
+                const relationKey = `${sourceId}-${targetId}`;
+                const reverseKey = `${targetId}-${sourceId}`;
+                
+                // 检查是否已存在相同方向的关系
+                if (relationMap.has(relationKey)) {
+                    console.warn(`发现重复关系: ${relationKey} (${link.type})`);
+                    // 可以选择保留第一个或合并描述
+                    return;
+                }
+                
+                // 检查是否存在反向关系
+                if (relationMap.has(reverseKey)) {
+                    console.warn(`发现反向关系: ${relationKey} 与 ${reverseKey}`);
+                    // 对于某些关系类型，双向关系是合理的（如多态）
+                    if (link.type === '多态' || link.type === '关联') {
+                        // 允许双向关系，但添加标记
+                        link.isBidirectional = true;
+                    }
+                }
+                
+                relationMap.set(relationKey, link);
+                processedLinks.push(link);
+            });
+            
+            return processedLinks;
+        }
+
         // 获取图谱数据
         async function loadGraphData() {
             try {
@@ -2066,10 +2132,39 @@
                     domain: node.domain || 'default'
                 }));
                 
+                // 处理重复关系
+                graphData.links = processDuplicateRelations(graphData.links);
+                
                 graphData.links = graphData.links.map(link => ({
                     ...link,
-                    domain: link.domain || 'default'
+                    domain: link.domain || 'default',
+                    edgeType: link.edgeType || getEdgeTypeForRelation(link.type)  // 自动设置边类型
                 }));
+                
+                // 调试：检查所有关系的边类型设置
+                console.log('所有关系类型:', [...new Set(graphData.links.map(l => l.type))]);
+                
+                const compositionLinks = graphData.links.filter(link => link.type === '组合');
+                if (compositionLinks.length > 0) {
+                    console.log('组合关系调试:', compositionLinks.map(link => ({
+                        id: link.id,
+                        type: link.type,
+                        edgeType: link.edgeType,
+                        source: link.source,
+                        target: link.target
+                    })));
+                }
+                
+                const dependencyLinks = graphData.links.filter(link => link.type === '依赖');
+                if (dependencyLinks.length > 0) {
+                    console.log('依赖关系调试:', dependencyLinks.map(link => ({
+                        id: link.id,
+                        type: link.type,
+                        edgeType: link.edgeType,
+                        source: link.source,
+                        target: link.target
+                    })));
+                }
                 
                 // 同时更新 allGraphData 和 filteredGraphData
                 allGraphData = {
@@ -2438,14 +2533,21 @@
                 filteredGraphData = { ...allGraphData };
                 console.log('选择所有领域，显示所有数据');
             } else {
-                // 筛选指定领域的实体和关系
+                // 只筛选指定领域的实体和关系，不显示其他领域的实体
                 const filteredNodes = allGraphData.nodes.filter(node => 
                     node.domain === currentDomain
                 );
                 
-                const filteredLinks = allGraphData.links.filter(link => 
-                    link.domain === currentDomain
-                );
+                // 获取筛选出的实体的ID集合
+                const filteredNodeIds = new Set(filteredNodes.map(node => node.id));
+                
+                // 只获取该领域内实体之间的关系
+                const filteredLinks = allGraphData.links.filter(link => {
+                    const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
+                    const targetId = typeof link.target === 'object' ? link.target.id : link.target;
+                    // 只显示两个端点都属于该领域的关系
+                    return filteredNodeIds.has(sourceId) && filteredNodeIds.has(targetId);
+                });
                 
                 console.log(`筛选领域 "${currentDomain}" 的数据:`, {
                     totalNodes: allGraphData.nodes.length,
@@ -2455,41 +2557,9 @@
                     filteredNodeIds: filteredNodes.map(n => n.id)
                 });
                 
-                // 获取筛选出的实体的ID集合
-                const filteredNodeIds = new Set(filteredNodes.map(node => node.id));
-                
-                // 找到所有与筛选实体有关系的实体ID
-                const relatedNodeIds = new Set(filteredNodeIds);
-                
-                // 遍历筛选出的关系，找到相关的所有实体
-                filteredLinks.forEach(link => {
-                    const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
-                    const targetId = typeof link.target === 'object' ? link.target.id : link.target;
-                    relatedNodeIds.add(sourceId);
-                    relatedNodeIds.add(targetId);
-                });
-                
-                // 获取所有相关实体
-                const allRelatedNodes = allGraphData.nodes.filter(node => 
-                    relatedNodeIds.has(node.id)
-                );
-                
-                // 获取所有相关关系（包括跨领域的关系）
-                const allRelatedLinks = allGraphData.links.filter(link => {
-                    const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
-                    const targetId = typeof link.target === 'object' ? link.target.id : link.target;
-                    return relatedNodeIds.has(sourceId) && relatedNodeIds.has(targetId);
-                });
-                
-                console.log('筛选结果:', {
-                    relatedNodes: allRelatedNodes.length,
-                    relatedLinks: allRelatedLinks.length,
-                    relatedNodeIds: Array.from(relatedNodeIds)
-                });
-                
                 filteredGraphData = {
-                    nodes: allRelatedNodes,
-                    links: allRelatedLinks
+                    nodes: filteredNodes,
+                    links: filteredLinks
                 };
             }
             
@@ -3254,7 +3324,7 @@
                 return;
             }
 
-            if (graphData.nodes.some(node => node.id === id)) {
+            if (allGraphData.nodes.some(node => node.id === id)) {
                 alert('实体ID已存在');
                 // 自动生成新的ID
                 entityIdInput.value = generateDefaultEntityId();
@@ -3426,7 +3496,7 @@
             // 尝试在原ID后添加数字后缀（如原ID为"1"，尝试"1_1"、"1_2"...）
             let suffix = 1;
             let newId = `${originalId}_${suffix}`;
-            while (graphData.nodes.some(node => node.id === newId)) {
+            while (allGraphData.nodes.some(node => node.id === newId)) {
                 suffix++;
                 newId = `${originalId}_${suffix}`;
             }
@@ -3550,7 +3620,7 @@
 
         async function deleteEntity(id) {
             // 获取要删除的实体及其关系信息
-            const entityToDelete = graphData.nodes.find(node => node.id === id);
+            const entityToDelete = allGraphData.nodes.find(node => node.id === id);
             if (!entityToDelete) {
                 alert('实体不存在');
                 return;
@@ -3565,7 +3635,7 @@
             if (!confirm('确定要删除此实体吗？关联的关系也将被删除')) return;
 
             // 查找与被删除实体相关的所有关系
-            const relatedLinks = graphData.links.filter(link => {
+            const relatedLinks = allGraphData.links.filter(link => {
                 const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
                 const targetId = typeof link.target === 'object' ? link.target.id : link.target;
                 return sourceId === id || targetId === id;
@@ -3585,10 +3655,16 @@
             // 调用后端API删除实体
             const success = await deleteEntityAPI(id);
             if (success) {
-                // 从本地数据中删除实体
-                graphData.nodes = graphData.nodes.filter(node => node.id !== id);
+                // 从完整数据中删除实体
+                allGraphData.nodes = allGraphData.nodes.filter(node => node.id !== id);
+                allGraphData.links = allGraphData.links.filter(link => {
+                    const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
+                    const targetId = typeof link.target === 'object' ? link.target.id : link.target;
+                    return sourceId !== id && targetId !== id;
+                });
                 
-                // 删除相关的所有关系
+                // 从当前过滤数据中删除实体
+                graphData.nodes = graphData.nodes.filter(node => node.id !== id);
                 graphData.links = graphData.links.filter(link => {
                     const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
                     const targetId = typeof link.target === 'object' ? link.target.id : link.target;
@@ -3688,6 +3764,7 @@
             const sourceId = sourceEntityInput.value;
             const targetId = targetEntityInput.value;
             const type = relationTypeInput.value.trim();
+            const edgeType = document.getElementById('edge-type').value;
 
             if (!sourceId || !targetId || !type) {
                 alert('请完善关系信息');
@@ -3720,6 +3797,7 @@
                 source: sourceId,
                 target: targetId,
                 type: type,
+                edgeType: edgeType,
                 domain: domain
             });
 
@@ -3730,6 +3808,7 @@
                     source: sourceId,
                     target: targetId,
                     type: type,
+                    edgeType: edgeType,
                     domain: domain
                 };
                 graphData.links.push(newLink);
@@ -3984,34 +4063,88 @@
             // 定义箭头标记，为每个箭头添加唯一ID
             const defs = svg.append('defs');
             graphData.links.forEach((link, index) => {
-                defs.append('marker')
+                const edgeType = link.edgeType || 'solid-arrow';
+                const marker = defs.append('marker')
                     .attr('id', `arrow-${index}`)
-                .attr('viewBox', '0 -5 10 10')
+                    .attr('viewBox', '0 -5 10 10')
                     .attr('refX', 45) // 箭头位置调整，适应大节点
-                .attr('refY', 0)
-                .attr('markerWidth', 6)
-                .attr('markerHeight', 6)
-                .attr('orient', 'auto')
-                .append('path')
-                .attr('d', 'M0,-5L10,0L0,5Z') // 添加Z闭合路径
-                    .attr('class', 'arrowhead')
-                    .attr('fill', 'none') // 设置为空心
-                    .attr('stroke', '#666') // 设置边框颜色
-                    .attr('stroke-width', 1.5) // 设置边框宽度
-                    .attr('data-link-index', index)
-                    .on('click', function(event) {
-                        event.stopPropagation();
-                        const linkIndex = parseInt(d3.select(this).attr('data-link-index'));
-                        const link = graphData.links[linkIndex];
-                        if (link) {
-                            selectedLink = link;
-                            clearAllHighlights();
-                            highlightRelationAndEntities(link);
-                            showRelationDetail(link);
-                            centerRelationInView(link);
-                            resetSearchState();
-                        }
-                    });
+                    .attr('refY', 0)
+                    .attr('markerWidth', 6)
+                    .attr('markerHeight', 6)
+                    .attr('orient', 'auto')
+                    .attr('data-link-index', index);
+
+                // 根据边类型创建不同的标记
+                switch (edgeType) {
+                    case 'solid-arrow':
+                        marker.append('path')
+                            .attr('d', 'M0,-5L10,0L0,5Z')
+                            .attr('class', 'arrowhead')
+                            .attr('fill', '#666')
+                            .attr('stroke', 'none');
+                        break;
+                    case 'solid-triangle':
+                        marker.append('path')
+                            .attr('d', 'M0,-5L10,0L0,5Z')
+                            .attr('class', 'arrowhead')
+                            .attr('fill', 'none')
+                            .attr('stroke', '#666')
+                            .attr('stroke-width', 1.5);
+                        break;
+                    case 'dashed-triangle':
+                        marker.append('path')
+                            .attr('d', 'M0,-5L10,0L0,5Z')
+                            .attr('class', 'arrowhead')
+                            .attr('fill', 'none')
+                            .attr('stroke', '#666')
+                            .attr('stroke-width', 1.5);
+                        break;
+                    case 'hollow-diamond':
+                        marker.append('path')
+                            .attr('d', 'M0,0L5,-5L10,0L5,5Z')
+                            .attr('class', 'arrowhead')
+                            .attr('fill', 'none')
+                            .attr('stroke', '#666')
+                            .attr('stroke-width', 1.5);
+                        break;
+                    case 'solid-diamond':
+                        marker.append('path')
+                            .attr('d', 'M0,0L5,-5L10,0L5,5Z')
+                            .attr('class', 'arrowhead')
+                            .attr('fill', '#000000')
+                            .attr('stroke', '#000000')
+                            .attr('stroke-width', 1);
+                        break;
+                    case 'dashed-arrow':
+                        marker.append('path')
+                            .attr('d', 'M0,-5L10,0L0,5Z')
+                            .attr('class', 'arrowhead')
+                            .attr('fill', '#000000')
+                            .attr('stroke', '#000000')
+                            .attr('stroke-width', 1);
+                        break;
+                    default:
+                        marker.append('path')
+                            .attr('d', 'M0,-5L10,0L0,5Z')
+                            .attr('class', 'arrowhead')
+                            .attr('fill', '#666')
+                            .attr('stroke', 'none');
+                }
+
+                // 添加点击事件
+                marker.on('click', function(event) {
+                    event.stopPropagation();
+                    const linkIndex = parseInt(d3.select(this).attr('data-link-index'));
+                    const link = graphData.links[linkIndex];
+                    if (link) {
+                        selectedLink = link;
+                        clearAllHighlights();
+                        highlightRelationAndEntities(link);
+                        showRelationDetail(link);
+                        centerRelationInView(link);
+                        resetSearchState();
+                    }
+                });
             });
 
             zoom = d3.zoom()
@@ -4043,6 +4176,10 @@
                 .attr('stroke-width', 2)
                 .attr('data-link-index', (d, i) => i)
                 .attr('marker-end', (d, i) => `url(#arrow-${i})`) // 为每条线分配对应的箭头
+                .attr('stroke-dasharray', function(d) {
+                    const edgeType = d.edgeType || 'solid-arrow';
+                    return (edgeType === 'dashed-triangle' || edgeType === 'dashed-arrow') ? '5,5' : null;
+                })
                 .on('click', (event, d) => {
                     // 点击关系边显示详情
                     event.stopPropagation();
@@ -4617,7 +4754,7 @@
                 // 生成新的ID（避免重复）
                 let newId = `${baseId}_new`;
                 let counter = 1;
-                while (graphData.nodes.some(node => node.id === newId)) {
+                while (allGraphData.nodes.some(node => node.id === newId)) {
                     newId = `${baseId}_new_${counter}`;
                     counter++;
                 }
@@ -4744,6 +4881,15 @@
                 }
                 
                 // 3. 更新本地数据
+                // 从完整数据中删除实体
+                allGraphData.nodes = allGraphData.nodes.filter(node => node.id !== entityId);
+                allGraphData.links = allGraphData.links.filter(link => {
+                    const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
+                    const targetId = typeof link.target === 'object' ? link.target.id : link.target;
+                    return sourceId !== entityId && targetId !== entityId;
+                });
+                
+                // 从当前过滤数据中删除实体
                 graphData.nodes = graphData.nodes.filter(node => node.id !== entityId);
                 graphData.links = graphData.links.filter(link => {
                     const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
@@ -4806,7 +4952,7 @@
                 // 生成新的ID（避免重复）
                 let newId = `${baseId}_copy`;
                 let counter = 1;
-                while (graphData.nodes.some(node => node.id === newId)) {
+                while (allGraphData.nodes.some(node => node.id === newId)) {
                     newId = `${baseId}_copy_${counter}`;
                     counter++;
                 }
@@ -4910,7 +5056,7 @@
                     // 生成新的ID（避免重复）
                     let newId = `${baseId}_copy_${i}`;
                     let counter = 1;
-                    while (graphData.nodes.some(node => node.id === newId)) {
+                    while (allGraphData.nodes.some(node => node.id === newId)) {
                         newId = `${baseId}_copy_${i}_${counter}`;
                         counter++;
                     }
@@ -5459,6 +5605,10 @@
                     <div class="detail-content">${link.type}</div>
                 </div>
                 <div class="detail-section">
+                    <h3>关系描述</h3>
+                    <div class="detail-content">${link.description || '无描述'}</div>
+                </div>
+                <div class="detail-section">
                     <h3>源实体</h3>
                     <div class="detail-content" onclick="showEntityDetail(${JSON.stringify(sourceEntity)})"
                          style="cursor: pointer; text-decoration: underline;">
@@ -5527,6 +5677,17 @@
                             <input type="hidden" id="edit-relation-type" value="${link.type}">
                             <div class="relation-type-dropdown" id="edit-relation-type-dropdown"></div>
                         </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-edge-type">边类型</label>
+                        <select id="edit-edge-type" class="form-control">
+                            <option value="solid-arrow" ${link.edgeType === 'solid-arrow' ? 'selected' : ''}>实线 + 箭头</option>
+                            <option value="solid-triangle" ${link.edgeType === 'solid-triangle' ? 'selected' : ''}>实线 + 空心三角箭头</option>
+                            <option value="dashed-triangle" ${link.edgeType === 'dashed-triangle' ? 'selected' : ''}>虚线 + 空心三角箭头</option>
+                            <option value="hollow-diamond" ${link.edgeType === 'hollow-diamond' ? 'selected' : ''}>空心菱形 + 实线</option>
+                            <option value="solid-diamond" ${link.edgeType === 'solid-diamond' ? 'selected' : ''}>实心菱形 + 实线</option>
+                            <option value="dashed-arrow" ${link.edgeType === 'dashed-arrow' ? 'selected' : ''}>虚线 + 箭头</option>
+                        </select>
                     </div>
                     <div class="btn-group">
                         <button id="save-relation-edit" class="btn-primary"
@@ -5717,6 +5878,7 @@
             const sourceId = document.getElementById('edit-source-entity').value;
             const targetId = document.getElementById('edit-target-entity').value;
             const type = document.getElementById('edit-relation-type').value.trim();
+            const edgeType = document.getElementById('edit-edge-type').value;
 
             if (!sourceId || !targetId || !type) {
                 alert('请完善关系信息');
@@ -5816,6 +5978,7 @@
                         source: sourceId,
                         target: targetId,
                         type: type,
+                        edgeType: edgeType,  // 添加边类型
                         id: relationshipId,  // 保留关系ID
                         domain: originalLink.domain || 'default'  // 保留领域信息
                     };
