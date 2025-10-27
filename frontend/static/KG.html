@@ -197,6 +197,15 @@
             background: linear-gradient(135deg, #f57c00 0%, #ff9800 100%);
         }
 
+        .data-btn.suffix {
+            background: linear-gradient(135deg, #9c27b0 0%, #ba68c8 100%);
+            color: white;
+        }
+
+        .data-btn.suffix:hover {
+            background: linear-gradient(135deg, #7b1fa2 0%, #9c27b0 100%);
+        }
+
         /* 禁用状态的样式 */
         .domain-select-disabled {
             opacity: 0.6;
@@ -1934,6 +1943,7 @@
                 
                 <div class="data-controls">
                     <button class="data-btn reorder" onclick="reorderEntityIds()">重新排序</button>
+                    <button class="data-btn suffix" onclick="addSuffixToIds()">添加后缀</button>
                     <button class="data-btn save" onclick="saveJsonData()">保存到数据库</button>
                     <button class="data-btn cancel" onclick="cancelDataEdit()">取消编辑</button>
                 </div>
@@ -5760,6 +5770,10 @@
                         </div>
                     </div>
                     <div class="form-group">
+                        <label for="edit-relation-description">关系描述</label>
+                        <textarea id="edit-relation-description" rows="3" placeholder="输入关系描述">${link.description || ''}</textarea>
+                    </div>
+                    <div class="form-group">
                         <label for="edit-edge-type">边类型</label>
                         <select id="edit-edge-type" class="form-control">
                             <option value="solid-arrow" ${link.edgeType === 'solid-arrow' ? 'selected' : ''}>实线 + 实心黑色三角箭头</option>
@@ -5959,6 +5973,7 @@
             const sourceId = document.getElementById('edit-source-entity').value;
             const targetId = document.getElementById('edit-target-entity').value;
             const type = document.getElementById('edit-relation-type').value.trim();
+            const description = document.getElementById('edit-relation-description').value.trim();
             const edgeType = document.getElementById('edit-edge-type').value;
 
             if (!sourceId || !targetId || !type) {
@@ -6027,7 +6042,8 @@
                 const updateData = {
                     source: sourceId,
                     target: targetId,
-                    type: type
+                    type: type,
+                    description: description
                 };
                 
                 console.log('发送更新数据:', updateData);
@@ -6059,6 +6075,7 @@
                         source: sourceId,
                         target: targetId,
                         type: type,
+                        description: description,  // 添加关系描述
                         edgeType: edgeType,  // 添加边类型
                         id: relationshipId,  // 保留关系ID
                         domain: originalLink.domain || 'default'  // 保留领域信息
@@ -7347,31 +7364,52 @@
         async function forceRefreshData() {
             console.log('强制刷新数据...');
             
-            try {
-                // 重新加载数据
-                const loadSuccess = await loadGraphData();
-                if (loadSuccess) {
-                    console.log('数据刷新成功');
+            // 添加延迟，确保后端数据已保存
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            let retryCount = 0;
+            const maxRetries = 3;
+            
+            while (retryCount < maxRetries) {
+                try {
+                    console.log(`尝试刷新数据 (第${retryCount + 1}次)...`);
                     
-                    // 更新界面
-                    updateEntityDropdowns();
-                    updateRelationTypeDropdown();
-                    renderEntityList();
-                    reloadGraph();
-                    
-                    // 更新领域信息
-                    updateDomainInfo();
-                    
-                    console.log('界面更新完成');
-                    return true;
-                } else {
-                    console.error('数据刷新失败');
-                    return false;
+                    // 重新加载数据
+                    const loadSuccess = await loadGraphData();
+                    if (loadSuccess) {
+                        console.log('数据刷新成功');
+                        
+                        // 更新界面
+                        updateEntityDropdowns();
+                        updateRelationTypeDropdown();
+                        renderEntityList();
+                        reloadGraph();
+                        
+                        // 更新领域信息
+                        updateDomainInfo();
+                        
+                        console.log('界面更新完成');
+                        return true;
+                    } else {
+                        console.error(`数据刷新失败 (第${retryCount + 1}次)`);
+                        retryCount++;
+                        if (retryCount < maxRetries) {
+                            console.log('等待2秒后重试...');
+                            await new Promise(resolve => setTimeout(resolve, 2000));
+                        }
+                    }
+                } catch (error) {
+                    console.error(`强制刷新数据时出错 (第${retryCount + 1}次):`, error);
+                    retryCount++;
+                    if (retryCount < maxRetries) {
+                        console.log('等待2秒后重试...');
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                    }
                 }
-            } catch (error) {
-                console.error('强制刷新数据时出错:', error);
-                return false;
             }
+            
+            console.error('数据刷新失败，已达到最大重试次数');
+            return false;
         }
 
         // 更新领域选择器，添加新的自定义领域
@@ -7482,6 +7520,7 @@
         window.saveJsonData = saveJsonData;
         window.cancelDataEdit = cancelDataEdit;
         window.swapEntities = swapEntities;
+        window.addSuffixToIds = addSuffixToIds;
         
         // 导出JSON编辑器相关函数
         window.parseAndRenderJson = parseAndRenderJson;
@@ -8620,6 +8659,73 @@
             }
         }
 
+        // 为所有ID添加后缀
+        function addSuffixToIds() {
+            try {
+                const jsonEditor = document.getElementById('json-editor');
+                if (!jsonEditor) {
+                    alert('找不到JSON编辑器');
+                    return;
+                }
+                
+                const jsonText = jsonEditor.value.trim();
+                if (!jsonText) {
+                    alert('请先加载数据');
+                    return;
+                }
+                
+                // 解析JSON数据
+                let parsedData;
+                try {
+                    parsedData = JSON.parse(jsonText);
+                } catch (e) {
+                    alert('JSON格式错误，请检查语法');
+                    return;
+                }
+                
+                if (!parsedData.nodes || !Array.isArray(parsedData.nodes)) {
+                    alert('数据格式错误：缺少nodes数组');
+                    return;
+                }
+                
+                const suffix = '0000';
+                let processedCount = 0;
+                
+                // 为所有实体ID添加后缀
+                parsedData.nodes.forEach(node => {
+                    if (node.id) {
+                        node.id = node.id + suffix;
+                        processedCount++;
+                    }
+                });
+                
+                // 更新关系中的源和目标ID
+                if (parsedData.links && Array.isArray(parsedData.links)) {
+                    parsedData.links.forEach(link => {
+                        if (link.source) {
+                            link.source = link.source + suffix;
+                        }
+                        if (link.target) {
+                            link.target = link.target + suffix;
+                        }
+                    });
+                }
+                
+                // 更新JSON编辑器内容
+                const updatedJson = JSON.stringify(parsedData, null, 2);
+                jsonEditor.value = updatedJson;
+                
+                // 显示结果信息
+                const currentDomain = parsedData.currentDomain || 'all';
+                const domainName = currentDomain === 'all' ? '所有领域' : currentDomain;
+                alert(`添加后缀完成！\n\n领域：${domainName}\n后缀：${suffix}\n处理实体：${processedCount}个\n处理关系：${parsedData.links ? parsedData.links.length : 0}个`);
+                
+            } catch (error) {
+                console.error('添加后缀失败:', error);
+                alert('添加后缀失败: ' + error.message);
+            }
+        }
+
         // 保存JSON数据到数据库
         async function saveJsonData() {
             try {
@@ -8654,14 +8760,14 @@
                 }
                 
                 // 显示确认对话框
-                const currentDomain = parsedData.currentDomain || 'all';
+                const dataDomain = parsedData.currentDomain || 'all';
                 let confirmMessage;
-                if (currentDomain === 'all') {
+                if (dataDomain === 'all') {
                     confirmMessage = `确认要更新所有领域的数据吗？\n\n这将覆盖所有现有的实体和关系数据。\n\n实体数量：${parsedData.nodes.length}\n关系数量：${parsedData.links.length}`;
-                } else if (isCustomDomain(currentDomain)) {
-                    confirmMessage = `确认要创建新领域"${currentDomain}"的数据吗？\n\n这将创建新的实体和关系，不会影响其他领域的数据。\n\n实体数量：${parsedData.nodes.length}\n关系数量：${parsedData.links.length}`;
+                } else if (isCustomDomain(dataDomain)) {
+                    confirmMessage = `确认要创建新领域"${dataDomain}"的数据吗？\n\n这将创建新的实体和关系，不会影响其他领域的数据。\n\n实体数量：${parsedData.nodes.length}\n关系数量：${parsedData.links.length}`;
                 } else {
-                    confirmMessage = `确认要更新领域"${currentDomain}"的数据吗？\n\n这将只更新该领域的实体和关系，其他领域的数据不受影响。\n\n实体数量：${parsedData.nodes.length}\n关系数量：${parsedData.links.length}`;
+                    confirmMessage = `确认要更新领域"${dataDomain}"的数据吗？\n\n这将只更新该领域的实体和关系，其他领域的数据不受影响。\n\n实体数量：${parsedData.nodes.length}\n关系数量：${parsedData.links.length}`;
                 }
                 
                 if (!confirm(confirmMessage)) {
@@ -8679,7 +8785,7 @@
                 const requestBody = {
                     nodes: parsedData.nodes,
                     links: parsedData.links,
-                    currentDomain: parsedData.currentDomain || 'all'
+                    currentDomain: dataDomain
                 };
                 
                 console.log('发送到后端的数据:', requestBody);
@@ -8701,17 +8807,41 @@
                 if (result.ret === 0) {
                     alert('数据保存成功！');
                     
+                    // 保存当前领域选择
+                    const savedDomain = currentDomain;
+                    console.log('保存当前领域选择:', savedDomain);
+                    
                     // 强制刷新数据并更新显示
                     try {
                         const refreshSuccess = await forceRefreshData();
                         if (refreshSuccess) {
+                            // 恢复领域选择
+                            currentDomain = savedDomain;
+                            console.log('恢复领域选择:', currentDomain);
+                            
+                            // 重新应用领域筛选
+                            filterDataByDomain();
+                            updateDomainInfo();
+                            
+                            // 更新领域选择器显示
+                            const domainSelectDisplay = document.getElementById('domain-select-display');
+                            const domainSelect = document.getElementById('domain-select');
+                            if (domainSelectDisplay && domainSelect) {
+                                if (currentDomain === 'all') {
+                                    domainSelectDisplay.value = '所有领域';
+                                } else {
+                                    domainSelectDisplay.value = currentDomain;
+                                }
+                                domainSelect.value = currentDomain;
+                            }
+                            
                             // 自动切换到预览模式
                             switchToPreviewMode();
                             
                             // 如果是自定义领域，更新领域选择器
-                            if (isCustomDomain(currentDomain)) {
+                            if (isCustomDomain(dataDomain)) {
                                 console.log('检测到自定义领域，更新领域选择器');
-                                updateDomainSelectorWithCustom(currentDomain);
+                                updateDomainSelectorWithCustom(dataDomain);
                             }
                             
                             console.log('数据保存并刷新成功:', graphData);
@@ -8720,7 +8850,7 @@
                         }
                     } catch (dataError) {
                         console.error('刷新数据失败:', dataError);
-                        alert('数据保存成功，但刷新数据失败，请手动刷新页面');
+                        alert(`数据保存成功，但刷新数据失败：${dataError.message}\n\n请手动刷新页面或点击"🔄 刷新数据"按钮`);
                     }
                     
                 } else {
